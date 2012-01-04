@@ -8,11 +8,11 @@ CREATE TABLE `status` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
   `origin_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site` varchar(2) NOT NULL,
   `category` smallint(4) NOT NULL,
   `title` varchar(100) CHARACTER SET ucs2 NOT NULL DEFAULT '',
-  `time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='status';

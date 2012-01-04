@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from json import dumps as json_encode
-from json import loads as json_decode
 import urlparse
 import urllib
 
 import config
+from .corelib.json import decode as json_decode
+from .corelib.json import encode as json_encode
 from .utils import httplib2_request
 
 class Douban(object):

@@ -5,6 +5,8 @@ from flask import g, session, request, send_from_directory, \
 
 import config
 from .corelib import auth_user_from_session, set_user_cookie
+from .corelib.json import decode as json_decode
+from .corelib.json import encode as json_encode
 from .model.user import User, UserAlias, OAuth2Token
 from .model.status import SyncTask
 from .oauth_login import DoubanLogin, OAuthLoginError
@@ -86,7 +88,7 @@ def connect_callback(provider):
     g.user = User.get(ua.user_id)
     set_user_cookie(g.user, session)
     
-    return g.user.name + api_client.json_encode(user_info)
+    return g.user.name + json_encode(user_info)
 
 
 @app.route("/sync/<provider>/<kind>")

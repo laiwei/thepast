@@ -15,39 +15,43 @@ redis_conn = connect_redis()
 
 while True:
     print '--start'
-    cursor = db_conn.cursor()
-    cursor.execute("""select id, kind, user_id, time from sync_task""")
-    while True:
-        r = cursor.fetchone()
-        print '----------r:',r
-        if not r:
-            break
-        user_id = r[2]
-        kind = r[1]
-        detail = redis_conn.get(SyncTask.kv_db_key_task %r[0])
-        detail = json_decode(detail) if detail is not None else {}
-        
-        start = detail.get('start', 0)
-        count = detail.get('count', 10)
+    ids = SyncTask.get_ids()
+    task_list = SyncTask.gets(ids)
+    for t in task_list:
+        detail = t.get_detail()
 
-        alias = UserAlias.get_by_user_and_type(user_id, 
+        alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
         token = OAuth2Token.get(alias.id)
         client = Douban(alias.alias, token.access_token, token.refresh_token)
 
-        if kind == config.SYNC_DOUBAN_NOTE:
-            content = client.get_notes(start, count)
-            content = json_decode(content) if content else []
-            for x in content:
-                d = DoubanNoteData(x)
-                Status.add_from_obj(d)
-            start += len(content)
-            redis_conn.set("", start)
+        if t.kind == config.SYNC_DOUBAN_NOTE:
+            start = detail.get('start', 0)
+            count = detail.get('count', 10)
+            contents = client.get_notes(start, count)
+            contents = json_decode(contents).get("entry", []) if contents else []
+            if contents:
+                for x in contents:
+                    print '-------note content:', x
+                    d = DoubanNoteData(x)
+                    Status.add_from_obj(t.user_id, d)
+                detail['start'] = detail.get('start', 0) + len(contents)
+                detail['uptime'] = datetime.datetime.now()
+                t.update_detail(detail)
                 
-        if kind == config.SYNC_DOUBAN_SHUO:
-            content = client.get_timeline(start)
+        if t.kind == config.SYNC_DOUBAN_SHUO:
+            until_id = detail.get("until_id")
+            contents = client.get_timeline(until_id=until_id)
+            contents = json_decode(contents) if contents else []
+            if contents:
+                for x in contents:
+                    print '-------status content:', x
+                    d = DoubanStatusData(x)
+                    Status.add_from_obj(t.user_id, d)
+                detail['until_id'] = contents[-1]
+                detail['uptime'] = datetime.datetime.now()
+                t.update_detail(detail)
 
-        print content
         time.sleep(2)
     
     time.sleep(5)
