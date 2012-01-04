@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
-from json import loads as json_decode
-from json import dumps as json_encode
+from .corelib.json import decode as json_decode
+from .corelib.json import encode as json_encode
 from MySQLdb import IntegrityError
 from past.store import connect_redis, connect_db
 from past import config
@@ -129,52 +129,51 @@ class AbsData(object):
 class DoubanData(AbsData):
     
     def __init__(self, category, data):
-        super(self.__class__, self).__init__(
-                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN],
-                category, data)
+        super(DoubanData, self).__init__( 
+                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], category, data)
 
 # 日记
 class DoubanNoteData(DoubanData):
     def __init__(self, data):
-        super(self.__class__, self).__init__(
+        super(DoubanNoteData, self).__init__(
                 config.CATE_DOUBAN_NOTE, data)
 
     def get_origin_id(self):
-        id_ = self.data.get("id", {}).get("$t")
+        id_ = self.data.get("id", {}).get("$t").encode('utf8')
         if id_:
             return (id_.rstrip("/").split("/"))[-1]
         return None
 
     def get_create_time(self):
-        return self.data.get("published",{}).get("$t")
+        return self.data.get("published",{}).get("$t").encode('utf8')
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t")
+        return self.data.get("title", {}).get("$t").encode('utf8')
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t")
+        return self.data.get("content", {}).get("$t").encode('utf8')
 
 
 # 相册 
 class DoubanPhotoData(DoubanData):
     def __init__(self, data):
-        super(self.__class__, self).__init__(
+        super(DoubanPhotoData, self).__init__(
                 config.CATE_DOUBAN_PHOTO, data)
 
     def get_origin_id(self):
-        id_ = self.data.get("id", {}).get("$t")
+        id_ = self.data.get("id", {}).get("$t").encode('utf8')
         if id_:
             return (id_.rstrip("/").split("/"))[-1]
         return None
 
     def get_create_time(self):
-        return self.data.get("published",{}).get("$t")
+        return self.data.get("published",{}).get("$t").encode('utf8')
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t")
+        return self.data.get("title", {}).get("$t").encode('utf8')
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t")
+        return self.data.get("content", {}).get("$t").encode('utf8')
 
     def get_large_img_src(self):
         links = self.data.get("link", [])
@@ -192,7 +191,7 @@ class DoubanPhotoData(DoubanData):
 class DoubanStatusData(DoubanData):
     
     def __init__(self, data):
-        super(self.__class__, self).__init__(
+        super(DoubanStatusData, self).__init__(
                 config.CATE_DOUBAN_STATUS, data)
 
     def get_origin_id(self):
@@ -300,10 +299,14 @@ class SyncTask(object):
         return task
     
     @classmethod
-    def get_ids(cls, start=None, limit=None):
+    def get_ids(cls):
         cursor = db_conn.cursor()
-        cursor.execute("""select id from sync_task where id>%s limit %s""", 
-                (start, limit))
+        cursor.execute("""select id from sync_task""") 
+        return [row[0] for row in cursor.fetchall()]
+    
+    @classmethod
+    def gets(cls, ids):
+        return [cls.get(x) for x in ids]
 
     def remove(self):
         cursor = db_conn.cursor()
