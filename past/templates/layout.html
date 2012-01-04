@@ -1,0 +1,104 @@
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>{%block title_block%} The Past of Me {%endblock%}</title>
+<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='css/default.css') }}">
+<script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+</head>
+
+<body>
+<div id="Top">
+{% block top_block %} 
+    <div id="TopMain">
+        <a href="/"> 
+            <img src="{{url_for('static', filename='img/logo.png')}}" 
+                border="0" style="display: block; float: left; margin-top: 9px; margin-left: 20px;">
+        </a>
+        <div id="Navigation">
+            <ul>
+                <li><a href="/" class="top">首页</a></li>
+                <li><a href="/member/laiwei" class="top">laiwei</a></li>
+            </ul>
+        </div>
+
+        <div id="Search">
+            <form>
+                <div class="search_bar">
+                <input type="text" maxlength="40" name="q" id="q" value="">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+</div>
+
+<div id="Wrapper">
+
+    <div id="Main">
+    {% block main_block%}
+        <div id="Sidebar">
+            {% block sidebar_block%}
+            {% endblock%}
+        </div>
+
+        <div id="Rightbar">
+            {% block rightbar_block%}
+            <div class="box">
+                <div class="cell">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tbody><tr>
+                            <td width="48" valign="top">
+                            <a href="/member/laiwei"><img src="/static/img/avatar.png" border="0"></a></td>
+                            <td width="10" valign="top"></td>
+                            <td width="auto" align="left"><span class="bigger"><a href="/member/laiwei">laiwei</a></span>
+                                <div class="sep5"></div>
+                                <span class="fade">who care</span>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                    <div class="sep10"></div>
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tbody><tr>
+                            <td width="33%" align="center">
+                                <a href="#" class="dark" style="display: block;"><span class="bigger">1</span>
+                                <div class="sep3"></div>
+                                <span class="fade">节点收藏</span></a></td>
+                            <td width="34%" class="vborder1" align="center">
+                                <a href="#" class="dark" style="display: block;"><span class="bigger">17</span>
+                                <div class="sep3"></div>
+                                <span class="fade">主题收藏</span></a></td>
+                            <td width="33%" align="center">
+                                <a href="#" class="dark" style="display: block;"><span class="bigger">6</span>
+                                <div class="sep3"></div>
+                                <span class="fade">特别关注</span></a></td>
+                        </tr></tbody></table>
+                </div>
+
+                <div class="inner">
+                    <a href="#">介绍</a>
+                </div>
+            </div>
+
+            <div class="sep20"> </div>
+
+            <div class="box"> </div>
+            {% endblock%}
+        </div>
+
+        <div id="Content">
+            {% block content_block%}
+            {% endblock%}
+        </div>
+
+        <div class="c"></div>
+
+    {% endblock%}
+    </div>
+
+</div>
+
+<div id="Bottom">{% block bottom_block %} {% endblock %}</div>
+</body>
+
+</html>
