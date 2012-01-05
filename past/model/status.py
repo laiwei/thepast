@@ -45,7 +45,7 @@ class Status(object):
                 redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
             status = cls.get(status_id)
         except IntegrityError:
-            print '---add status duplicated, ignore...'
+            logging.warning("add status duplicated, ignore...")
             db_conn.rollback()
         finally:
             cursor.close()
@@ -54,10 +54,10 @@ class Status(object):
 
     @classmethod
     def add_from_obj(cls, user_id, d, raw=None):
-        origin_id = d.get_origin_id()
-        create_time = d.get_create_time()
-        title = d.get_title()
-        content = d.get_content()
+        origin_id = d.get_origin_id().encode("utf8")
+        create_time = d.get_create_time().encode("utf8")
+        title = d.get_title().encode("utf8")
+        content = d.get_content().encode("utf8")
 
         site = d.site
         category = d.category
@@ -333,7 +333,9 @@ class SyncTask(object):
     def get_ids(cls):
         cursor = db_conn.cursor()
         cursor.execute("""select id from sync_task""") 
-        return [row[0] for row in cursor.fetchall()]
+        r = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        return r
     
     @classmethod
     def gets(cls, ids):

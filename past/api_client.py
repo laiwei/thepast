@@ -11,6 +11,8 @@ from past.model.status import (DoubanStatusData, DoubanNoteData,
 
 log = logging.getLogger(__file__)
 
+#TODO: save photo of status
+
 class Douban(object):
     
     def __init__(self, alias_id, access_token, refresh_token=None, api_host = "https://api.douban.com"):
