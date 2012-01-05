@@ -124,12 +124,8 @@ def sync_douban(cates):
     if not token:
         return redirect("/connect/douban")
     
-    if cates is None:
-        SyncTask.add(config.CATE_DOUBAN_STATUS, g.user.id)
-        SyncTask.add(config.CATE_DOUBAN_NOTE, g.user.id)
-        SyncTask.add(config.CATE_DOUBAN_MINIBLOG, g.user.id)
-
-    cates = filter(lambda x: x in config.CATE_LIST, cates)
+    cates = filter(lambda x: x in [str(y) for y in config.CATE_LIST], cates)
+    print cates
     for c in cates:
         SyncTask.add(c, g.user.id)
     

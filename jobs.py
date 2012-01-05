@@ -5,14 +5,11 @@ import time
 from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
-from past.store import connect_db, connect_redis
 from past.api_client import Douban
 from past.model.status import (Status, DoubanNoteData, 
         DoubanStatusData, DoubanMiniBlogData, SyncTask)
 from past.model.user import User, UserAlias, OAuth2Token
 
-db_conn = connect_db()
-redis_conn = connect_redis()
 log = logging.getLogger(__file__)
 
 while True:
@@ -53,7 +50,7 @@ while True:
             if note_list:
                 for x in note_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-                detail['start'] = detail.get('start', 0) + len(note_list)
+                detail['start'] = int(detail.get('start', 0)) + len(note_list)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
 
@@ -64,7 +61,7 @@ while True:
             if miniblog_list:
                 for x in miniblog_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-                detail['start'] = detail.get('start', 0) + len(miniblog_list)
+                detail['start'] = int(detail.get('start', 0)) + len(miniblog_list)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
 
@@ -74,7 +71,7 @@ while True:
             if status_list:
                 for x in status_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-                detail['until_id'] = DoubanStatusData(status_list[-1]).get_origin_id()
+                detail['until_id'] = status_list[-1].get_origin_id()
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
 

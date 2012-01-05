@@ -202,6 +202,7 @@ def to_basestring(value):
     assert isinstance(value, bytes)
     return value.decode("utf-8")
 
+
 _DATE_FORMAT = "%Y-%m-%d"
 _TIME_FORMAT = "%H:%M:%S"
 def recursive_unicode(obj):
