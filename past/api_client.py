@@ -2,10 +2,12 @@
 
 import urlparse
 import urllib
-
+import logging
 import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import httplib2_request
+
+log = logging.getLogger(__file__)
 
 class Douban(object):
     
@@ -34,13 +36,13 @@ class Douban(object):
             else:
                 uri = "%s?%s" % (uri, qs)
         headers = {"Authorization": "Bearer %s" % self.access_token}     
-
+        log.info('getting %s...' % uri)
         resp, content = httplib2_request(uri, "GET", headers=headers)
         if resp.status == 200:
             return content
         else:
-            print resp.status, content
-
+            log.warn("get %s fail, status code=%s, msg=%s" \
+                    % (uri, resp.status, content))
         return None
 
     def post(self):
