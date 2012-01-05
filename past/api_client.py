@@ -83,6 +83,10 @@ class Douban(object):
         return self.get("/people/%s/events/wish" % self.alias_id, 
                 {"start-index": start, "max-results": count})
     
+    def get_miniblogs(self, start, count):
+        return self.get("/people/%s/miniblog" % self.alias_id,
+                {"start-index": start, "max-results": count})
+
     def get_timeline(self, since_id=None, until_id=None):
         d = {}
         if since_id is not None:

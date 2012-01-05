@@ -160,6 +160,26 @@ class DoubanNoteData(DoubanData):
     def get_content(self):
         return self.data.get("content", {}).get("$t")
 
+# 广播
+class DoubanMiniBlogData(DoubanData):
+    def __init__(self, data):
+        super(DoubanMiniBlogData(Data, self).__init__(
+                config.CATE_DOUBAN_MINIBLOG, data)
+
+    def get_origin_id(self):
+        id_ = self.data.get("id", {}).get("$t")
+        if id_:
+            return (id_.rstrip("/").split("/"))[-1]
+        return None
+
+    def get_create_time(self):
+        return self.data.get("published",{}).get("$t")
+
+    def get_title(self):
+        return self.data.get("title", {}).get("$t")
+
+    def get_content(self):
+        return self.data.get("content", {}).get("$t")
 
 # 相册 
 class DoubanPhotoData(DoubanData):
