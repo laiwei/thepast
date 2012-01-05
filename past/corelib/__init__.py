@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
-import config 
-from .model.user import User
+from past import config 
+from past.model.user import User
 
 def auth_user_from_session(session_):
     user = None

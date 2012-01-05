@@ -4,12 +4,11 @@ from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, flash
 
 import config
-from .corelib import auth_user_from_session, set_user_cookie
-from .corelib.json import decode as json_decode
-from .corelib.json import encode as json_encode
-from .model.user import User, UserAlias, OAuth2Token
-from .model.status import SyncTask
-from .oauth_login import DoubanLogin, OAuthLoginError
+from past.corelib import auth_user_from_session, set_user_cookie
+from past.utils.escape import json_encode, json_decode
+from past.model.user import User, UserAlias, OAuth2Token
+from past.model.status import SyncTask
+from past.oauth_login import DoubanLogin, OAuthLoginError
 import api_client
 
 from past import app

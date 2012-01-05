@@ -14,6 +14,7 @@ CREATE TABLE `status` (
   `title` varchar(100) CHARACTER SET ucs2 NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_origin` (`origin_id`, `site`, `category`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='status';
 

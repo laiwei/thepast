@@ -2,21 +2,22 @@
 
 import datetime
 import time
-from json import loads as json_decode
-from json import dumps as json_encode
 from past import config
+from past.utils.escape import json_decode, json_encode
 from past.store import connect_db, connect_redis
 from past.api_client import Douban
-from past.model.status import Status, DoubanNoteData, SyncTask
+from past.model.status import Status, DoubanNoteData, DoubanStatusData, SyncTask
 from past.model.user import User, UserAlias, OAuth2Token
 
 db_conn = connect_db()
 redis_conn = connect_redis()
 
 while True:
-    print '--start'
+    print '---once again...'
     ids = SyncTask.get_ids()
     task_list = SyncTask.gets(ids)
+    if not task_list:
+        print '---no task...'
     for t in task_list:
         detail = t.get_detail()
 
@@ -32,9 +33,9 @@ while True:
             contents = json_decode(contents).get("entry", []) if contents else []
             if contents:
                 for x in contents:
-                    print '-------note content:', x
+                    print '----note content:', x
                     d = DoubanNoteData(x)
-                    Status.add_from_obj(t.user_id, d)
+                    Status.add_from_obj(t.user_id, d, x)
                 detail['start'] = detail.get('start', 0) + len(contents)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
@@ -45,11 +46,12 @@ while True:
             contents = json_decode(contents) if contents else []
             if contents:
                 for x in contents:
-                    print '-------status content:', x
+                    print '----status content:', x
                     d = DoubanStatusData(x)
-                    Status.add_from_obj(t.user_id, d)
-                detail['until_id'] = contents[-1]
+                    Status.add_from_obj(t.user_id, d, x)
+                detail['until_id'] = DoubanStatusData(contents[-1]).get_origin_id()
                 detail['uptime'] = datetime.datetime.now()
+                print '----will set detail:',detail, json_encode(detail)
                 t.update_detail(detail)
 
         time.sleep(2)

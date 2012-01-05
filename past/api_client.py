@@ -4,9 +4,8 @@ import urlparse
 import urllib
 
 import config
-from .corelib.json import decode as json_decode
-from .corelib.json import encode as json_encode
-from .utils import httplib2_request
+from past.utils.escape import json_encode, json_decode
+from past.utils import httplib2_request
 
 class Douban(object):
     

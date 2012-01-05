@@ -1,7 +1,6 @@
 #-*- coding:utf-8 -*-
 
-from .corelib.json import decode as json_decode
-from .corelib.json import encode as json_encode
+from past.utils.escape import json_encode, json_decode
 from MySQLdb import IntegrityError
 from past.store import connect_redis, connect_db
 from past import config
@@ -12,6 +11,7 @@ db_conn = connect_db()
 class Status(object):
     
     STATUS_REDIS_KEY = "/status/text/%s"
+    RAW_STATUS_REDIS_KEY = "/status/raw/%s"
 
     def __init__(self, id, user_id, origin_id, 
             create_time, site, category, title=""):
@@ -24,9 +24,12 @@ class Status(object):
         self.title = title
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
+        self.raw = json_decode(redis_conn.get(
+                self.__class__.RAW_STATUS_REDIS_KEY % self.id))
 
     @classmethod
-    def add(cls, user_id, origin_id, create_time, site, category, title, text=None):
+    def add(cls, user_id, origin_id, create_time, site, category, title, 
+            text=None, raw=None):
         status = None
         cursor = db_conn.cursor()
         try:
@@ -38,8 +41,11 @@ class Status(object):
             status_id = cursor.lastrowid
             if text is not None:
                 redis_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
+            if raw is not None:
+                redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
             status = cls.get(status_id)
         except IntegrityError:
+            print '---add status duplicated, ignore...'
             db_conn.rollback()
         finally:
             cursor.close()
@@ -47,7 +53,7 @@ class Status(object):
         return status
 
     @classmethod
-    def add_from_obj(cls, user_id, d):
+    def add_from_obj(cls, user_id, d, raw=None):
         origin_id = d.get_origin_id()
         create_time = d.get_create_time()
         title = d.get_title()
@@ -57,7 +63,8 @@ class Status(object):
         category = d.category
         user_id = user_id
 
-        cls.add(user_id, origin_id, create_time, site, category, title, content)
+        cls.add(user_id, origin_id, create_time, site, category, 
+                title, content, raw)
 
     @classmethod
     def get(cls, status_id):
@@ -198,13 +205,13 @@ class DoubanStatusData(DoubanData):
         return self.data.get("id")
 
     def get_create_time(self):
-        return self.data.get("created_at")
+        return self.data.get("created_at").encode("utf8")
 
     def get_title(self):
         return ""
 
     def get_content(self):
-        return self.data.get("text")
+        return self.data.get("text").encode("utf8")
 
     def get_attachments(self):
         attachs =  self.data.get("attachments")
@@ -217,20 +224,24 @@ class DoubanStatusAttachment(object):
         self.data = data
 
     def get_title(self):
-        return self.data.get("title")
+        return self.data.get("title").encode("utf8")
 
     def get_href(self):
-        return self.data.get("expaned_href")
+        return self.data.get("expaned_href").encode("utf8")
 
     def get_caption(self):
-        return self.data.get("caption")
+        return self.data.get("caption").encode("utf8")
 
     def get_description(self):
-        return self.data.get("discription")
+        return self.data.get("discription").encode("utf8")
 
     def get_media(self):
         medias = self.data.get("media")
         return [DoubanStatusAttachmentMedia(x) for x in medias]
+
+    def get_props(self):
+        props = self.data.get("properties", {}) 
+        return props
 
 class DoubanStatusAttachmentMedia(object):
     
@@ -238,24 +249,24 @@ class DoubanStatusAttachmentMedia(object):
         self.data = data
 
     def get_type(self):
-        return self.data.get("type")
+        return self.data.get("type").encode("utf8")
     
     def get_media_src(self):
-        return self.data.get("src")
+        return self.data.get("src").encode("utf8")
 
     def get_href(self):
-        return self.data.get("href")
+        return self.data.get("href").encode("utf8")
 
     def get_size(self):
-        return self.data.get("size")
+        return self.data.get("size").encode("utf8")
 
     ## just for music
     def get_title(self):
-        return self.data.get("title")
+        return self.data.get("title").encode("utf8")
 
     ##-- just for flash
     def get_imgsrc(self):
-        return self.data.get("imgsrc")
+        return self.data.get("imgsrc").encode("utf8")
 
 
 class SyncTask(object):
@@ -319,6 +330,7 @@ class SyncTask(object):
     def get_detail(self):
         k = self.__class__.kv_db_key_task % self.id
         d = redis_conn.get(k)
+        print '---------------d:',d,";k:",k
         d = json_decode(d) if d else {}
         return d
 
