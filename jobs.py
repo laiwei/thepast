@@ -2,9 +2,9 @@
 
 import datetime
 import time
-import logging
 from past import config
 from past.utils.escape import json_encode, json_decode
+from past.utils.logger import logging
 from past.store import connect_db, connect_redis
 from past.api_client import Douban
 from past.model.status import Status, DoubanNoteData, DoubanStatusData, SyncTask
@@ -15,18 +15,34 @@ redis_conn = connect_redis()
 log = logging.getLogger(__file__)
 
 while True:
-    print '---once again...'
+    log.info("%s syncing..." % datetime.datetime.now())
     ids = SyncTask.get_ids()
     task_list = SyncTask.gets(ids)
     if not task_list:
-        print '---no task...'
+        log.warn("no task list, so sleep 10s and continue...")
+        time.sleep(10)
+        break
+    
+    log.info("task_list length is %s" % len(task_list))
     for t in task_list:
         detail = t.get_detail()
+        log.info("task detail is %s" % detail)
 
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+        if not alias:
+            log.warn("no alias, break...")
+            break
+
         token = OAuth2Token.get(alias.id)
+        if not token:
+            log.warn("no access token, break...")
+            break
+
         client = Douban(alias.alias, token.access_token, token.refresh_token)
+        if not client:
+            log.warn("get client fail, break...")
+            break
 
         if t.kind == config.SYNC_DOUBAN_NOTE:
             start = detail.get('start', 0)
@@ -35,7 +51,6 @@ while True:
             contents = json_decode(contents).get("entry", []) if contents else []
             if contents:
                 for x in contents:
-                    print '----note content:', x
                     d = DoubanNoteData(x)
                     Status.add_from_obj(t.user_id, d, json_encode(x))
                 detail['start'] = detail.get('start', 0) + len(contents)
@@ -48,15 +63,13 @@ while True:
             contents = json_decode(contents) if contents else []
             if contents:
                 for x in contents:
-                    print '----status content:', x
                     d = DoubanStatusData(x)
                     Status.add_from_obj(t.user_id, d, json_encode(x))
                 detail['until_id'] = DoubanStatusData(contents[-1]).get_origin_id()
                 detail['uptime'] = datetime.datetime.now()
-                print '----will set detail:',detail, json_encode(detail)
                 t.update_detail(detail)
 
-        time.sleep(2)
+        time.sleep(5)
     
     time.sleep(5)
 

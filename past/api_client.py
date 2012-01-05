@@ -2,9 +2,9 @@
 
 import urlparse
 import urllib
-import logging
 import config
 from past.utils.escape import json_encode, json_decode
+from past.utils.logger import logging
 from past.utils import httplib2_request
 
 log = logging.getLogger(__file__)

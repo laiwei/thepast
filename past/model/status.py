@@ -330,7 +330,6 @@ class SyncTask(object):
     def get_detail(self):
         k = self.__class__.kv_db_key_task % self.id
         d = redis_conn.get(k)
-        print '---------------d:',d,";k:",k
         d = json_decode(d) if d else {}
         return d
 
