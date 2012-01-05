@@ -6,6 +6,8 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
+from past.model.status import (DoubanStatusData, DoubanNoteData,
+    DoubanMiniBlogData)
 
 log = logging.getLogger(__file__)
 
@@ -63,9 +65,12 @@ class Douban(object):
     def get_note(self, note_id):
         return self.get("/note/%s" % note_id)
 
+    #FIXED
     def get_notes(self, start, count):
-        return self.get("/people/%s/notes" % self.alias_id, 
+        contents = self.get("/people/%s/notes" % self.alias_id, 
                 {"start-index": start, "max-results": count})
+        contents = json_decode(contents).get("entry",[]) if contents else []
+        return [DoubanNoteData(c) for c in contents]
         
     def get_events(self, start, count):
         return self.get("/people/%s/events" % self.alias_id, 
@@ -83,10 +88,14 @@ class Douban(object):
         return self.get("/people/%s/events/wish" % self.alias_id, 
                 {"start-index": start, "max-results": count})
     
+    #FIXED
     def get_miniblogs(self, start, count):
-        return self.get("/people/%s/miniblog" % self.alias_id,
+        contents = self.get("/people/%s/miniblog" % self.alias_id,
                 {"start-index": start, "max-results": count})
+        contents = json_decode(contents).get("entry",[]) if contents else []
+        return [DoubanMiniBlogData(c) for c in contents]
 
+    #FIXED
     def get_timeline(self, since_id=None, until_id=None):
         d = {}
         if since_id is not None:
@@ -94,7 +103,10 @@ class Douban(object):
         if until_id is not None:
             d["until_id"] = until_id
 
-        return self.get("/shuo/statuses/user_timeline/%s" % self.alias_id, d)
+        contents = self.get("/shuo/statuses/user_timeline/%s" \
+                % self.alias_id, d)
+        contents = json_decode(contents) if contents else []
+        return [DoubanStatusData(c) for c in contents]
 
     """
         GET /people/{userID}/collection?cat=book

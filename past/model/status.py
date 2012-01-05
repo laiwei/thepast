@@ -1,9 +1,9 @@
 #-*- coding:utf-8 -*-
 
+from past import config
 from past.utils.escape import json_encode, json_decode
 from MySQLdb import IntegrityError
 from past.store import connect_redis, connect_db
-from past import config
 
 redis_conn = connect_redis()
 db_conn = connect_db()
@@ -163,7 +163,7 @@ class DoubanNoteData(DoubanData):
 # 广播
 class DoubanMiniBlogData(DoubanData):
     def __init__(self, data):
-        super(DoubanMiniBlogData(Data, self).__init__(
+        super(DoubanMiniBlogData, self).__init__(
                 config.CATE_DOUBAN_MINIBLOG, data)
 
     def get_origin_id(self):
