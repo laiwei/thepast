@@ -292,20 +292,20 @@ class DoubanStatusAttachmentMedia(object):
 class SyncTask(object):
     kv_db_key_task = '/synctask/%s'
 
-    def __init__(self, id, kind, user_id, time):
+    def __init__(self, id, category, user_id, time):
         self.id = str(id)
-        self.kind = kind
+        self.category = category
         self.user_id = str(user_id)
         self.time = time
 
     @classmethod
-    def add(cls, kind, user_id):
+    def add(cls, category, user_id):
         task = None
         cursor = db_conn.cursor()
         try:
             cursor.execute("""insert into sync_task
-                    (kind, user_id) values (%s,%s)""",
-                    (kind, user_id))
+                    (category, user_id) values (%s,%s)""",
+                    (category, user_id))
             db_conn.commit()
             task_id = cursor.lastrowid
             task = cls.get(task_id)
@@ -320,7 +320,7 @@ class SyncTask(object):
     def get(cls, id):
         task = None
         cursor = db_conn.cursor()
-        cursor.execute("""select kind,user_id,time from sync_task
+        cursor.execute("""select category,user_id,time from sync_task
                 where id=%s limit 1""", id) 
         row = cursor.fetchone()
         if row:

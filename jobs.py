@@ -45,7 +45,7 @@ while True:
             log.warn("get client fail, break...")
             break
 
-        if t.kind == config.SYNC_DOUBAN_NOTE:
+        if t.category == config.CATE_DOUBAN_NOTE:
             start = detail.get('start', 0)
             count = detail.get('count', 10)
             contents = client.get_notes(start, count)
@@ -57,7 +57,7 @@ while True:
                 detail['start'] = detail.get('start', 0) + len(contents)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
-        elif t.kind == config.SYNC_DOUBAN_MINIBLOG:
+        elif t.category == config.CATE_DOUBAN_MINIBLOG:
             start = detail.get('start', 0)
             count = detail.get('count', 10)
             contents = client.get_miniblogs(start, count)
@@ -70,7 +70,7 @@ while True:
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
 
-        elif t.kind == config.SYNC_DOUBAN_SHUO:
+        elif t.category == config.CATE_DOUBAN_STATUS:
             until_id = detail.get("until_id")
             contents = client.get_timeline(until_id=until_id)
             contents = json_decode(contents) if contents else []

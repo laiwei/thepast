@@ -70,11 +70,11 @@ CREATE TABLE `oauth2_token` (
 drop table if exists `sync_task`;
 CREATE TABLE `sync_task` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `kind` varchar(10) NOT NULL,
+  `category` smallint(4) NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_kind` (`user_id`, `kind`)
+  UNIQUE KEY `idx_user_cate` (`user_id`, `category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='sync_task';
 
 

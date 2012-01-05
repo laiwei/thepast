@@ -90,13 +90,14 @@ def connect_callback(provider):
     return g.user.name + json_encode(user_info)
 
 
-@app.route("/sync/<provider>/<kind>")
-def sync(provider,kind):
+@app.route("/sync/<provider>/<cates>")
+def sync(provider,cates):
     if provider not in ('douban', 'wordpress','weibo'):
         abort(401, "暂时不支持其他服务")
-    
+    cates = cates.split("|")
+
     if provider == 'douban':
-        return sync_douban()
+        return sync_douban(cates)
 
     elif provider == 'wordpress':
         pass
@@ -104,7 +105,10 @@ def sync(provider,kind):
     elif provider == 'weibo':
         pass
 
-def sync_douban():
+def sync_douban(cates):
+    if not (cates and isinstance(cates, list)):
+        return "no cates"
+
     if not g.user:
         return redirect("/connect/douban")
     
@@ -119,10 +123,15 @@ def sync_douban():
     
     if not token:
         return redirect("/connect/douban")
+    
+    if cates is None:
+        SyncTask.add(config.CATE_DOUBAN_STATUS, g.user.id)
+        SyncTask.add(config.CATE_DOUBAN_NOTE, g.user.id)
+        SyncTask.add(config.CATE_DOUBAN_MINIBLOG, g.user.id)
 
-    SyncTask.add(config.SYNC_DOUBAN_SHUO, g.user.id)
-    SyncTask.add(config.SYNC_DOUBAN_NOTE, g.user.id)
-    SyncTask.add(config.SYNC_DOUBAN_MINIBLOG, g.user.id)
+    cates = filter(lambda x: x in config.CATE_LIST, cates)
+    for c in cates:
+        SyncTask.add(c, g.user.id)
     
     flash("good, douban sync task add succ...")
     return redirect("/connect")
