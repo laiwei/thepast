@@ -122,6 +122,7 @@ def sync_douban():
 
     SyncTask.add(config.SYNC_DOUBAN_SHUO, g.user.id)
     SyncTask.add(config.SYNC_DOUBAN_NOTE, g.user.id)
+    SyncTask.add(config.SYNC_DOUBAN_MINIBLOG, g.user.id)
     
     flash("good, douban sync task add succ...")
     return redirect("/connect")

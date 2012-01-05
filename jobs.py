@@ -7,7 +7,8 @@ from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.store import connect_db, connect_redis
 from past.api_client import Douban
-from past.model.status import Status, DoubanNoteData, DoubanStatusData, SyncTask
+from past.model.status import (Status, DoubanNoteData, 
+        DoubanStatusData, DoubanMiniBlogData, SyncTask
 from past.model.user import User, UserAlias, OAuth2Token
 
 db_conn = connect_db()
@@ -56,8 +57,20 @@ while True:
                 detail['start'] = detail.get('start', 0) + len(contents)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
-                
-        if t.kind == config.SYNC_DOUBAN_SHUO:
+        elif t.kind == config.SYNC_DOUBAN_MINIBLOG:
+            start = detail.get('start', 0)
+            count = detail.get('count', 10)
+            contents = client.get_miniblogs(start, count)
+            contents = json_decode(contents).get("entry", []) if contents else []
+            if contents:
+                for x in contents:
+                    d = DoubanMiniBlogData(x)
+                    Status.add_from_obj(t.user_id, d, json_encode(x))
+                detail['start'] = detail.get('start', 0) + len(contents)
+                detail['uptime'] = datetime.datetime.now()
+                t.update_detail(detail)
+
+        elif t.kind == config.SYNC_DOUBAN_SHUO:
             until_id = detail.get("until_id")
             contents = client.get_timeline(until_id=until_id)
             contents = json_decode(contents) if contents else []
