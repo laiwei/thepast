@@ -20,10 +20,13 @@ Also includes a few other miscellaneous string manipulation functions that
 have crept in over time.
 """
 
+from functools import wraps
 import htmlentitydefs
 import re
 import sys
 import urllib
+import datetime
+import types
 
 # Python3 compatibility:  On python2.5, introduce the bytes alias from 2.6
 try: bytes
@@ -199,6 +202,8 @@ def to_basestring(value):
     assert isinstance(value, bytes)
     return value.decode("utf-8")
 
+_DATE_FORMAT = "%Y-%m-%d"
+_TIME_FORMAT = "%H:%M:%S"
 def recursive_unicode(obj):
     """Walks a simple data structure, converting byte strings to unicode.
 
@@ -212,6 +217,22 @@ def recursive_unicode(obj):
         return tuple(recursive_unicode(i) for i in obj)
     elif isinstance(obj, bytes):
         return to_unicode(obj)
+    elif isinstance(obj, datetime.datetime):
+        return to_unicode(obj.strftime("%s %s" % (_DATE_FORMAT, _TIME_FORMAT)))
+    elif isinstance(obj, datetime.date):
+        return to_unicode(obj.strftime("%s" % _DATE_FORMAT))
+    elif isinstance(obj, datetime.time):
+        return to_unicode(obj.strftime("%s" % _TIME_FORMAT))
+    elif isinstance(obj, types.IntType) or isinstance(obj, types.LongType):
+        return to_unicode(str(obj))
+    elif isinstance(obj, types.FloatType):
+        return to_unicode("%f" % obj)
+    elif obj is True:
+        return to_unicode("true")
+    elif obj is False:
+        return to_unicode("false")
+    elif obj is None:
+        return to_unicode("null")
     else:
         return obj
 
@@ -325,3 +346,10 @@ def _build_unicode_map():
     return unicode_map
 
 _HTML_UNICODE_MAP = _build_unicode_map()
+
+def jsonize(func):
+    @wraps(func)
+    def _(*a, **kw):
+        r = func(*a, **kw)
+        return json_encode(r)
+    return _

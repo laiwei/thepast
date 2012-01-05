@@ -146,19 +146,19 @@ class DoubanNoteData(DoubanData):
                 config.CATE_DOUBAN_NOTE, data)
 
     def get_origin_id(self):
-        id_ = self.data.get("id", {}).get("$t").encode('utf8')
+        id_ = self.data.get("id", {}).get("$t")
         if id_:
             return (id_.rstrip("/").split("/"))[-1]
         return None
 
     def get_create_time(self):
-        return self.data.get("published",{}).get("$t").encode('utf8')
+        return self.data.get("published",{}).get("$t")
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t").encode('utf8')
+        return self.data.get("title", {}).get("$t")
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t").encode('utf8')
+        return self.data.get("content", {}).get("$t")
 
 
 # 相册 
@@ -168,19 +168,19 @@ class DoubanPhotoData(DoubanData):
                 config.CATE_DOUBAN_PHOTO, data)
 
     def get_origin_id(self):
-        id_ = self.data.get("id", {}).get("$t").encode('utf8')
+        id_ = self.data.get("id", {}).get("$t")
         if id_:
             return (id_.rstrip("/").split("/"))[-1]
         return None
 
     def get_create_time(self):
-        return self.data.get("published",{}).get("$t").encode('utf8')
+        return self.data.get("published",{}).get("$t")
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t").encode('utf8')
+        return self.data.get("title", {}).get("$t")
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t").encode('utf8')
+        return self.data.get("content", {}).get("$t")
 
     def get_large_img_src(self):
         links = self.data.get("link", [])

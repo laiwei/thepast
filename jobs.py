@@ -2,8 +2,9 @@
 
 import datetime
 import time
+import logging
 from past import config
-from past.utils.escape import json_decode, json_encode
+from past.utils.escape import json_encode, json_decode
 from past.store import connect_db, connect_redis
 from past.api_client import Douban
 from past.model.status import Status, DoubanNoteData, DoubanStatusData, SyncTask
@@ -11,6 +12,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 
 db_conn = connect_db()
 redis_conn = connect_redis()
+log = logging.getLogger(__file__)
 
 while True:
     print '---once again...'
@@ -35,7 +37,7 @@ while True:
                 for x in contents:
                     print '----note content:', x
                     d = DoubanNoteData(x)
-                    Status.add_from_obj(t.user_id, d, x)
+                    Status.add_from_obj(t.user_id, d, json_encode(x))
                 detail['start'] = detail.get('start', 0) + len(contents)
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
@@ -48,7 +50,7 @@ while True:
                 for x in contents:
                     print '----status content:', x
                     d = DoubanStatusData(x)
-                    Status.add_from_obj(t.user_id, d, x)
+                    Status.add_from_obj(t.user_id, d, json_encode(x))
                 detail['until_id'] = DoubanStatusData(contents[-1]).get_origin_id()
                 detail['uptime'] = datetime.datetime.now()
                 print '----will set detail:',detail, json_encode(detail)
