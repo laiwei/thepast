@@ -1,9 +1,12 @@
 #-*- coding:utf-8 -*-
 
+from MySQLdb import IntegrityError
 from past import config
 from past.utils.escape import json_encode, json_decode
-from MySQLdb import IntegrityError
+from past.utils.logger import logging
 from past.store import connect_redis, connect_db
+
+log = logging.getLogger(__file__)
 
 redis_conn = connect_redis()
 db_conn = connect_db()
@@ -45,7 +48,7 @@ class Status(object):
                 redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
             status = cls.get(status_id)
         except IntegrityError:
-            logging.warning("add status duplicated, ignore...")
+            log.warning("add status duplicated, ignore...")
             db_conn.rollback()
         finally:
             cursor.close()
@@ -84,11 +87,40 @@ class Status(object):
     def gets(cls, ids):
         pass
 
-class DoubanUser(object):
+
+## User数据接口 
+class AbsUserData(object):
+
     def __init__(self, data):
         self.data = data
         if isinstance(data, basestring):
             self.data = json_decode(data)
+
+    def get_user_id(self):
+        raise NotImplementedError
+
+    def get_uid(self):
+        raise NotImplementedError
+
+    def get_nickname(self):
+        raise NotImplementedError
+
+    def get_intro(self):
+        raise NotImplementedError
+
+    def get_signature(self):
+        raise NotImplementedError
+
+    def get_avatar(self):
+        raise NotImplementedError
+
+    def get_icon(self):
+        raise NotImplementedError
+    
+## 豆瓣user数据接口
+class DoubanUser(AbsUserData):
+    def __init__(self, data):
+        super(DoubanUser, self).__init__(data)
 
     def get_user_id(self):
         id_ = self.data.get("id", {}).get("$t")
@@ -107,8 +139,45 @@ class DoubanUser(object):
 
     def get_signature(self):
         return self.data.get("signature", {}).get("$t")
+
+    def get_avatar(self):
+        icon = self.get_icon()
+        user_id = self.get_user_id()
+
+        return icon.replace(user_id, "l%s" % user_id)
+
+    def get_icon(self):
+        return self.data.get("link")[2].get("@href", "")
         
 
+## 新浪微博user数据接口
+class SinaWeiboUser(AbsUserData):
+
+    def __init__(self, data):
+        super(SinaWeiboUser, self).__init__(data)
+
+    def get_user_id(self):
+        return self.data.get("idstr","").encode("utf8")
+
+    def get_uid(self):
+        return self.data.get("domain", "").encode("utf8")
+
+    def get_nickname(self):
+        return self.data.get("screen_name", "").encode("utf8")
+
+    def get_intro(self):
+        return self.data.get("description", "").encode("utf8")
+
+    def get_signature(self):
+        return ""
+
+    def get_avatar(self):
+        return self.data.get("avatar_large", "").encode("utf8")
+
+    def get_icon(self):
+        return self.data.gete("profile_image_url", "").encode("utf8")
+
+## 第三方数据接口
 class AbsData(object):
     
     def __init__(self, site, category, data):
@@ -131,6 +200,9 @@ class AbsData(object):
         raise NotImplementedError
 
     def get_content(self):
+        raise NotImplementedError
+
+    def get_user(self):
         raise NotImplementedError
 
 class DoubanData(AbsData):
@@ -289,6 +361,36 @@ class DoubanStatusAttachmentMedia(object):
         return self.data.get("imgsrc").encode("utf8")
 
 
+class SinaWeiboData(AbsData):
+    
+    def __init__(self, category, data):
+        super(SinaWeiboData, self).__init__( 
+                config.OPENID_TYPE_DICT[config.OPENID_SINA], category, data)
+
+class SinaWeiboStatusData(SinaWeiboData):
+    def __init__(self, data):
+        super(SinaWeiboStatusData, self).__init__(
+                config.CATE_SINA_STATUS, data)
+    
+    def get_origin_id(self):
+        return self.data.get("idstr", "").encode("utf8")
+
+    def get_create_time(self):
+        return self.data.get("created_at", "").encode("utf8")
+
+    def get_title(self):
+        return ""
+
+    def get_content(self):
+        return self.data.get("text", "").encode("utf8")
+    
+    def retweeted_status(self):
+        return SinaWeiboStatusData(self.data.get("retweeted_status"))
+
+    def get_user(self):
+        return SinaWeiboUser(self.data.get("user"))
+
+## Sycktask: 用户添加的同步任务
 class SyncTask(object):
     kv_db_key_task = '/synctask/%s'
 
