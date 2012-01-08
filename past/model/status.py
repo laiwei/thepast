@@ -36,6 +36,7 @@ class Status(object):
         status = None
         cursor = db_conn.cursor()
         try:
+            print '--- inserting %s %s %s %s' %(user_id, origin_id, site, category) 
             cursor.execute("""insert into status 
                     (user_id, origin_id, create_time, site, category, title)
                     values (%s,%s,%s,%s,%s,%s)""",
@@ -57,10 +58,10 @@ class Status(object):
 
     @classmethod
     def add_from_obj(cls, user_id, d, raw=None):
-        origin_id = d.get_origin_id().encode("utf8")
-        create_time = d.get_create_time().encode("utf8")
-        title = d.get_title().encode("utf8")
-        content = d.get_content().encode("utf8")
+        origin_id = d.get_origin_id()
+        create_time = d.get_create_time()
+        title = d.get_title()
+        content = d.get_content()
 
         site = d.site
         category = d.category
@@ -157,25 +158,25 @@ class SinaWeiboUser(AbsUserData):
         super(SinaWeiboUser, self).__init__(data)
 
     def get_user_id(self):
-        return self.data.get("idstr","").encode("utf8")
+        return self.data.get("idstr","")
 
     def get_uid(self):
-        return self.data.get("domain", "").encode("utf8")
+        return self.data.get("domain", "")
 
     def get_nickname(self):
-        return self.data.get("screen_name", "").encode("utf8")
+        return self.data.get("screen_name", "")
 
     def get_intro(self):
-        return self.data.get("description", "").encode("utf8")
+        return self.data.get("description", "")
 
     def get_signature(self):
         return ""
 
     def get_avatar(self):
-        return self.data.get("avatar_large", "").encode("utf8")
+        return self.data.get("avatar_large", "")
 
     def get_icon(self):
-        return self.data.gete("profile_image_url", "").encode("utf8")
+        return self.data.gete("profile_image_url", "")
 
 ## 第三方数据接口
 class AbsData(object):
@@ -297,13 +298,13 @@ class DoubanStatusData(DoubanData):
         return self.data.get("id")
 
     def get_create_time(self):
-        return self.data.get("created_at").encode("utf8")
+        return self.data.get("created_at")
 
     def get_title(self):
         return ""
 
     def get_content(self):
-        return self.data.get("text").encode("utf8")
+        return self.data.get("text")
 
     def get_attachments(self):
         attachs =  self.data.get("attachments")
@@ -316,16 +317,16 @@ class DoubanStatusAttachment(object):
         self.data = data
 
     def get_title(self):
-        return self.data.get("title").encode("utf8")
+        return self.data.get("title")
 
     def get_href(self):
-        return self.data.get("expaned_href").encode("utf8")
+        return self.data.get("expaned_href")
 
     def get_caption(self):
-        return self.data.get("caption").encode("utf8")
+        return self.data.get("caption")
 
     def get_description(self):
-        return self.data.get("discription").encode("utf8")
+        return self.data.get("discription")
 
     def get_media(self):
         medias = self.data.get("media")
@@ -341,24 +342,24 @@ class DoubanStatusAttachmentMedia(object):
         self.data = data
 
     def get_type(self):
-        return self.data.get("type").encode("utf8")
+        return self.data.get("type")
     
     def get_media_src(self):
-        return self.data.get("src").encode("utf8")
+        return self.data.get("src")
 
     def get_href(self):
-        return self.data.get("href").encode("utf8")
+        return self.data.get("href")
 
     def get_size(self):
-        return self.data.get("size").encode("utf8")
+        return self.data.get("size")
 
     ## just for music
     def get_title(self):
-        return self.data.get("title").encode("utf8")
+        return self.data.get("title")
 
     ##-- just for flash
     def get_imgsrc(self):
-        return self.data.get("imgsrc").encode("utf8")
+        return self.data.get("imgsrc")
 
 
 class SinaWeiboData(AbsData):
@@ -373,16 +374,16 @@ class SinaWeiboStatusData(SinaWeiboData):
                 config.CATE_SINA_STATUS, data)
     
     def get_origin_id(self):
-        return self.data.get("idstr", "").encode("utf8")
+        return self.data.get("idstr", "")
 
     def get_create_time(self):
-        return self.data.get("created_at", "").encode("utf8")
+        return self.data.get("created_at", "")
 
     def get_title(self):
         return ""
 
     def get_content(self):
-        return self.data.get("text", "").encode("utf8")
+        return self.data.get("text", "") 
     
     def retweeted_status(self):
         return SinaWeiboStatusData(self.data.get("retweeted_status"))
