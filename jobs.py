@@ -5,7 +5,7 @@ import time
 from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
-from past.api_client import Douban
+from past.api_client import Douban, SinaWeibo
 from past.model.status import (Status, DoubanNoteData, 
         DoubanStatusData, DoubanMiniBlogData, SyncTask)
 from past.model.user import User, UserAlias, OAuth2Token
@@ -27,8 +27,13 @@ while True:
         detail = t.get_detail()
         log.info("task detail is %s" % detail)
 
-        alias = UserAlias.get_by_user_and_type(t.user_id, 
-                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+        alias = None
+        if t.category < 200:
+            alias = UserAlias.get_by_user_and_type(t.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+        elif t.category >= 200 and t.category < 300:
+            alias = UserAlias.get_by_user_and_type(t.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_SINA])
         if not alias:
             log.warn("no alias, break...")
             break
@@ -37,8 +42,13 @@ while True:
         if not token:
             log.warn("no access token, break...")
             break
-
-        client = Douban(alias.alias, token.access_token, token.refresh_token)
+        
+        client = None
+        if t.category < 200:
+            client = Douban(alias.alias, token.access_token, token.refresh_token)
+        elif t.category >= 200 and t.category < 300:
+            client = SinaWeibo(alias.alias, token.access_token)
+            
         if not client:
             log.warn("get client fail, break...")
             break
@@ -75,7 +85,14 @@ while True:
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
         elif t.category == config.CATE_SINA_STATUS:
-            pass 
+            until_id = detail.get("until_id")
+            status_list = client.get_timeline(until_id=until_id)
+            if status_list:
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                detail['until_id'] = status_list[-1].get_origin_id()
+                detail['uptime'] = datetime.datetime.now()
+                t.update_detail(detail)
 
         time.sleep(5)
     
