@@ -8,7 +8,7 @@ def randbytes(bytes_):
 
 def httplib2_request(uri, method="GET", body='', headers=None, 
         redirections=httplib2.DEFAULT_MAX_REDIRECTS, 
-        connection_type=None):
+        connection_type=None, disable_ssl_certificate_validation=True):
 
     DEFAULT_POST_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
@@ -19,7 +19,8 @@ def httplib2_request(uri, method="GET", body='', headers=None,
         headers['Content-Type'] = headers.get('Content-Type', 
             DEFAULT_POST_CONTENT_TYPE)
 
-    return httplib2.Http().request(uri, method=method, body=body,
+    return httplib2.Http(disable_ssl_certificate_validation=disable_ssl_certificate_validation).\
+        request(uri, method=method, body=body,
         headers=headers, redirections=redirections,
         connection_type=connection_type)
 

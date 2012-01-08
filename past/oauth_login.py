@@ -35,7 +35,7 @@ class OAuth2Login(OAuthLogin):
         self.state = state
         self.display = display
 
-    def  get_login_uri(self):
+    def get_login_uri(self):
         qs = {
             'client_id'     : self.apikey,
             'response_type' : 'code',
@@ -53,17 +53,6 @@ class OAuth2Login(OAuthLogin):
 
         return uri
 
-class DoubanLogin(OAuth2Login):
-    provider = config.OPENID_DOUBAN   
-
-    authorize_uri       = 'https://www.douban.com/service/auth2/auth'
-    access_token_uri    = 'https://www.douban.com/service/auth2/token' 
-    user_info_uri       = 'https://api.douban.com/people/@me'
-
-    def __init__(self, apikey, apikey_secret, redirect_uri, 
-            scope=None, state=None, display=None):
-        super(DoubanLogin, self).__init__(apikey, apikey_secret, redirect_uri, scope)
-
     def get_access_token(self, authorization_code):
         qs = {
             "client_id": self.apikey,
@@ -79,6 +68,80 @@ class DoubanLogin(OAuth2Login):
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
         return json_decode(content)
+
+
+class DoubanLogin(OAuth2Login):
+    provider = config.OPENID_DOUBAN   
+
+    authorize_uri = 'https://www.douban.com/service/auth2/auth'
+    access_token_uri = 'https://www.douban.com/service/auth2/token' 
+    user_info_uri = 'https://api.douban.com/people/@me'
+
+    def __init__(self, apikey, apikey_secret, redirect_uri, 
+            scope=None, state=None, display=None):
+        super(DoubanLogin, self).__init__(apikey, apikey_secret, redirect_uri, scope)
+
+    def get_user_info(self, access_token, uid=None):
+        headers = {"Authorization": "Bearer %s" % access_token}     
+        qs = {
+            "alt":"json",
+        }
+        uri = "%s?%s" %(self.user_info_uri, urllib.urlencode(qs))
+        resp, content = httplib2_request(uri, "GET", 
+                headers = headers)
+        print '--------resp, content', content, type(content)
+        if resp.status != 200:
+            raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content)
+        user_info = {}
+        user_info['origin_id'] = r.get("id", {}).get("$t", "").split("/")[-1]
+        user_info['screen_name'] = r.get("title", {}).get("$t", "")
+        user_info['signature'] = r.get("db:signature", {}).get("$t", "")
+        user_info['intro'] = r.get("content",{ }).get("$t", "")
+        user_info['avatar'] = ""
+        user_info['icon'] = r.get("link")[2].get("@href","")
+        for k,v in user_info.items():
+            user_info[k] = v.encode("utf8") if isinstance(v,unicode) else str(v)
+        return user_info
+        
+
+class SinaLogin(OAuth2Login):
+    provider = config.OPENID_SINA
+
+    authorize_uri = 'https://api.weibo.com/oauth2/authorize'
+    access_token_uri = 'https://api.weibo.com/oauth2/access_token' 
+    user_info_uri = 'https://api.weibo.com/2/users/show.json' 
+
+    def __init__(self, apikey, apikey_secret, redirect_uri):
+        super(SinaLogin, self).__init__(apikey, apikey_secret, redirect_uri)
+
+    def get_user_info(self, access_token, uid):
+        qs = {
+            "source": self.apikey,
+            "access_token": access_token,
+            "uid": uid,
+        }
+        qs = urllib.urlencode(qs)
+        uri = "%s?%s" % (self.user_info_uri, qs)
+        resp, content = httplib2_request(uri, "GET")
+        print '--------resp, content', content, type(content)
+        if resp.status != 200:
+            raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content)
+        user_info = {}
+        user_info['origin_id'] = r.get("id", "")
+        user_info['screen_name'] = r.get("screen_name", "")
+        user_info['signature'] = ""
+        user_info['intro'] = r.get("description", "")
+        user_info['avatar'] = r.get("avatar_large", "")
+        user_info['icon'] = r.get("profile_image_url", "")
+
+        for k,v in user_info.items():
+            user_info[k] = v.encode("utf8") if isinstance(v,unicode) else str(v)
+
+        return user_info
 
 class QQLogin(OAuth2Login):
     provider = config.OPENID_QQ
