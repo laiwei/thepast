@@ -8,6 +8,7 @@ import cgi
 import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import httplib2_request
+from past.model.status import SinaWeiboUser, DoubanUser
 
 class OAuthLoginError(Exception):
     def __init__(self, msg):
@@ -94,15 +95,8 @@ class DoubanLogin(OAuth2Login):
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
         r = json_decode(content)
-        user_info = {}
-        user_info['origin_id'] = r.get("id", {}).get("$t", "").split("/")[-1]
-        user_info['screen_name'] = r.get("title", {}).get("$t", "")
-        user_info['signature'] = r.get("db:signature", {}).get("$t", "")
-        user_info['intro'] = r.get("content",{ }).get("$t", "")
-        user_info['avatar'] = ""
-        user_info['icon'] = r.get("link")[2].get("@href","")
-        for k,v in user_info.items():
-            user_info[k] = v.encode("utf8") if isinstance(v,unicode) else str(v)
+        user_info = DoubanUser(r)
+
         return user_info
         
 
@@ -130,18 +124,9 @@ class SinaLogin(OAuth2Login):
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
         r = json_decode(content)
-        user_info = {}
-        user_info['origin_id'] = r.get("id", "")
-        user_info['screen_name'] = r.get("screen_name", "")
-        user_info['signature'] = ""
-        user_info['intro'] = r.get("description", "")
-        user_info['avatar'] = r.get("avatar_large", "")
-        user_info['icon'] = r.get("profile_image_url", "")
+        user = SinaWeiboUser(r)
 
-        for k,v in user_info.items():
-            user_info[k] = v.encode("utf8") if isinstance(v,unicode) else str(v)
-
-        return user_info
+        return user
 
 class QQLogin(OAuth2Login):
     provider = config.OPENID_QQ

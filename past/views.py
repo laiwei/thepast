@@ -98,10 +98,10 @@ def connect_callback(provider):
     if not user_info:
         abort(401, "no_user_info")
     
-    ua = UserAlias.get(openid_type, user_info["origin_id"])
+    ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
         ua = UserAlias.create_new_user(openid_type,
-                user_info["origin_id"], user_info["screen_name"])   
+                user_info.get_user_id(), user_info.get_nickname())   
     if not ua:
         abort(401)
 
@@ -111,7 +111,7 @@ def connect_callback(provider):
     g.user = User.get(ua.user_id)
     set_user_cookie(g.user, session)
     
-    return g.user.name + json_encode(user_info)
+    return g.user.name + user_info
 
 
 @app.route("/sync/<provider>/<cates>")

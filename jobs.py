@@ -74,6 +74,8 @@ while True:
                 detail['until_id'] = status_list[-1].get_origin_id()
                 detail['uptime'] = datetime.datetime.now()
                 t.update_detail(detail)
+        elif t.category == config.CATE_SINA_STATUS:
+            pass 
 
         time.sleep(5)
     
