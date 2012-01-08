@@ -8,7 +8,7 @@ from past.corelib import auth_user_from_session, set_user_cookie
 from past.utils.escape import json_encode, json_decode
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask
-from past.oauth_login import DoubanLogin, OAuthLoginError
+from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError
 import api_client
 
 from past import app
@@ -16,12 +16,14 @@ from past import app
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    print '--before: g.user is ', g.user, 'id(g) is ', id(g), \
-            'request is ', request
+    print '--- user is:%s' % g.user
+    #print '--before: g.user is ', g.user, 'id(g) is ', id(g), \
+    #        'request is ', request
 
 @app.teardown_request
 def teardown_request(exception):
-    print '--teardown: g.user is ', g.user, 'id(g) is ', id(g), 
+    pass
+    #print '--teardown: g.user is ', g.user, 'id(g) is ', id(g), 
 
 @app.route("/favicon.ico")
 def favicon():
@@ -49,8 +51,16 @@ def connect(provider):
         return "Hi, %s, you have already login" %g.user.name
 
     d = config.APIKEY_DICT.get(provider)
-    douban = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
-    login_uri = douban.get_login_uri()
+    login_service = None
+    if provider == config.OPENID_DOUBAN:
+        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_SINA:
+        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+    print '---- login_service:', d,login_service
+    if not login_service:
+        abort(404)
+
+    login_uri = login_service.get_login_uri()
     print '----login uri:', login_uri
     return redirect(login_uri)
 
@@ -61,29 +71,43 @@ def connect_callback(provider):
         abort(401)
 
     d = config.APIKEY_DICT.get(provider)
-    douban = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+    login_service = None
+    if provider == config.OPENID_DOUBAN:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
+        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_SINA:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
+        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+
+    if not login_service:
+        abort(404)
+
     try:
-        token_dict = douban.get_access_token(code)
+        token_dict = login_service.get_access_token(code)
     except OAuthLoginError, e:
         abort(401, e.msg)
+    if not ( token_dict and token_dict.get("access_token") ):
+        abort(401, "no_access_token")
     
-    douban_user_id = token_dict.get("douban_user_id")
-    if not douban_user_id:
-        abort(401, "no_douban_user_id")
+    try:
+        user_info = login_service.get_user_info(
+            token_dict.get("access_token"), token_dict.get("uid"))
+    except OAuthLoginError, e:
+        abort(401, e.msg)
 
-    ua = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_DOUBAN],
-            douban_user_id)
+    if not user_info:
+        abort(401, "no_user_info")
+    
+    ua = UserAlias.get(openid_type, user_info["origin_id"])
     if not ua:
-        ua = UserAlias.create_new_user(
-                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], 
-                douban_user_id, douban_user_id)   
+        ua = UserAlias.create_new_user(openid_type,
+                user_info["origin_id"], user_info["screen_name"])   
     if not ua:
         abort(401)
 
     OAuth2Token.add(ua.id, token_dict.get("access_token"), 
-            token_dict.get("refresh_token"))
-    user_info = api_client.Douban(ua.alias, token_dict.get("access_token")).get_me() 
-    
+            token_dict.get("refresh_token", ""))
+
     g.user = User.get(ua.user_id)
     set_user_cookie(g.user, session)
     
@@ -92,42 +116,47 @@ def connect_callback(provider):
 
 @app.route("/sync/<provider>/<cates>")
 def sync(provider,cates):
-    if provider not in ('douban', 'wordpress','weibo'):
+    if provider not in (config.OPENID_DOUBAN, 
+            config.OPENID_SINA, config.OPENID_WORDPRESS):
         abort(401, "暂时不支持其他服务")
     cates = cates.split("|")
 
-    if provider == 'douban':
-        return sync_douban(cates)
+    return _sync(provider, cates)
 
-    elif provider == 'wordpress':
-        pass
+def _sync(provider, cates):
 
-    elif provider == 'weibo':
-        pass
-
-def sync_douban(cates):
     if not (cates and isinstance(cates, list)):
         return "no cates"
 
+    cates = filter(lambda x: x in [str(y) for y in config.CATE_LIST], cates)
+    if not cates:
+        abort(400, "not support such cates")
+
+    redir = "/connect/%s" % provider
+
     if not g.user:
-        return redirect("/connect/douban")
-    
+        print '--- no g.user...'
+        return redirect(redir)
+
     uas = UserAlias.gets_by_user_id(g.user.id)
-    r = filter(lambda x: x.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], uas)
+    print '--- uas:', uas
+    r = filter(lambda x: x.type == config.OPENID_TYPE_DICT[provider], uas)
     user_alias = r and r[0]
     
     if not user_alias:
-        return redirect("/connect/douban")
+        print '--- no user_alias...'
+        return redirect(redir)
 
     token = OAuth2Token.get(user_alias.id)   
     
     if not token:
-        return redirect("/connect/douban")
-    
-    cates = filter(lambda x: x in [str(y) for y in config.CATE_LIST], cates)
-    print cates
+        print '--- no token...'
+        return redirect(redir)
+
     for c in cates:
         SyncTask.add(c, g.user.id)
     
-    flash("good, douban sync task add succ...")
-    return redirect("/connect")
+    flash("good, %s sync task add succ..." % provider)
+
+    return "%s sync task add succ..." % provider
+
