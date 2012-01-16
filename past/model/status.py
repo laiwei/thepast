@@ -30,7 +30,7 @@ class Status(object):
                 self.__class__.STATUS_REDIS_KEY % self.id))
         self.raw = json_decode(redis_conn.get(
                 self.__class__.RAW_STATUS_REDIS_KEY % self.id))
-
+    
     @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 
             text=None, raw=None):
@@ -90,8 +90,22 @@ class Status(object):
         return status
 
     @classmethod
+    def get_ids(cls, start=0, limit=20, order="create_time", cate=None):
+        cursor = db_conn.cursor()
+        if cate is not None:
+            cursor.execute("""select id from status where category=%s 
+                    order by %s limit %s,%s""", 
+                    (cate, order, start, limit))
+        else:
+            cursor.execute("""select id from status 
+                    order by %s limit %s,%s""", 
+                    (order, start, limit))
+        rows = cursor.fetchall()
+        return [x[0] for x in rows]
+    
+    @classmethod
     def gets(cls, ids):
-        pass
+        return [cls.get(x) for x in ids]
     
     @classmethod
     def get_max_origin_id(cls, cate):

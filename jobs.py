@@ -69,7 +69,6 @@ def _sync(t, old=False):
         if status_list:
             for x in status_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-    
 
 def sync_helper(cate,old=False):
     log.info("%s syncing old %s... cate=%s" % (datetime.datetime.now(), old, cate))

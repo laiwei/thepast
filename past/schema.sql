@@ -1,5 +1,5 @@
 drop database if exists `thepast`;
-create database `thepast`;
+create database `thepast` character set utf8;
 
 use `thepast`;
 
@@ -7,27 +7,27 @@ drop table if exists `status`;
 CREATE TABLE `status` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
-  `origin_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `origin_id` int(20) unsigned NOT NULL DEFAULT '0',
   `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site` varchar(2) NOT NULL,
   `category` smallint(4) NOT NULL,
-  `title` varchar(300) CHARACTER SET ucs2 NOT NULL DEFAULT '',
+  `title` varchar(150) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_origin` (`origin_id`, `site`, `category`),
   KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='status';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='status';
 
 drop table if exists `user`;
 CREATE TABLE `user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uid` varchar(16) NOT NULL DEFAULT '',
-  `name` varchar(63) CHARACTER SET ucs2 NOT NULL DEFAULT '',
+  `name` varchar(63) NOT NULL DEFAULT '',
   `session_id` varchar(16) DEFAULT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_uid` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='user';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='user';
 
 
 drop table if exists `user_alias`;
@@ -35,12 +35,12 @@ CREATE TABLE `user_alias` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `type` varchar(2) NOT NULL DEFAULT '',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `alias` varchar(63) CHARACTER SET ucs2 NOT NULL DEFAULT '',
+  `alias` varchar(63) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_type` (`alias`,`type`),
   KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='alias';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='alias';
 
 
 drop table if exists `passwd`;
@@ -52,7 +52,7 @@ CREATE TABLE `passwd` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='passwd';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='passwd';
 
 drop table if exists `oauth2_token`;
 CREATE TABLE `oauth2_token` (
@@ -63,7 +63,7 @@ CREATE TABLE `oauth2_token` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_id` (`alias_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='oauth2_token';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
 
 
 
@@ -75,6 +75,6 @@ CREATE TABLE `sync_task` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_cate` (`user_id`, `category`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='sync_task';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='sync_task';
 
 

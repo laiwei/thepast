@@ -21,12 +21,19 @@ def init_db():
     return status
         
 def connect_db():
-    return MySQLdb.connect(
-        host=config.DB_HOST,
-        port=config.DB_PORT,
-        user=config.DB_USER,
-        passwd=config.DB_PASSWD,
-        db=config.DB_NAME)
+    try:
+        conn = MySQLdb.connect(
+            host=config.DB_HOST,
+            port=config.DB_PORT,
+            user=config.DB_USER,
+            passwd=config.DB_PASSWD,
+            db=config.DB_NAME,
+            use_unicode=True,
+            charset="utf8")
+        return conn
+    except Exception, e:
+        print "connect db fail:%s" % e
+        return None
 
 def connect_redis():
     return redis.Redis(config.REDIS_HOST, config.REDIS_PORT)

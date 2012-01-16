@@ -7,7 +7,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie
 from past.utils.escape import json_encode, json_decode
 from past.model.user import User, UserAlias, OAuth2Token
-from past.model.status import SyncTask
+from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError
 import api_client
 
@@ -16,6 +16,8 @@ from past import app
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
+    g.start = request.args.get('start', 0)
+    g.count = request.args.get('count', 20)
     print '--- user is:%s' % g.user
     #print '--before: g.user is ', g.user, 'id(g) is ', id(g), \
     #        'request is ', request
@@ -32,7 +34,9 @@ def favicon():
 
 @app.route("/")
 def index():
-    return render_template("timeline.html")
+    ids = Status.get_ids(start=g.start, limit=g.count)
+    status_list = Status.gets(ids)
+    return render_template("timeline.html", **locals())
 
 @app.route("/user/<uid>")
 def user(uid):
