@@ -11,7 +11,7 @@ CREATE TABLE `status` (
   `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `site` varchar(2) NOT NULL,
   `category` smallint(4) NOT NULL,
-  `title` varchar(100) CHARACTER SET ucs2 NOT NULL DEFAULT '',
+  `title` varchar(300) CHARACTER SET ucs2 NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_origin` (`origin_id`, `site`, `category`),
@@ -22,7 +22,7 @@ drop table if exists `user`;
 CREATE TABLE `user` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `uid` varchar(16) NOT NULL DEFAULT '',
-  `name` varchar(16) CHARACTER SET ucs2 NOT NULL DEFAULT '',
+  `name` varchar(63) CHARACTER SET ucs2 NOT NULL DEFAULT '',
   `session_id` varchar(16) DEFAULT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
