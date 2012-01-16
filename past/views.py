@@ -111,7 +111,7 @@ def connect_callback(provider):
     g.user = User.get(ua.user_id)
     set_user_cookie(g.user, session)
     
-    return g.user.name + user_info
+    return g.user.name + str(user_info)
 
 
 @app.route("/sync/<provider>/<cates>")

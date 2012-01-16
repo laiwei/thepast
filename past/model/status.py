@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 
+import datetime
 from MySQLdb import IntegrityError
 from past import config
 from past.utils.escape import json_encode, json_decode
@@ -61,7 +62,11 @@ class Status(object):
         origin_id = d.get_origin_id()
         create_time = d.get_create_time()
         title = d.get_title()
+        if isinstance(title, unicode):
+            title = title.encode("utf8")
         content = d.get_content()
+        if isinstance(content, unicode):
+            content = content.encode("utf8")
 
         site = d.site
         category = d.category
@@ -87,7 +92,39 @@ class Status(object):
     @classmethod
     def gets(cls, ids):
         pass
+    
+    @classmethod
+    def get_max_origin_id(cls, cate):
+        cursor = db_conn.cursor()
+        cursor.execute('''select max(origin_id) from status 
+            where category=%s''', (cate,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return 0
 
+    @classmethod
+    def get_min_origin_id(cls, cate):
+        cursor = db_conn.cursor()
+        cursor.execute('''select min(origin_id) from status 
+            where category=%s''', (cate,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return 0
+    
+    @classmethod
+    def get_count_by_cate(cls, cate):
+        cursor = db_conn.cursor()
+        cursor.execute('''select count(1) from status 
+            where category=%s''', (cate,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return 0
 
 ## User数据接口 
 class AbsUserData(object):
@@ -377,7 +414,8 @@ class SinaWeiboStatusData(SinaWeiboData):
         return self.data.get("idstr", "")
 
     def get_create_time(self):
-        return self.data.get("created_at", "")
+        t = self.data.get("created_at", "")
+        return datetime.datetime.strptime(t, "%a %b %d %H:%M:%S +0800 %Y")
 
     def get_title(self):
         return ""

@@ -212,7 +212,9 @@ class SinaWeibo(object):
 
         contents = self.get("/statuses/user_timeline.json", d)
         contents = json_decode(contents).get("statuses", []) if contents else []
-        print '-------sinawebicontent:', contents[-1]
-        print '-------len sinawebicontent:', len(contents)
+        ##debug
+        if contents:
+            print '-------sinawebicontent:', contents[-1]
+            print '-------len sinawebicontent:', len(contents)
         return [SinaWeiboStatusData(c) for c in contents]
 
