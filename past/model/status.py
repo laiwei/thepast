@@ -3,9 +3,10 @@
 import datetime
 from MySQLdb import IntegrityError
 from past import config
-from past.utils.escape import json_encode, json_decode
+from past.utils.escape import json_encode, json_decode, linkify
 from past.utils.logger import logging
 from past.store import connect_redis, connect_db
+from past.model.user import UserAlias
 
 log = logging.getLogger(__file__)
 
@@ -25,12 +26,18 @@ class Status(object):
         self.create_time = create_time
         self.site = site
         self.category = category
-        self.title = title
+        self.title = title and linkify(title) or ""
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
         self.raw = json_decode(redis_conn.get(
                 self.__class__.RAW_STATUS_REDIS_KEY % self.id))
-    
+        self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
+
+    def __repr__(self):
+        return "<Status id=%s, user_id=%s, origin_id=%s, cate=%s, title=%s>" \
+            %(self.id, self.user_id, self.origin_id, self.category, self.title)
+    __str__ = __repr__
+
     @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 
             text=None, raw=None):
@@ -62,11 +69,7 @@ class Status(object):
         origin_id = d.get_origin_id()
         create_time = d.get_create_time()
         title = d.get_title()
-        if isinstance(title, unicode):
-            title = title.encode("utf8")
         content = d.get_content()
-        if isinstance(content, unicode):
-            content = content.encode("utf8")
 
         site = d.site
         category = d.category
@@ -90,23 +93,25 @@ class Status(object):
         return status
 
     @classmethod
-    def get_ids(cls, start=0, limit=20, order="create_time", cate=None):
+    def get_ids(cls, user_id, start=0, limit=20, order="create_time", cate=None):
         cursor = db_conn.cursor()
+        if not user_id:
+            return []
         if cate is not None:
-            cursor.execute("""select id from status where category=%s 
-                    order by %s limit %s,%s""", 
-                    (cate, order, start, limit))
+            cursor.execute("""select id from status where category=%s and user_id=%s 
+                    order by %s desc limit %s,%s""", 
+                    (cate, user_id, order, start, limit))
         else:
-            cursor.execute("""select id from status 
-                    order by %s limit %s,%s""", 
-                    (order, start, limit))
+            cursor.execute("""select id from status where user_id=%s
+                    order by %s desc limit %s,%s""", 
+                    (user_id, order, start, limit))
         rows = cursor.fetchall()
         return [x[0] for x in rows]
     
     @classmethod
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
-    
+
     @classmethod
     def get_max_origin_id(cls, cate):
         cursor = db_conn.cursor()
@@ -139,6 +144,16 @@ class Status(object):
             return row[0]
         else:
             return 0
+
+    def get_data(self):
+        if self.category == config.CATE_DOUBAN_MINIBLOG:
+            return DoubanMiniBlogData(self.raw)
+        elif self.category == config.CATE_DOUBAN_NOTE:
+            return DoubanNoteData(self.raw)
+        elif self.category == config.CATE_SINA_STATUS:
+            return SinaWeiboStatusData(self.raw)
+        else:
+            return None
 
 ## User数据接口 
 class AbsUserData(object):
@@ -252,6 +267,9 @@ class AbsData(object):
         raise NotImplementedError
 
     def get_content(self):
+        raise NotImplementedError
+
+    def get_retweeted_status(self):
         raise NotImplementedError
 
     def get_user(self):
@@ -437,11 +455,22 @@ class SinaWeiboStatusData(SinaWeiboData):
     def get_content(self):
         return self.data.get("text", "") 
     
-    def retweeted_status(self):
-        return SinaWeiboStatusData(self.data.get("retweeted_status"))
+    def get_retweeted_status(self):
+        re = self.data.get("retweeted_status")
+        if re:
+            return SinaWeiboStatusData(re)
 
     def get_user(self):
         return SinaWeiboUser(self.data.get("user"))
+
+    def get_origin_pic(self):
+        return self.data.get("original_pic", "")
+
+    def get_thumbnail_pic(self):
+        return self.data.get("thumbnail_pic", "")
+
+    def get_middle_pic(self):
+        return self.data.get("bmiddle_pic", "")
 
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):

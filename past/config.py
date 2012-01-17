@@ -70,4 +70,6 @@ CATE_LIST = (
     CATE_TWITTER_STATUS,
 )
 
-from local_config import *
+DOUBAN_NOTE = 'http://douban.com/note/%s'
+DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
+WEIBO_STATUS = 'http://weibo.com/%s'
