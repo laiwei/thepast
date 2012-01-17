@@ -39,6 +39,9 @@ h4 {
     margin: 0px;
 }
 
+img {
+    max-width: 570px;
+}
 form {
     display: inline;
     padding: none;
