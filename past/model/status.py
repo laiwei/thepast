@@ -3,7 +3,7 @@
 import datetime
 from MySQLdb import IntegrityError
 from past import config
-from past.utils.escape import json_encode, json_decode, linkify
+from past.utils.escape import json_encode, json_decode, linkify, MyHTMLParser
 from past.utils.logger import logging
 from past.store import connect_redis, connect_db
 from past.model.user import UserAlias
@@ -29,6 +29,7 @@ class Status(object):
         self.title = title and linkify(title) or ""
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
+        self.text = MyHTMLParser.parse(self.text, preserve=['img', 'a'])
         self.raw = json_decode(redis_conn.get(
                 self.__class__.RAW_STATUS_REDIS_KEY % self.id))
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias

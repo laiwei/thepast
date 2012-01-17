@@ -34,7 +34,7 @@
         <div class="inner">
             <div class="content topic_content">
                 {%if s.category == config.CATE_SINA_STATUS%}
-                    {{s.text}}
+                    {{s.text|safe}}
                     {% set retweeted = s.get_data().get_retweeted_status() %}
                     {% set re_mid_pic = retweeted and retweeted.get_middle_pic() or '' %}
                     {% set middle_pic = s.get_data().get_middle_pic() %}
@@ -50,7 +50,7 @@
                 {%endif%}
 
                 {%if s.category == config.CATE_DOUBAN_NOTE%}
-                    {{s.text}}
+                    {{s.text|nl2br|truncate|safe}}
                 {%endif%}
             </div>
         </div>

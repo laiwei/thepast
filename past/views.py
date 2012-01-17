@@ -42,7 +42,6 @@ def index():
 @app.route("/user/<uid>")
 def user(uid):
     u = User.get(uid)
-    print '--------------user:', u, u.name, request
     return u.name
 
 @app.route("/signin")
