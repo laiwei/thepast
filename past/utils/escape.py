@@ -27,6 +27,7 @@ import sys
 import urllib
 import datetime
 import types
+from HTMLParser import HTMLParser
 
 # Python3 compatibility:  On python2.5, introduce the bytes alias from 2.6
 try: bytes
@@ -327,35 +328,65 @@ def linkify(text, shorten=False, extra_params="",
     text = _unicode(xhtml_escape(text))
     return _URL_RE.sub(make_link, text)
 
+
+class MyHTMLParser(HTMLParser):
+    def __init__(self, text, preserve=None):
+        HTMLParser.__init__(self)
+        self.stack = [] 
+        self.preserve = preserve
+        if preserve is None:
+            self.preserve = []
+        elif isinstance(preserve, basestring):
+            self.preserve = [preserve]
+
+    def handle_starttag(self, tag, attrs):
+        print "Encountered a start tag:", tag
+        if tag.lower() in self.preserve:
+            self.stack.append( self.__html_start_tag(tag, attrs) )
+
+    def handle_endtag(self, tag):
+        if tag.lower() in self.preserve:
+            self.stack.append( self.__html_end_tag(tag) )
+
+    def handle_startendtag(self, tag, attrs):
+        if tag.lower() in self.preserve:
+            self.stack.append( self.__html_startend_tag(tag, attrs) )
+
+    def handle_data(self, data):
+        self.stack.append(data)
+
+    def __html_start_tag(self, tag, attrs): 
+        return '<%s%s>' % (tag, self.__html_attrs(attrs)) 
+
+    def __html_startend_tag(self, tag, attrs): 
+        return '<%s%s/>' % (tag, self.__html_attrs(attrs)) 
+
+    def __html_end_tag(self, tag): 
+        return '</%s>' % (tag,) 
+
+    def __html_attrs(self, attrs): 
+        _attrs = '' 
+        if attrs: 
+            _attrs = ' %s' % (' '.join(['%s="%s"' % (item[0],item[1]) for item in attrs])) 
+        return _attrs 
+
+    @classmethod
+    def parse(cls, text, preserve=None):
+        _p = cls(text, preserve)
+        _p.feed(text)
+        _p.close()
+        return "".join(_p.stack)
+
 def clear_html_element(text, preserve=None):
     '''clear the html element in text'''
     if not preserve:
         p = re.compile(r'<[^>]*>')
         return p.sub("", text)
+    if isinstance(preserve, basestring):
+        preserve = [preserve]
 
-    from HTMLParser import HTMLParser
-
-    class MyHTMLParser(HTMLParser):
-        def __init__(self, *args, **kwagrs):
-            HTMLParser.__init__(self)
-            self.stack = [] 
-
-        def handle_starttag(self, tag, attrs):
-            print "Encountered a start tag:", tag
-            if tag.lower() in preserve:
-                self.stack.append('<%s>' % tag)
-        def handle_endtag(self, tag):
-            print "Encountered  an end tag:", tag
-            self.stack.pop()
-        def handle_data(self, data):
-            print "Encountered   some data:", data
-
-
-    parser = MyHTMLParser()
-    parser.feed('<html><head><title>Test</title></head>'
-            '<body><h1>Parse me!</h1></body></html>')
-    
-
+    p = MyHTMLParser.parse(text, preserve)
+    return p
 
 def _convert_entity(m):
     if m.group(1) == "#":
