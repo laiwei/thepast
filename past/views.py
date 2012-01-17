@@ -16,8 +16,8 @@ from past import app
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    g.start = request.args.get('start', 0)
-    g.count = request.args.get('count', 20)
+    g.start = int(request.args.get('start', 0))
+    g.count = int(request.args.get('count', 20))
     print '--- user is:%s' % g.user
     #print '--before: g.user is ', g.user, 'id(g) is ', id(g), \
     #        'request is ', request
@@ -34,9 +34,10 @@ def favicon():
 
 @app.route("/")
 def index():
-    ids = Status.get_ids(start=g.start, limit=g.count)
+    cate = request.args.get("cate")
+    ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=cate)
     status_list = Status.gets(ids)
-    return render_template("timeline.html", **locals())
+    return render_template("timeline.html", status_list=status_list, config=config)
 
 @app.route("/user/<uid>")
 def user(uid):

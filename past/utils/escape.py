@@ -327,6 +327,35 @@ def linkify(text, shorten=False, extra_params="",
     text = _unicode(xhtml_escape(text))
     return _URL_RE.sub(make_link, text)
 
+def clear_html_element(text, preserve=None):
+    '''clear the html element in text'''
+    if not preserve:
+        p = re.compile(r'<[^>]*>')
+        return p.sub("", text)
+
+    from HTMLParser import HTMLParser
+
+    class MyHTMLParser(HTMLParser):
+        def __init__(self, *args, **kwagrs):
+            HTMLParser.__init__(self)
+            self.stack = [] 
+
+        def handle_starttag(self, tag, attrs):
+            print "Encountered a start tag:", tag
+            if tag.lower() in preserve:
+                self.stack.append('<%s>' % tag)
+        def handle_endtag(self, tag):
+            print "Encountered  an end tag:", tag
+            self.stack.pop()
+        def handle_data(self, data):
+            print "Encountered   some data:", data
+
+
+    parser = MyHTMLParser()
+    parser.feed('<html><head><title>Test</title></head>'
+            '<body><h1>Parse me!</h1></body></html>')
+    
+
 
 def _convert_entity(m):
     if m.group(1) == "#":
