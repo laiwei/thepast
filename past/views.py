@@ -4,7 +4,7 @@ from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, flash
 
 import config
-from past.corelib import auth_user_from_session, set_user_cookie
+from past.corelib import auth_user_from_session, set_user_cookie, logout_user
 from past.utils.escape import json_encode, json_decode
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
@@ -19,13 +19,10 @@ def before_request():
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 20))
     print '--- user is:%s' % g.user
-    #print '--before: g.user is ', g.user, 'id(g) is ', id(g), \
-    #        'request is ', request
 
 @app.teardown_request
 def teardown_request(exception):
     pass
-    #print '--teardown: g.user is ', g.user, 'id(g) is ', id(g), 
 
 @app.route("/favicon.ico")
 def favicon():
@@ -34,7 +31,10 @@ def favicon():
 
 @app.route("/")
 def index():
-    cate = request.args.get("cate")
+    if not g.user:
+        return redirect(url_for("connect"))
+
+    cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=cate)
     status_list = Status.gets(ids)
     return render_template("timeline.html", status_list=status_list, config=config)
@@ -44,16 +44,16 @@ def user(uid):
     u = User.get(uid)
     return u.name
 
-@app.route("/signin")
-def signin():
-    return "signin"
+@app.route("/logout")
+def logout():
+    if not g.user:
+        return "you are not login"
+    r = logout_user(g.user)
+    return "logout succ"
 
 @app.route("/connect/", defaults={"provider": config.OPENID_DOUBAN})
 @app.route("/connect/<provider>")
 def connect(provider):
-    if g.user:
-        return "Hi, %s, you have already login" %g.user.name
-
     d = config.APIKEY_DICT.get(provider)
     login_service = None
     if provider == config.OPENID_DOUBAN:
@@ -65,9 +65,9 @@ def connect(provider):
         abort(404)
 
     login_uri = login_service.get_login_uri()
-    print '----login uri:', login_uri
     return redirect(login_uri)
 
+## 这里其实是所有的登陆入口
 @app.route("/connect/<provider>/callback")
 def connect_callback(provider):
     code = request.args.get("code")
@@ -104,18 +104,23 @@ def connect_callback(provider):
     
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
-        ua = UserAlias.create_new_user(openid_type,
-                user_info.get_user_id(), user_info.get_nickname())   
+        if not g.user:
+            ua = UserAlias.create_new_user(openid_type,
+                    user_info.get_user_id(), user_info.get_nickname())
+        else:
+            ua = UserAlias.bind_to_exists_user(g.user, 
+                    openid_type, user_info.get_user_id())
     if not ua:
         abort(401)
 
     OAuth2Token.add(ua.id, token_dict.get("access_token"), 
             token_dict.get("refresh_token", ""))
 
-    g.user = User.get(ua.user_id)
-    set_user_cookie(g.user, session)
+    if not g.user:
+        g.user = User.get(ua.user_id)
+        set_user_cookie(g.user, session)
     
-    return g.user.name + str(user_info)
+    return redirect(url_for('index'))
 
 
 @app.route("/sync/<provider>/<cates>")

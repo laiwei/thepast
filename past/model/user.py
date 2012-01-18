@@ -68,6 +68,13 @@ class User(object):
 
         return user
 
+    def clear_session(self):
+        cursor = db_conn.cursor()
+        cursor.execute("""update user set session_id=%s where id=%s""", 
+                (None, self.id))
+        cursor.close()
+        db_conn.commit()
+
 class UserAlias(object):
 
     def __init__(self, id_, type_, alias, user_id):

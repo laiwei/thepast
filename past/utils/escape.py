@@ -340,7 +340,6 @@ class MyHTMLParser(HTMLParser):
             self.preserve = [preserve]
 
     def handle_starttag(self, tag, attrs):
-        print "Encountered a start tag:", tag
         if tag.lower() in self.preserve:
             self.stack.append( self.__html_start_tag(tag, attrs) )
 
