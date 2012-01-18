@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-t", "--time", dest="time", help="sync old or new msg")
     parser.add_option("-c", "--cate", type="int", dest="cate", help="category")
+    parser.add_option("-n", "--num", type="int", dest="num", help="run how many times")
     (options, args) = parser.parse_args()
     
     if not options.time or options.time not in ['new', 'old']:
@@ -96,5 +97,10 @@ if __name__ == '__main__':
     else:
         old = True if options.time=='old' else False
         cate = options.cate if options.cate else None
-        sync_helper(cate, old)
+        num = options.num if options.num else 1
+        for i in xrange(num):
+            sync_helper(cate, old)
+            time.sleep(5)
 
+
+##python jobs.py -t old -c 200 -n 2

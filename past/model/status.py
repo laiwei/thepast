@@ -45,7 +45,6 @@ class Status(object):
         status = None
         cursor = db_conn.cursor()
         try:
-            print '--- inserting %s %s %s %s' %(user_id, origin_id, site, category) 
             cursor.execute("""insert into status 
                     (user_id, origin_id, create_time, site, category, title)
                     values (%s,%s,%s,%s,%s,%s)""",
@@ -99,13 +98,13 @@ class Status(object):
         if not user_id:
             return []
         if cate is not None:
-            cursor.execute("""select id from status where category=%s and user_id=%s 
-                    order by %s desc limit %s,%s""", 
-                    (cate, user_id, order, start, limit))
+            sql = """select id from status where user_id=%s and category=%s
+                    order by """ + order + """ desc limit %s,%s""" 
+            cursor.execute(sql, (user_id, cate, start, limit))
         else:
-            cursor.execute("""select id from status where user_id=%s
-                    order by %s desc limit %s,%s""", 
-                    (user_id, order, start, limit))
+            sql = """select id from status where user_id=%s
+                    order by """ + order + """ desc limit %s,%s""" 
+            cursor.execute(sql, (user_id, start, limit))
         rows = cursor.fetchall()
         return [x[0] for x in rows]
     
@@ -323,6 +322,14 @@ class DoubanMiniBlogData(DoubanData):
 
     def get_content(self):
         return self.data.get("content", {}).get("$t")
+    
+    def get_links(self):
+        links = {}
+        _links = self.data.get("link", [])
+        for x in _links:
+            rel = x.get("@rel")
+            links[rel] = x.get("@href")
+        return links
 
 # 相册 
 class DoubanPhotoData(DoubanData):

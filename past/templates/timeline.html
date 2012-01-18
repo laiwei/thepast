@@ -18,8 +18,10 @@
         <td style="padding-left: 12px" valign="top">
 
         <div class="sep3"></div>
-        <span class="bigger" style="font-size: 16px; line-height: 130%"><a href="#">{{s.title|safe}}</a></span>
-        <div class="sep5"></div>
+        {% if s.category == config.CATE_DOUBAN_NOTE%}
+            <span class="bigger" style="font-size: 16px; line-height: 130%"><a href="#">{{s.title|safe}}</a></span>
+            <div class="sep5"></div>
+        {% endif %}
         <span class="created">
             {% if s.category == config.CATE_DOUBAN_MINIBLOG %}
             <a href="{{config.DOUBAN_MINIBLOG %(s.origin_user_id, s.origin_id)}}" class="node">From：豆瓣广播</a>
@@ -50,7 +52,16 @@
                 {%endif%}
 
                 {%if s.category == config.CATE_DOUBAN_NOTE%}
-                    {{s.text|nl2br|truncate|safe}}
+                    {{s.text|nl2br|safe}}
+                {%endif%}
+
+                {%if s.category == config.CATE_DOUBAN_MINIBLOG%}
+                    {{s.text|safe}}
+                    {% set links = s.get_data().get_links() %}
+                    {% if links and links.get("image") %}
+                        <br />
+                        <img src="{{links.get("image")}}"/>
+                    {% endif %}
                 {%endif%}
             </div>
         </div>
