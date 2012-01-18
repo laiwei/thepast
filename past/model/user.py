@@ -3,6 +3,7 @@
 from MySQLdb import IntegrityError
 from past.store import connect_db, connect_redis
 from past.utils import randbytes
+from past.utils.escape import json_decode, json_encode
 
 #-- connect db and redis
 db_conn = connect_db()
@@ -74,6 +75,32 @@ class User(object):
                 (None, self.id))
         cursor.close()
         db_conn.commit()
+
+    def set_profile(self, profile):
+        redis_conn.set('/profile/%s' %self.id, json_encode(profile))
+        return self.get_profile()
+
+    def get_profile(self):
+        r = redis_conn.get('/profile/%s' %self.id)
+        return json_decode(r) if r else {}
+    
+    def set_profile_item(self, k, v):
+        p = self.get_profile()
+        p[k] = v
+        self.set_profile(p)
+        return self.get_profile()
+
+    def get_avatar_url(self):
+        return self.get_profile().get("avatar_url", "")
+
+    def set_avatar_url(self, url):
+        return self.set_profile_item("avatar_url", url)
+
+    def get_icon_url(self):
+        return self.get_profile().get("icon_url", "")
+
+    def set_icon_url(self, url):
+        return self.set_profile_item("icon_url", url)
 
 class UserAlias(object):
 

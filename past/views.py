@@ -113,6 +113,11 @@ def connect_callback(provider):
     if not ua:
         abort(401)
 
+    ##设置个人资料（头像等等）
+    u = User.get(ua.user_id)
+    u.set_avatar_url(user_info.get_avatar())
+    u.set_icon_url(user_info.get_icon())
+
     OAuth2Token.add(ua.id, token_dict.get("access_token"), 
             token_dict.get("refresh_token", ""))
 

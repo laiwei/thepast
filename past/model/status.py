@@ -214,8 +214,12 @@ class DoubanUser(AbsUserData):
         return icon.replace(user_id, "l%s" % user_id)
 
     def get_icon(self):
-        return self.data.get("link")[2].get("@href", "")
-        
+        links = {}
+        _links = self.data.get("link", [])
+        for x in _links:
+            rel = x.get("@rel")
+            links[rel] = x.get("@href")
+        return links.get("icon", "")
 
 ## 新浪微博user数据接口
 class SinaWeiboUser(AbsUserData):
@@ -242,7 +246,7 @@ class SinaWeiboUser(AbsUserData):
         return self.data.get("avatar_large", "")
 
     def get_icon(self):
-        return self.data.gete("profile_image_url", "")
+        return self.data.get("profile_image_url", "")
 
 ## 第三方数据接口
 class AbsData(object):
