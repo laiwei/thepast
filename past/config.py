@@ -49,6 +49,11 @@ APIKEY_DICT = {
         "secret" : "cb59a6ea5c8e0220f452d2bc4a9145c1",
         "redirect_uri" : "http://127.0.0.1:5000/connect/sina/callback",
     },
+    OPENID_TWITTER : {
+        "key" : "keyN5F8B5JpqHzOPGT8QVX1mQ",
+        "secret" : "DXuaw0Tsxg6MrBLyTm4cAn6kDFPIOafea82mZmCs",
+        "redirect_uri" : "http://127.0.0.1:5000/connect/twitter/callback",
+    },
 }
 
 #-- category of status --
