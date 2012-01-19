@@ -1,0 +1,8 @@
+*.swp
+*.pyc
+
+local_config.py
+env/
+build/
+third-src/
+var/
