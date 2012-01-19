@@ -38,23 +38,7 @@ OPENID_TYPE_DICT = {
 }
 
 #-- oauth key & secret config --
-APIKEY_DICT = {
-    OPENID_DOUBAN : {
-        "key" : "047e255f2309478c0d7a701d691bd6a4",
-        "secret" : "0253348fa4d10541",
-        "redirect_uri" : "http://127.0.0.1:5000/connect/douban/callback",
-    },
-    OPENID_SINA : {
-        "key" : "4028327410",
-        "secret" : "cb59a6ea5c8e0220f452d2bc4a9145c1",
-        "redirect_uri" : "http://127.0.0.1:5000/connect/sina/callback",
-    },
-    OPENID_TWITTER : {
-        "key" : "keyN5F8B5JpqHzOPGT8QVX1mQ",
-        "secret" : "DXuaw0Tsxg6MrBLyTm4cAn6kDFPIOafea82mZmCs",
-        "redirect_uri" : "http://127.0.0.1:5000/connect/twitter/callback",
-    },
-}
+APIKEY_DICT = {}
 
 #-- category of status --
 CATE_DOUBAN_STATUS = 100
