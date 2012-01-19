@@ -38,7 +38,23 @@ OPENID_TYPE_DICT = {
 }
 
 #-- oauth key & secret config --
-APIKEY_DICT = {}
+APIKEY_DICT = {
+    OPENID_DOUBAN : {
+        "key" : "",
+        "secret" : "",
+        "redirect_uri" : "http://thepast.me/connect/douban/callback",
+    },
+    OPENID_SINA : {
+        "key" : "",
+        "secret" : "",
+        "redirect_uri" : "http://thepast.me/connect/sina/callback",
+    },
+    OPENID_TWITTER : {
+        "key" : "",
+        "secret" : "",
+        "redirect_uri" : "http://thepast.me/connect/twitter/callback",
+    },
+}
 
 #-- category of status --
 CATE_DOUBAN_STATUS = 100

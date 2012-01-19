@@ -20,7 +20,8 @@ class OAuthLoginError(Exception):
 class OAuthLogin(object):
     version = '1.0'
 
-class OAuth2Login(OAuthLogin):
+
+class OAuth2Login(object):
     version = '2.0'
 
     authorize_uri       = ''
@@ -99,7 +100,6 @@ class DoubanLogin(OAuth2Login):
 
         return user_info
         
-
 class SinaLogin(OAuth2Login):
     provider = config.OPENID_SINA
 
