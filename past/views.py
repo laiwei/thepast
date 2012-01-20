@@ -8,7 +8,7 @@ from past.corelib import auth_user_from_session, set_user_cookie, logout_user
 from past.utils.escape import json_encode, json_decode
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
-from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError
+from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
 import api_client
 
 from past import app
@@ -60,48 +60,54 @@ def connect(provider):
         login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_SINA:
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
-    print '---- login_service:', d,login_service
-    if not login_service:
-        abort(404)
+    elif provider == config.OPENID_TWITTER:
+        login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
+    print login_service.callback
+    try:
+        login_uri = login_service.get_login_uri()
+    except OAuthLoginError, e:
+        return "auth error:%s" % e
 
-    login_uri = login_service.get_login_uri()
+    if provider == config.OPENID_TWITTER:
+        login_service.save_request_token_to_session(session)
+        
     return redirect(login_uri)
 
-## 这里其实是所有的登陆入口
-@app.route("/connect/<provider>/callback")
-def connect_callback(provider):
-    code = request.args.get("code")
-    if not code:
-        abort(401)
 
-    d = config.APIKEY_DICT.get(provider)
-    login_service = None
-    if provider == config.OPENID_DOUBAN:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
-        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_SINA:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
-        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+def twitter_callback(request):
+    d = config.APIKEY_DICT.get(config.OPENID_TWITTER)
+    openid_type = config.OPENID_TYPE_DICT[config.OPENID_TWITTER]
+    login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
 
-    if not login_service:
-        abort(404)
-
-    try:
-        token_dict = login_service.get_access_token(code)
-    except OAuthLoginError, e:
-        abort(401, e.msg)
-    if not ( token_dict and token_dict.get("access_token") ):
-        abort(401, "no_access_token")
+    ## from twitter
+    code = request.args.get("oauth_code") ## FIXME no use
+    verifier = request.args.get("oauth_verifier")
     
+    ## from session
+    request_token = login_service.get_request_token_from_session(session)
+    
+    ## set the authorized request_token to OAuthHandle
+    login_service.auth.set_request_token(request_token.get("key"), 
+            request_token.get("secret"))
+
+    ## get access_token
     try:
-        user_info = login_service.get_user_info(
-            token_dict.get("access_token"), token_dict.get("uid"))
+        token_dict = login_service.get_access_token(verifier)
     except OAuthLoginError, e:
         abort(401, e.msg)
 
-    if not user_info:
-        abort(401, "no_user_info")
+    api = login_service.api(token_dict.get("access_token"), 
+            token_dict.get("access_token_secret"))
+    user_info = login_service.get_user_info(api)
     
+    user = save_user_and_token(token_dict, user_info, openid_type)
+    if user:
+        return redirect(url_for('index'))
+    else:
+        return "connect fail"
+    
+## 保存用户信息到数据库，并保存token
+def save_user_and_token(token_dict, user_info, openid_type):
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
         if not g.user:
@@ -111,22 +117,63 @@ def connect_callback(provider):
             ua = UserAlias.bind_to_exists_user(g.user, 
                     openid_type, user_info.get_user_id())
     if not ua:
-        abort(401)
+        return None
 
     ##设置个人资料（头像等等）
     u = User.get(ua.user_id)
     u.set_avatar_url(user_info.get_avatar())
     u.set_icon_url(user_info.get_icon())
 
-    OAuth2Token.add(ua.id, token_dict.get("access_token"), 
-            token_dict.get("refresh_token", ""))
+    ##保存access token
+    if openid_type == config.OPENID_TWITTER:
+        OAuth2Token.add(ua.id, token_dict.get("access_token"), 
+                token_dict.get("access_token_secret", ""))
+    else:
+        OAuth2Token.add(ua.id, token_dict.get("access_token"), 
+                token_dict.get("refresh_token", ""))
 
+    ##set cookie，保持登录状态
     if not g.user:
         g.user = User.get(ua.user_id)
         set_user_cookie(g.user, session)
     
-    return redirect(url_for('index'))
+    return g.user
 
+
+## 这里其实是所有的登陆入口
+@app.route("/connect/<provider>/callback")
+def connect_callback(provider):
+    code = request.args.get("code")
+
+    d = config.APIKEY_DICT.get(provider)
+    login_service = None
+    if provider == config.OPENID_DOUBAN:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
+        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_SINA:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
+        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_TWITTER:
+        return twitter_callback(request)
+
+    try:
+        token_dict = login_service.get_access_token(code)
+    except OAuthLoginError, e:
+        abort(401, e.msg)
+
+    if not ( token_dict and token_dict.get("access_token") ):
+        abort(401, "no_access_token")
+    try:
+        user_info = login_service.get_user_info(
+            token_dict.get("access_token"), token_dict.get("uid"))
+    except OAuthLoginError, e:
+        abort(401, e.msg)
+    
+    user = save_user_and_token(token_dict, user_info, openid_type)
+    if user:
+        return redirect(url_for('index'))
+    else:
+        return "connect fail"
 
 @app.route("/sync/<provider>/<cates>")
 def sync(provider,cates):

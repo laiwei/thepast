@@ -2,6 +2,7 @@
 
 import datetime
 from MySQLdb import IntegrityError
+
 from past import config
 from past.utils.escape import json_encode, json_decode, linkify, MyHTMLParser
 from past.utils.logger import logging
@@ -244,6 +245,42 @@ class SinaWeiboUser(AbsUserData):
 
     def get_avatar(self):
         return self.data.get("avatar_large", "")
+
+    def get_icon(self):
+        return self.data.get("profile_image_url", "")
+
+## Twitter user数据接口
+class TwitterUser(AbsUserData):
+
+    def __init__(self, data):
+        d = dict(data.__dict__)
+        try:
+            del d['_api']
+        except KeyError:
+            pass
+        try:
+            del d['status']
+        except KeyError:
+            pass
+        super(TwitterUser, self).__init__(d)
+
+    def get_user_id(self):
+        return self.data.get("idstr","")
+
+    def get_uid(self):
+        return self.data.get("name", "")
+
+    def get_nickname(self):
+        return self.data.get("screen_name", "")
+
+    def get_intro(self):
+        return self.data.get("description", "")
+
+    def get_signature(self):
+        return ""
+
+    def get_avatar(self):
+        return self.data.get("profile_image_url", "")
 
     def get_icon(self):
         return self.data.get("profile_image_url", "")

@@ -5,21 +5,69 @@ from warnings import warn
 import urllib
 import cgi
 
+import tweepy
+from tweepy.error import TweepError
+
 import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import httplib2_request
-from past.model.status import SinaWeiboUser, DoubanUser
+from past.model.status import SinaWeiboUser, DoubanUser, TwitterUser
 
 class OAuthLoginError(Exception):
     def __init__(self, msg):
-        self.msg = msg
+        if isinstance(msg, TweepError):
+            self.msg = "%s:%s" %(msg.reason, msg.response) 
+        else:
+            self.msg = msg
+
     def __str__(self):
         return "%s" % (self.msg,)
     __repr__ = __str__
 
-class OAuthLogin(object):
-    version = '1.0'
+class TwitterOAuthLogin(object):
+    def __init__(self, apikey, apikey_secret, redirect_uri):
+        self.consumer_key = apikey
+        self.consumer_secret = apikey_secret
+        self.callback = redirect_uri
+        self.auth = self._get_auth()
 
+    def _get_auth(self):
+        return tweepy.OAuthHandler(self.consumer_key, self.consumer_secret, self.callback)
+
+    def get_login_uri(self):
+        return self.auth.get_authorization_url()
+
+    def get_access_token(self, verifier=None):
+        self.auth.get_access_token(verifier)
+        print self.auth.access_token.key
+        t = {"access_token":self.auth.access_token.key, 
+            "access_token_secret": self.auth.access_token.secret,}
+        return t
+    
+    def save_request_token_to_session(self, session_):
+        t = {"key": self.auth.request_token.key,
+            "secret": self.auth.request_token.secret,}
+        session_['request_token'] = json_encode(t)
+
+    def get_request_token_from_session(self, session_, delete=True):
+        t = session_.get("request_token")
+        token = json_decode(t) if t else {}
+        if delete:
+            self.delete_request_token_from_session(session_)
+        return token
+
+    def delete_request_token_from_session(self, session_):
+        session_['request_token'] = ""
+
+    def api(self, access_token=None, access_token_secret=None):
+        if access_token and access_token_secret:
+            self.auth.set_access_token(access_token, access_token_secret)
+
+        return tweepy.API(self.auth)
+
+    def get_user_info(self, api):
+        user = api.me()
+        return TwitterUser(user)
 
 class OAuth2Login(object):
     version = '2.0'

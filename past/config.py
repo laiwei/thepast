@@ -78,3 +78,6 @@ CATE_LIST = (
 DOUBAN_NOTE = 'http://douban.com/note/%s'
 DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
+
+from local_config import *
+
