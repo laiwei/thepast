@@ -265,7 +265,7 @@ class TwitterUser(AbsUserData):
         super(TwitterUser, self).__init__(d)
 
     def get_user_id(self):
-        return self.data.get("idstr","")
+        return self.data.get("id_str","")
 
     def get_uid(self):
         return self.data.get("name", "")

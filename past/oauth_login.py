@@ -57,7 +57,7 @@ class TwitterOAuthLogin(object):
         return token
 
     def delete_request_token_from_session(self, session_):
-        session_['request_token'] = ""
+        session_.pop("request_token", None)
 
     def api(self, access_token=None, access_token_secret=None):
         if access_token and access_token_secret:

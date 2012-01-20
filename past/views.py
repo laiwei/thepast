@@ -62,7 +62,6 @@ def connect(provider):
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_TWITTER:
         login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
-    print login_service.callback
     try:
         login_uri = login_service.get_login_uri()
     except OAuthLoginError, e:
@@ -108,6 +107,7 @@ def twitter_callback(request):
     
 ## 保存用户信息到数据库，并保存token
 def save_user_and_token(token_dict, user_info, openid_type):
+    print '----saving',token_dict, user_info, openid_type
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
         if not g.user:
@@ -125,7 +125,7 @@ def save_user_and_token(token_dict, user_info, openid_type):
     u.set_icon_url(user_info.get_icon())
 
     ##保存access token
-    if openid_type == config.OPENID_TWITTER:
+    if openid_type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
         OAuth2Token.add(ua.id, token_dict.get("access_token"), 
                 token_dict.get("access_token_secret", ""))
     else:

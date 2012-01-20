@@ -15,6 +15,7 @@ REDIS_PORT = 6379
 DEBUG = True
 SECRET_KEY = "dev_key_of_thepast"
 SESSION_COOKIE_NAME = "pastme"
+PERMANENT_SESSION_LIFETIME = 3600 * 24 * 30
 
 SITE_COOKIE = "pastck"
 
