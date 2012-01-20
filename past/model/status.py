@@ -253,16 +253,7 @@ class SinaWeiboUser(AbsUserData):
 class TwitterUser(AbsUserData):
 
     def __init__(self, data):
-        d = dict(data.__dict__)
-        try:
-            del d['_api']
-        except KeyError:
-            pass
-        try:
-            del d['status']
-        except KeyError:
-            pass
-        super(TwitterUser, self).__init__(d)
+        super(TwitterUser, self).__init__(data)
 
     def get_user_id(self):
         return self.data.get("id_str","")
@@ -486,6 +477,7 @@ class SinaWeiboData(AbsData):
         super(SinaWeiboData, self).__init__( 
                 config.OPENID_TYPE_DICT[config.OPENID_SINA], category, data)
 
+# 新浪微博status
 class SinaWeiboStatusData(SinaWeiboData):
     def __init__(self, data):
         super(SinaWeiboStatusData, self).__init__(
@@ -520,6 +512,41 @@ class SinaWeiboStatusData(SinaWeiboData):
 
     def get_middle_pic(self):
         return self.data.get("bmiddle_pic", "")
+
+# twitter status
+class TwitterStatusData(AbsData):
+    def __init__(self, data):
+        super(TwitterStatusData, self).__init__(
+                config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
+                config.CATE_TWITTER_STATUS, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("id", ""))
+
+    def get_create_time(self):
+        t = self.data.get("created_at", "")
+        return datetime.datetime.strptime(t, "%a %b %d %H:%M:%S +0000 %Y")
+
+    def get_title(self):
+        return ""
+
+    def get_content(self):
+        return self.data.get("text", "") 
+    
+    def get_retweeted_status(self):
+        return None
+
+    def get_user(self):
+        return TwitterUser(self.data.get("user"))
+
+    def get_origin_pic(self):
+        return ""
+
+    def get_thumbnail_pic(self):
+        return ""
+
+    def get_middle_pic(self):
+        return ""
 
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):

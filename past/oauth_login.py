@@ -63,7 +63,7 @@ class TwitterOAuthLogin(object):
         if access_token and access_token_secret:
             self.auth.set_access_token(access_token, access_token_secret)
 
-        return tweepy.API(self.auth)
+        return tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
 
     def get_user_info(self, api):
         user = api.me()

@@ -178,7 +178,7 @@ def connect_callback(provider):
 @app.route("/sync/<provider>/<cates>")
 def sync(provider,cates):
     if provider not in (config.OPENID_DOUBAN, 
-            config.OPENID_SINA, config.OPENID_WORDPRESS):
+            config.OPENID_SINA, config.OPENID_WORDPRESS, config.OPENID_TWITTER,):
         abort(401, "暂时不支持其他服务")
     cates = cates.split("|")
 

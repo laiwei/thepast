@@ -2,12 +2,14 @@
 
 import urlparse
 import urllib
+import tweepy
 import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
 from past.model.status import (DoubanStatusData, DoubanNoteData,
-    DoubanMiniBlogData, SinaWeiboStatusData)
+    DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData)
+from past.model.user import User,UserAlias, OAuth2Token
 
 log = logging.getLogger(__file__)
 
@@ -154,7 +156,7 @@ class Douban(object):
     
 
 class SinaWeibo(object):
-
+    ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
     def __init__(self, alias, access_token, refresh_token=None,
             api_host = "https://api.weibo.com", api_version=2):
         self.access_token = access_token
@@ -218,3 +220,21 @@ class SinaWeibo(object):
             print '-------len sinawebicontent:', len(contents)
         return [SinaWeiboStatusData(c) for c in contents]
 
+class Twitter(object):
+    def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
+        ua = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_TWITTER], alias)
+        self.apikey = apikey if apikey is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("key")
+        self.apikey_secret = apikey_secret if apikey_secret is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("secret")
+        
+        token = OAuth2Token.get(alias.id)
+        self.access_token = access_token if access_token is not None else token.access_token
+        self.access_token_secret = access_token_secret if access_token_secret is not None else token.refresh_token
+
+        self.auth = tweepy.OAuthHandler(self.apikey, self.apikey_secret)        
+        self.auth.set_access_token(access_token, access_token_secret)
+    
+    def api(self):
+        return tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
+
+    def get_home_timeline(self):
+        pass
