@@ -558,6 +558,11 @@ class SyncTask(object):
         self.user_id = str(user_id)
         self.time = time
 
+    def __repr__(self):
+        return "<SyncTask id=%s, user_id=%s, cate=%s>" \
+            %(self.id, self.user_id, self.category)
+    __str__ = __repr__
+
     @classmethod
     def add(cls, category, user_id):
         task = None
@@ -600,6 +605,21 @@ class SyncTask(object):
     @classmethod
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
+
+    @classmethod
+    def gets_by_user(cls, user):
+        cursor = db_conn.cursor()
+        cursor.execute("""select id from sync_task where user_id = %s""", user.id)
+        rows = cursor.fetchall()
+        cursor.close()
+        return [cls.get(row[0] )for row in rows]
+
+    @classmethod
+    def gets_by_user_and_cate(cls,user,cate):
+        print user, cate, type(cate)
+        tasks = cls.gets_by_user(user)
+        print tasks
+        return [x for x in tasks if str(x.category) == cate]
 
     def remove(self):
         cursor = db_conn.cursor()

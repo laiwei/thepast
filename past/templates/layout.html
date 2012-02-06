@@ -18,7 +18,7 @@
         <div id="Navigation">
             <ul>
                 <li><a href="/" class="top">首页</a></li>
-                <li><a href="/member/laiwei" class="top">laiwei</a></li>
+                <li><a href="/user/{{g.user.uid}}" class="top">{{g.user.name}}</a></li>
             </ul>
         </div>
 
@@ -49,40 +49,41 @@
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tbody><tr>
                             <td width="48" valign="top">
-                            <a href="/member/laiwei"><img src="/static/img/avatar.png" border="0"></a></td>
+                            <a href="/user/{{g.user.uid}}"><img src="/static/img/avatar.png" border="0"></a></td>
                             <td width="10" valign="top"></td>
-                            <td width="auto" align="left"><span class="bigger"><a href="/member/laiwei">laiwei</a></span>
+                            <td width="auto" align="left"><span class="bigger"><a href="/user/{{g.user.uid}}">{{g.user.name}}</a></span>
                                 <div class="sep5"></div>
                                 <span class="fade">who care</span>
                             </td>
                         </tr>
                     </tbody></table>
                     <div class="sep10"></div>
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tbody><tr>
-                            <td width="33%" align="center">
-                                <a href="#" class="dark" style="display: block;"><span class="bigger">1</span>
-                                <div class="sep3"></div>
-                                <span class="fade">节点收藏</span></a></td>
-                            <td width="34%" class="vborder1" align="center">
-                                <a href="#" class="dark" style="display: block;"><span class="bigger">17</span>
-                                <div class="sep3"></div>
-                                <span class="fade">主题收藏</span></a></td>
-                            <td width="33%" align="center">
-                                <a href="#" class="dark" style="display: block;"><span class="bigger">6</span>
-                                <div class="sep3"></div>
-                                <span class="fade">特别关注</span></a></td>
-                        </tr></tbody></table>
                 </div>
 
                 <div class="inner">
-                    <a href="#">介绍</a>
+                    记录自己的新浪微博，豆瓣广播，twitter...
                 </div>
             </div>
 
             <div class="sep20"> </div>
 
-            <div class="box"> </div>
+            <div class="box">
+                <div class="cell">
+                    <span class="bigger">绑定第三方</span>
+                </div>
+                <div class="inner">
+                    <ul>
+                        <li><a href="/connect/douban" class="dark" style="display: block;">
+                            豆瓣</a> </li>
+                        <li><a href="/connect/sina" class="dark" style="display: block;">
+                            新浪微博</a> </li>
+                        <li><a href="/connect/twitter" class="dark" style="display: block;">
+                            twitter</a> </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="sep20"> </div>
+
             {% endblock%}
         </div>
 
@@ -98,7 +99,11 @@
 
 </div>
 
-<div id="Bottom">{% block bottom_block %} {% endblock %}</div>
+<div id="Bottom">
+{% block bottom_block %} 
+Copyright 2012 @thepast.me
+{% endblock %}
+</div>
 </body>
 
 </html>

@@ -3,84 +3,72 @@
 {% block content_block %}
 <div class="box">
     <div class="cell">
-        <span class="bigger">{{g.user.name}}</span>
+        <span class="bigger">Profile</span>
         <div class="sep10"></div>
-        这就是 我们都回不去的 昨天...
     </div>
 
-    {% for s in status_list %}
-    <div class="cell">
-        <table><tbody>
-        <tr>
-        <td valign="top" class="avatar">
-        <a href="#"><img src="{{g.user.get_icon_url()}}" border="0"></a></td>
-
-        <td style="padding-left: 12px" valign="top">
-
-        <div class="sep3"></div>
-        {% if s.category == config.CATE_DOUBAN_NOTE%}
-            <span class="bigger" style="font-size: 16px; line-height: 130%"><a href="#">{{s.title|safe}}</a></span>
-            <div class="sep5"></div>
-        {% endif %}
-        <span class="created">
-            {% if s.category == config.CATE_DOUBAN_MINIBLOG %}
-            <a href="{{config.DOUBAN_MINIBLOG %(s.origin_user_id, s.origin_id)}}" class="node">From：豆瓣广播</a>
-            {% elif s.category == config.CATE_DOUBAN_NOTE%}
-            <a href="{{config.DOUBAN_NOTE %(s.origin_id,)}}" class="node">From：豆瓣日记</a>
-            {% elif s.category == config.CATE_SINA_STATUS%}
-                <a href="{{config.WEIBO_STATUS %(s.origin_id)}}" class="node">From：新浪微博</a>
-            {% elif s.category == config.CATE_TWITTER_STATUS%}
-                <a href="{{config.TWITTER_STATUS %(s.origin_id)}}" class="node">From：twitter</a>
-            {% endif %}
-            &nbsp;&nbsp;{{s.create_time}}&nbsp;
-        </span>
-
-        <div class="inner">
-            <div class="content topic_content">
-                {%if s.category == config.CATE_SINA_STATUS%}
-                    {{s.text|safe}}
-                    {% set retweeted = s.get_data().get_retweeted_status() %}
-                    {% set re_mid_pic = retweeted and retweeted.get_middle_pic() or '' %}
-                    {% set middle_pic = s.get_data().get_middle_pic() %}
-
-                    {% if retweeted %}
-                        {{ "@" + retweeted.get_content() }} 
-                    {% endif %}
-                    
-                    {% if re_mid_pic or middle_pic %}
-                        <br />
-                        <img src="{{re_mid_pic or middle_pic}}"/>
-                    {% endif %}
-                {%endif%}
-
-                {%if s.category == config.CATE_DOUBAN_NOTE%}
-                    {{s.text|nl2br|safe}}
-                {%endif%}
-
-                {%if s.category == config.CATE_DOUBAN_MINIBLOG%}
-                    {{s.text|safe}}
-                    {% set links = s.get_data().get_links() %}
-                    {% if links and links.get("image") %}
-                        <br />
-                        <img src="{{links.get("image")}}"/>
-                    {% endif %}
-                {%endif%}
-            </div>
-        </div>
-        </td>
-        </tr>
-        </tbody></table>
-    </div>
-    {% endfor %}
-    <div class="box">
-        {% if g.start>0 %}
-        <a href="/?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>
-        {% endif %}
-        <a href="/?start={{g.start+g.count}}">下一页</a>
+    <div class="inner">
+    个人信息
     </div>
 </div>
+
+<div class="sep20"></div>
+
+<div class="box">
+    <div class="cell">
+        <span class="bigger">Sync Settings</span>
+        <div class="sep10"></div>
+    </div>
+
+    <div id="sync" class="inner">
+        <ul>
+            {%if config.CATE_SINA_STATUS in my_sync_cates%}
+            <ol> <input type="submit" value="-"> 取消同步我的新浪微博</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的新浪微博</input> </ol>
+            {%endif%}
+
+            {%if config.CATE_DOUBAN_NOTE in my_sync_cates%}
+            <ol> <input type="submit" value="-"> 取消同步我的豆瓣广播和日记</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的豆瓣广播和日记</input> </ol>
+            {%endif%}
+
+            {%if config.CATE_TWITTER_STATUS in my_sync_cates%}
+            <ol> <input type="submit" value="-"> 取消同步我的twitter</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的twitter</input> </ol>
+            {%endif%}
+
+        </ul>
+    </div>
+</div>
+<div class="sep20"></div>
+
+<script>
+    $("#sync input").each(function(i){
+        if(i == 0){
+            var cates = '{{config.CATE_SINA_STATUS}}';
+        }else if(i == 1){
+            var cates = '{{"%s|%s" %(config.CATE_DOUBAN_NOTE, config.CATE_DOUBAN_MINIBLOG)}}';
+        }else if(i == 2){
+            var cates = '{{config.CATE_TWITTER_STATUS}}';
+        }
+        $(this).bind('click', function(){
+            var obj = $(this);
+            if(obj.val() == "+"){
+                console.log("add sync...");
+                $.post("/sync/" + cates, function(data){
+                    alert(data);
+                });
+            }else{
+                console.log("remove sync...");
+                $.post("/sync/" + cates, {"remove":true}, function(data){
+                    alert(data);
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}
 
-{% block bottom_block %}
-Copyright 2012 @thepast.me
-{% endblock %}

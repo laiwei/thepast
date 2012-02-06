@@ -4,7 +4,8 @@ from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, flash
 
 import config
-from past.corelib import auth_user_from_session, set_user_cookie, logout_user
+from past.corelib import auth_user_from_session, set_user_cookie, \
+    logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
@@ -15,7 +16,12 @@ from past import app
 
 @app.before_request
 def before_request():
-    g.user = auth_user_from_session(session)
+    #g.user = auth_user_from_session(session)
+    g.user = User.get(2)
+    if g.user:
+        g.user_alias = UserAlias.gets_by_user_id(g.user.id)
+    else:
+        g.user_alias = None
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 20))
     print '--- user is:%s' % g.user
@@ -42,7 +48,10 @@ def index():
 @app.route("/user/<uid>")
 def user(uid):
     u = User.get(uid)
-    return u.name
+    sync_tasks = SyncTask.gets_by_user(u)
+    my_sync_cates = [x.category for x in sync_tasks]
+    return render_template("user.html", user=u, 
+            my_sync_cates = my_sync_cates, config=config)
 
 @app.route("/logout")
 def logout():
@@ -72,8 +81,90 @@ def connect(provider):
         
     return redirect(login_uri)
 
+## 这里其实是所有的登陆入口
+@app.route("/connect/<provider>/callback")
+def connect_callback(provider):
+    code = request.args.get("code")
 
-def twitter_callback(request):
+    d = config.APIKEY_DICT.get(provider)
+    login_service = None
+    if provider == config.OPENID_DOUBAN:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
+        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_SINA:
+        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
+        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_TWITTER:
+        return _twitter_callback(request)
+
+    try:
+        token_dict = login_service.get_access_token(code)
+    except OAuthLoginError, e:
+        abort(401, e.msg)
+
+    if not ( token_dict and token_dict.get("access_token") ):
+        abort(401, "no_access_token")
+    try:
+        user_info = login_service.get_user_info(
+            token_dict.get("access_token"), token_dict.get("uid"))
+    except OAuthLoginError, e:
+        abort(401, e.msg)
+    
+    user = _save_user_and_token(token_dict, user_info, openid_type)
+    if user:
+        return redirect(url_for('index'))
+    else:
+        return "connect fail"
+
+@app.route("/sync/<cates>", methods=["GET", "POST"])
+def sync(cates):
+    cates = cates.split("|")
+    if not (cates and isinstance(cates, list)):
+        return "no cates"
+
+    cates = filter(lambda x: x in [str(y) for y in config.CATE_LIST], cates)
+    if not cates:
+        abort(400, "not support such cates")
+
+    provider = category2provider(int(cates[0]))
+    redir = "/connect/%s" % provider
+
+    if not g.user:
+        print '--- no g.user...'
+        return redirect(redir)
+
+    if request.form.get("remove"):
+        for c in cates:
+            print c, type(c), g.user
+            r = SyncTask.gets_by_user_and_cate(g.user, str(c))
+            print r
+            for x in r:
+                x.remove()
+        return "ok"
+
+    uas = UserAlias.gets_by_user_id(g.user.id)
+    print '--- uas:', uas
+    r = filter(lambda x: x.type == config.OPENID_TYPE_DICT[provider], uas)
+    user_alias = r and r[0]
+    
+    if not user_alias:
+        print '--- no user_alias...'
+        return redirect(redir)
+
+    token = OAuth2Token.get(user_alias.id)   
+    
+    if not token:
+        print '--- no token...'
+        return redirect(redir)
+
+    for c in cates:
+        SyncTask.add(c, g.user.id)
+    
+    flash("good, %s sync task add succ..." % provider)
+
+    return "%s sync task add succ..." % provider
+
+def _twitter_callback(request):
     d = config.APIKEY_DICT.get(config.OPENID_TWITTER)
     openid_type = config.OPENID_TYPE_DICT[config.OPENID_TWITTER]
     login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
@@ -99,14 +190,14 @@ def twitter_callback(request):
             token_dict.get("access_token_secret"))
     user_info = login_service.get_user_info(api)
     
-    user = save_user_and_token(token_dict, user_info, openid_type)
+    user = _save_user_and_token(token_dict, user_info, openid_type)
     if user:
         return redirect(url_for('index'))
     else:
         return "connect fail"
     
 ## 保存用户信息到数据库，并保存token
-def save_user_and_token(token_dict, user_info, openid_type):
+def _save_user_and_token(token_dict, user_info, openid_type):
     print '----saving',token_dict, user_info, openid_type
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
@@ -139,85 +230,4 @@ def save_user_and_token(token_dict, user_info, openid_type):
     
     return g.user
 
-
-## 这里其实是所有的登陆入口
-@app.route("/connect/<provider>/callback")
-def connect_callback(provider):
-    code = request.args.get("code")
-
-    d = config.APIKEY_DICT.get(provider)
-    login_service = None
-    if provider == config.OPENID_DOUBAN:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
-        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_SINA:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
-        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_TWITTER:
-        return twitter_callback(request)
-
-    try:
-        token_dict = login_service.get_access_token(code)
-    except OAuthLoginError, e:
-        abort(401, e.msg)
-
-    if not ( token_dict and token_dict.get("access_token") ):
-        abort(401, "no_access_token")
-    try:
-        user_info = login_service.get_user_info(
-            token_dict.get("access_token"), token_dict.get("uid"))
-    except OAuthLoginError, e:
-        abort(401, e.msg)
-    
-    user = save_user_and_token(token_dict, user_info, openid_type)
-    if user:
-        return redirect(url_for('index'))
-    else:
-        return "connect fail"
-
-@app.route("/sync/<provider>/<cates>")
-def sync(provider,cates):
-    if provider not in (config.OPENID_DOUBAN, 
-            config.OPENID_SINA, config.OPENID_WORDPRESS, config.OPENID_TWITTER,):
-        abort(401, "暂时不支持其他服务")
-    cates = cates.split("|")
-
-    return _sync(provider, cates)
-
-def _sync(provider, cates):
-
-    if not (cates and isinstance(cates, list)):
-        return "no cates"
-
-    cates = filter(lambda x: x in [str(y) for y in config.CATE_LIST], cates)
-    if not cates:
-        abort(400, "not support such cates")
-
-    redir = "/connect/%s" % provider
-
-    if not g.user:
-        print '--- no g.user...'
-        return redirect(redir)
-
-    uas = UserAlias.gets_by_user_id(g.user.id)
-    print '--- uas:', uas
-    r = filter(lambda x: x.type == config.OPENID_TYPE_DICT[provider], uas)
-    user_alias = r and r[0]
-    
-    if not user_alias:
-        print '--- no user_alias...'
-        return redirect(redir)
-
-    token = OAuth2Token.get(user_alias.id)   
-    
-    if not token:
-        print '--- no token...'
-        return redirect(redir)
-
-    for c in cates:
-        SyncTask.add(c, g.user.id)
-    
-    flash("good, %s sync task add succ..." % provider)
-
-    return "%s sync task add succ..." % provider
 

@@ -21,9 +21,19 @@ def set_user_cookie(user, session_):
     session_id = user.session_id if user.session_id else randbytes(8)
     session_[config.SITE_COOKIE] = "%s:%s" % (user.id, session_id)
 
-
 def logout_user(user):
     if not user:
         return 
     user.clear_session()
 
+def category2provider(cate):
+    if cate < 200:
+        return config.OPENID_DOUBAN
+    elif cate < 300:
+        return config.OPENID_SINA
+    elif cate < 400:
+        return config.OPENID_WORDPRESS
+    elif cate < 500:
+        return config.OPENID_TWITTER
+    else:
+        return None
