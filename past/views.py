@@ -24,7 +24,6 @@ def before_request():
         g.user_alias = None
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 20))
-    print '--- user is:%s' % g.user
 
 @app.teardown_request
 def teardown_request(exception):

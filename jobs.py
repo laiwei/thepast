@@ -7,7 +7,8 @@ from optparse import OptionParser
 from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
-from past.api_client import Douban, SinaWeibo
+from past.api_client import Douban, SinaWeibo, Twitter
+from past.corelib import category2provider
 from past.model.status import (Status, DoubanNoteData, 
         DoubanStatusData, DoubanMiniBlogData, SyncTask)
 from past.model.user import User, UserAlias, OAuth2Token
@@ -17,12 +18,17 @@ log = logging.getLogger(__file__)
 
 def _sync(t, old=False):
     alias = None
-    if t.category < 200:
+    provider = category2provider(t.category)
+    if provider == config.OPENID_DOUBAN:
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
-    elif t.category >= 200 and t.category < 300:
+    elif provider == config.OPENID_SINA:
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_SINA])
+    elif provider == config.OPENID_TWITTER:
+        pass
+        alias = UserAlias.get_by_user_and_type(t.user_id, 
+                config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
     if not alias:
         log.warn("no alias...")
         return
@@ -33,10 +39,12 @@ def _sync(t, old=False):
         return
     
     client = None
-    if t.category < 200:
+    if provider == config.OPENID_DOUBAN:
         client = Douban(alias.alias, token.access_token, token.refresh_token)
-    elif t.category >= 200 and t.category < 300:
+    elif provider == config.OPENID_SINA:
         client = SinaWeibo(alias.alias, token.access_token)
+    elif provider == config.OPENID_TWITTER:
+        client = Twitter(alias.alias)
     if not client:
         log.warn("get client fail, break...")
         return
@@ -63,6 +71,16 @@ def _sync(t, old=False):
         if old:
             until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
             status_list = client.get_timeline(until_id=until_id)
+        else:
+            since_id = Status.get_min_origin_id(t.category, t.user_id)
+            status_list = client.get_timeline(since_id=since_id)
+        if status_list:
+            for x in status_list:
+                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+    elif t.category == config.CATE_TWITTER_STATUS:
+        if old:
+            until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
+            status_list = client.get_timeline(max_id=until_id)
         else:
             since_id = Status.get_min_origin_id(t.category, t.user_id)
             status_list = client.get_timeline(since_id=since_id)

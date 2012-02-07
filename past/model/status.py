@@ -30,7 +30,10 @@ class Status(object):
         self.title = title and linkify(title) or ""
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
-        self.text = MyHTMLParser.parse(self.text, preserve=['img', 'a'])
+        if self.category not in [config.CATE_DOUBAN_NOTE, config.CATE_DOUBAN_MINIBLOG]:
+            self.text = self.text and linkify(self.text) or ""
+        else:
+            self.text = MyHTMLParser.parse(self.text, preserve=['img', 'a'])
         self.raw = json_decode(redis_conn.get(
                 self.__class__.RAW_STATUS_REDIS_KEY % self.id))
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
@@ -160,7 +163,7 @@ class Status(object):
 class AbsUserData(object):
 
     def __init__(self, data):
-        self.data = data
+        self.data = data or {}
         if isinstance(data, basestring):
             self.data = json_decode(data)
 
@@ -282,7 +285,7 @@ class AbsData(object):
     def __init__(self, site, category, data):
         self.site = site
         self.category = category
-        self.data = data
+        self.data = data or {}
         if isinstance(data, basestring):
             self.data = json_decode(data)
 

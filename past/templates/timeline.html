@@ -65,6 +65,10 @@
                         <img src="{{links.get("image")}}"/>
                     {% endif %}
                 {%endif%}
+
+                {%if s.category == config.CATE_TWITTER_STATUS%}
+                    {{s.text|safe}}
+                {%endif%}
             </div>
         </div>
         </td>

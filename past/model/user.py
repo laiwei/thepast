@@ -195,7 +195,7 @@ class OAuth2Token(object):
         ot = None
         cursor = db_conn.cursor()
         cursor.execute("""select access_token, refresh_token  
-                from oauth2_token where alias_id=%s""", 
+                from oauth2_token where alias_id=%s order by time desc limit 1""", 
                 (alias_id,))
         row = cursor.fetchone()
         if row:

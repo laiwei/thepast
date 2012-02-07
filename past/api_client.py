@@ -226,15 +226,19 @@ class Twitter(object):
         self.apikey = apikey if apikey is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("key")
         self.apikey_secret = apikey_secret if apikey_secret is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("secret")
         
-        token = OAuth2Token.get(alias.id)
+        token = OAuth2Token.get(ua.id)
         self.access_token = access_token if access_token is not None else token.access_token
         self.access_token_secret = access_token_secret if access_token_secret is not None else token.refresh_token
 
         self.auth = tweepy.OAuthHandler(self.apikey, self.apikey_secret)        
-        self.auth.set_access_token(access_token, access_token_secret)
+        self.auth.set_access_token(self.access_token, self.access_token_secret)
     
     def api(self):
         return tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
 
-    def get_home_timeline(self):
-        pass
+    def get_timeline(self, since_id=None, max_id=None, count=200):
+        contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
+        print '-'*20, "twitter timeline"
+        print contents[-1]
+        return [TwitterStatusData(c) for c in contents]
+
