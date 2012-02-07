@@ -16,8 +16,8 @@ from past import app
 
 @app.before_request
 def before_request():
-    #g.user = auth_user_from_session(session)
-    g.user = User.get(2)
+    g.user = auth_user_from_session(session)
+    #g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -50,8 +50,16 @@ def user(uid):
     u = User.get(uid)
     sync_tasks = SyncTask.gets_by_user(u)
     my_sync_cates = [x.category for x in sync_tasks]
+    site_homepage_list = []
+    for ua in g.user_alias:
+        if ua.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
+            site_homepage_list.append({'site':u'豆瓣', 'homepage':'http://www.douban.com/people/%s' %ua.alias})
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
+            site_homepage_list.append({'site':u'新浪微博', 'homepage':'http://www.weibo.com/%s' %ua.alias})
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
+            site_homepage_list.append({'site':u'twitter', 'homepage':'http://www.twitter.com/%s' %ua.alias})
     return render_template("user.html", user=u, 
-            my_sync_cates = my_sync_cates, config=config)
+            my_sync_cates = my_sync_cates, site_homepage_list=site_homepage_list, config=config)
 
 @app.route("/logout")
 def logout():
@@ -135,12 +143,12 @@ def sync(cates):
 
     if request.form.get("remove"):
         for c in cates:
-            print c, type(c), g.user
+            print c, type(c)
             r = SyncTask.gets_by_user_and_cate(g.user, str(c))
             print r
             for x in r:
                 x.remove()
-        return "ok"
+        return json_encode({'ok':'true'})
 
     uas = UserAlias.gets_by_user_id(g.user.id)
     print '--- uas:', uas
@@ -149,20 +157,18 @@ def sync(cates):
     
     if not user_alias:
         print '--- no user_alias...'
-        return redirect(redir)
+        return json_encode({'ok':'false', 'redir':redir})
 
     token = OAuth2Token.get(user_alias.id)   
     
     if not token:
         print '--- no token...'
-        return redirect(redir)
+        return json_encode({'ok':'false', 'redir':redir})
 
     for c in cates:
         SyncTask.add(c, g.user.id)
     
-    flash("good, %s sync task add succ..." % provider)
-
-    return "%s sync task add succ..." % provider
+    return json_encode({'ok':'true'})
 
 def _twitter_callback(request):
     d = config.APIKEY_DICT.get(config.OPENID_TWITTER)

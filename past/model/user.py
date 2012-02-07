@@ -15,6 +15,7 @@ class User(object):
         self.id = str(id)
         self.uid = None
         self.name = None
+        self.create_time = None
         self.session_id = None
     
     def __repr__(self):
@@ -25,7 +26,7 @@ class User(object):
     @classmethod
     def get(cls, id):
         cursor = db_conn.cursor()
-        cursor.execute("""select uid,name,session_id 
+        cursor.execute("""select uid,name,session_id,time 
             from user where id=%s""", id)
         row = cursor.fetchone()
         cursor.close()
@@ -34,6 +35,7 @@ class User(object):
             u.uid = str(row[0])
             u.name = row[1]
             u.session_id = row[2]
+            u.create_time = row[3]
             return u
 
         return None

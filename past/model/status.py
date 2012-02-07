@@ -114,10 +114,10 @@ class Status(object):
         return [cls.get(x) for x in ids]
 
     @classmethod
-    def get_max_origin_id(cls, cate):
+    def get_max_origin_id(cls, cate, user_id):
         cursor = db_conn.cursor()
         cursor.execute('''select max(origin_id) from status 
-            where category=%s''', (cate,))
+            where category=%s and user_id=%s''', (cate, user_id))
         row = cursor.fetchone()
         if row:
             return row[0]
@@ -125,10 +125,10 @@ class Status(object):
             return 0
 
     @classmethod
-    def get_min_origin_id(cls, cate):
+    def get_min_origin_id(cls, cate, user_id):
         cursor = db_conn.cursor()
         cursor.execute('''select min(origin_id) from status 
-            where category=%s''', (cate,))
+            where category=%s and user_id=%s''', (cate, user_id))
         row = cursor.fetchone()
         if row:
             return row[0]
@@ -136,10 +136,10 @@ class Status(object):
             return 0
     
     @classmethod
-    def get_count_by_cate(cls, cate):
+    def get_count_by_cate(cls, cate, user_id):
         cursor = db_conn.cursor()
         cursor.execute('''select count(1) from status 
-            where category=%s''', (cate,))
+            where category=%s and user_id=%s''', (cate, user_id))
         row = cursor.fetchone()
         if row:
             return row[0]
@@ -616,7 +616,6 @@ class SyncTask(object):
 
     @classmethod
     def gets_by_user_and_cate(cls,user,cate):
-        print user, cate, type(cate)
         tasks = cls.gets_by_user(user)
         print tasks
         return [x for x in tasks if str(x.category) == cate]

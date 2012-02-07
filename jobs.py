@@ -43,7 +43,7 @@ def _sync(t, old=False):
 
     if t.category == config.CATE_DOUBAN_NOTE:
         if old:
-            start = Status.get_count_by_cate(t.category)
+            start = Status.get_count_by_cate(t.category, t.user_id)
         else:
             start = 0
         note_list = client.get_notes(start, 50)
@@ -52,7 +52,7 @@ def _sync(t, old=False):
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
     elif t.category == config.CATE_DOUBAN_MINIBLOG:
         if old:
-            start = Status.get_count_by_cate(t.category)
+            start = Status.get_count_by_cate(t.category, t.user_id)
         else:
             start = 0
         miniblog_list = client.get_miniblogs(start, 50)
@@ -61,10 +61,10 @@ def _sync(t, old=False):
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
     elif t.category == config.CATE_DOUBAN_STATUS or t.category == config.CATE_SINA_STATUS:
         if old:
-            until_id = Status.get_min_origin_id(t.category) #means max_id
+            until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
             status_list = client.get_timeline(until_id=until_id)
         else:
-            since_id = Status.get_min_origin_id(t.category)
+            since_id = Status.get_min_origin_id(t.category, t.user_id)
             status_list = client.get_timeline(since_id=since_id)
         if status_list:
             for x in status_list:
