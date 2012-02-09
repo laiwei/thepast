@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block content_block %}
+<div class="box">
+    <div class="cell">
+        <span class="bigger">Profile</span>
+        <div class="sep10"></div>
+    </div>
+
+    <div class="inner">
+    <span class="fade">{{g.user.name}}, ThePast第{{g.user.id}}号成员，加入于{{g.user.create_time}}</span>
+    <div class="sep10"></div>
+    <table><tbody>
+        {% for x in site_homepage_list %}
+        <tr><td width="30%"><span class="fade">{{x['site']}}:</span></td>
+            <td><span class="fade"><a href="{{x['homepage']}}">{{x['homepage']}}</a></span></td></tr>
+        {% endfor %}
+    </tbody></table>
+    </div>
+</div>
+
+<div class="sep20"></div>
+
+<div class="box">
+    <div class="cell">
+        <span class="bigger">Sync Settings</span>
+        <div class="sep10"></div>
+    </div>
+
+    <div id="sync" class="inner">
+        <ul>
+            {%if config.CATE_SINA_STATUS in my_sync_cates%}
+            <ol> <input type="submit" value="- "> 取消同步我的新浪微博</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的新浪微博</input> </ol>
+            {%endif%}
+
+            {%if config.CATE_DOUBAN_NOTE in my_sync_cates%}
+            <ol> <input type="submit" value="- "> 取消同步我的豆瓣广播和日记</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的豆瓣广播和日记</input> </ol>
+            {%endif%}
+
+            {%if config.CATE_TWITTER_STATUS in my_sync_cates%}
+            <ol> <input type="submit" value="- "> 取消同步我的twitter</input> </ol>
+            {%else%}
+            <ol> <input type="submit" value="+"> 定期同步我的twitter</input> </ol>
+            {%endif%}
+
+        </ul>
+    </div>
+</div>
+<div class="sep20"></div>
+
+<script>
+    $("#sync input").each(function(i){
+        if(i == 0){
+            var cates = '{{config.CATE_SINA_STATUS}}';
+        }else if(i == 1){
+            var cates = '{{"%s|%s" %(config.CATE_DOUBAN_NOTE, config.CATE_DOUBAN_MINIBLOG)}}';
+        }else if(i == 2){
+            var cates = '{{config.CATE_TWITTER_STATUS}}';
+        }
+        $(this).bind('click', function(){
+            var obj = $(this);
+            if(obj.val() == "+"){
+                console.log("add sync...");
+                $.post("/sync/" + cates, function(data){
+                    console.log(data);
+                    if(data.ok == 'false'){
+                        window.location = data.redir;
+                    }else{
+                        obj.val("- ");
+                    }
+                }, "json");
+            }else{
+                console.log("remove sync...");
+                $.post("/sync/" + cates, {"remove":true}, function(data){
+                    console.log(data);
+                    obj.val("+");
+                }, "json");
+            }
+        });
+    });
+</script>
+{% endblock %}
+

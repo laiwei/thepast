@@ -42,11 +42,30 @@ def index():
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=cate)
     status_list = Status.gets(ids)
-    return render_template("timeline.html", status_list=status_list, config=config)
+    return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
 @app.route("/user/<uid>")
 def user(uid):
     u = User.get(uid)
+    if not u:
+        abort(404, "no such user")
+
+    if g.user and g.user.id == u.id:
+        return redirect(url_for("index"))
+    
+    #TODO:增加可否查看其他用户的权限检查
+    cate = request.args.get("cate", None)
+    ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=cate)
+    status_list = Status.gets(ids)
+    return render_template("timeline.html", user=u, status_list=status_list, config=config)
+
+
+@app.route("/settings/profile")
+def profile():
+    if not g.user:
+        return redirect("/login")
+
+    u = g.user
     sync_tasks = SyncTask.gets_by_user(u)
     my_sync_cates = [x.category for x in sync_tasks]
     site_homepage_list = []
@@ -57,7 +76,7 @@ def user(uid):
             site_homepage_list.append({'site':u'新浪微博', 'homepage':'http://www.weibo.com/%s' %ua.alias})
         elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             site_homepage_list.append({'site':u'twitter', 'homepage':'http://www.twitter.com/%s' %ua.alias})
-    return render_template("user.html", user=u, 
+    return render_template("profile.html", user=u, 
             my_sync_cates = my_sync_cates, site_homepage_list=site_homepage_list, config=config)
 
 @app.route("/logout")
@@ -66,6 +85,13 @@ def logout():
         return "you are not login"
     r = logout_user(g.user)
     return "logout succ"
+
+#TODO
+@app.route("/login")
+def login():
+    if g.user:
+        return redirect(url_for("index"))
+    return render_template("login.html")
 
 @app.route("/connect/", defaults={"provider": config.OPENID_DOUBAN})
 @app.route("/connect/<provider>")

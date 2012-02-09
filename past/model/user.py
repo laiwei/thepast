@@ -25,17 +25,24 @@ class User(object):
 
     @classmethod
     def get(cls, id):
+        uid = None
+        if isinstance(id, basestring) and not id.isdigit():
+            uid = id
         cursor = db_conn.cursor()
-        cursor.execute("""select uid,name,session_id,time 
-            from user where id=%s""", id)
+        if uid:
+            cursor.execute("""select id, uid,name,session_id,time 
+                from user where uid=%s""", uid)
+        else:
+            cursor.execute("""select id, uid,name,session_id,time 
+                from user where id=%s""", id)
         row = cursor.fetchone()
         cursor.close()
         if row:
-            u = cls(id)
-            u.uid = str(row[0])
-            u.name = row[1]
-            u.session_id = row[2]
-            u.create_time = row[3]
+            u = cls(row[0])
+            u.uid = str(row[1])
+            u.name = row[2]
+            u.session_id = row[3]
+            u.create_time = row[4]
             return u
 
         return None
