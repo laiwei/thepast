@@ -37,7 +37,7 @@ def favicon():
 @app.route("/")
 def index():
     if not g.user:
-        return redirect(url_for("connect"))
+        return redirect(url_for("login"))
 
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=cate)

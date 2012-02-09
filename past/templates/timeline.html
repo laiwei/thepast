@@ -3,9 +3,8 @@
 {% block content_block %}
 <div class="box">
     <div class="cell">
-        <span class="bigger">{{g.user.name}}</span>
+        <span class="bigger">Hi, {{g.user.name}}, Welcome to thePast.me</span>
         <div class="sep10"></div>
-        这就是 我们都回不去的 昨天...
     </div>
 
     {% for s in status_list %}
@@ -78,9 +77,9 @@
     {% endfor %}
     <div class="box">
         {% if g.start>0 %}
-        <a href="/?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>
+        <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         {% endif %}
-        <a href="/?start={{g.start+g.count}}">下一页</a>
+        <a href="?start={{g.start+g.count}}">下一页</a>
     </div>
 </div>
 {% endblock %}

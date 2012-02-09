@@ -19,7 +19,7 @@
             <ul>
                 <li><a href="/" class="top">Home</a></li>
                 {% if g.user %}
-                <li><a href="/user/{{g.user.uid}}" class="top">{{g.user.name}}</a></li>
+                <li><a href="/settings/profile" class="top">{{g.user.name}}</a></li>
                 <li><a href="/logout" class="top">Logout</a></li>
                 {% else %}
                 <li><a href="/login" class="top">SignUp</a></li>
@@ -56,11 +56,11 @@
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tbody><tr>
                             <td width="48" valign="top">
-                            <a href="/user/{{g.user.uid}}"><img src="{{g.user.get_icon_url()}}" border="0"></a></td>
+                            <a href="/settings/profile"><img src="{{g.user.get_icon_url()}}" border="0"></a></td>
                             <td width="10" valign="top"></td>
                             <td width="auto" align="left"><span class="bigger"><a href="/settings/profile">{{g.user.name}}</a></span>
                                 <div class="sep5"></div>
-                                <span class="fade"></span>
+                                <span class="fade">这就是我们都回不去的昨天...</span>
                             </td>
                         </tr>
                     </tbody></table>
@@ -74,7 +74,7 @@
                 {% endif %}
 
                 <div class="inner">
-                    记录你的过去！ 豆瓣，twitter，新浪微博... 仍在增加中
+                    记录自己的过去！ 豆瓣，twitter，新浪微博... 仍在增加中
                 </div>
             </div>
 
