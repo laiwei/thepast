@@ -100,9 +100,25 @@
 </div>
 
 <div id="Bottom">
-{% block bottom_block %} 
-Copyright 2012 @thepast.me
-{% endblock %}
+    <div id="BottomMain">
+        {% block bottom_block %} 
+            <strong><a class="dark" href="/about"> 关于 </a></strong> &nbsp;&nbsp;
+            <strong><a class="dark" href="/FAQ"> FAQ </a></strong> &nbsp;&nbsp;
+
+            <div class="sep10"></div>
+            <div class="sep5"></div>
+            
+            <span class="fade">
+                记录你的过去...
+                copyright thepast.me && You
+            </span>
+            <div class="sep10"></div>
+            <div class="sep5"></div>
+            <small>
+                VERSION:0.0.1
+            </small>
+        {% endblock %}
+    </div>
 </div>
 </body>
 

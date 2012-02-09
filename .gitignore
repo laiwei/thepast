@@ -6,3 +6,5 @@ env/
 build/
 third-src/
 var/
+
+nohup.out
