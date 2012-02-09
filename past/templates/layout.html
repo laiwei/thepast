@@ -35,6 +35,7 @@
                 </div>
             </form>
         </div>
+        
     </div>
 {% endblock %}
 </div>
@@ -68,8 +69,7 @@
                 </div>
                 {% else %}
                 <div class="cell">
-                    <span class="fade">Welcome to thePast</span>
-                    <div class="sep10"></div>
+                    <span class="bigger">Welcome to thePast</span>
                 </div>
                 {% endif %}
 
@@ -97,6 +97,22 @@
             </div>
             <div class="sep20"> </div>
 
+            {%if g.user%}
+            <div class="box">
+                <div class="cell">
+                    <span class="bigger">管理我的同步任务</span>
+                </div>
+                <div class="inner">
+                    <ul>
+                        <li><a href="/settings/profile" class="dark" style="display: block;">
+                            猛击管理</a> </li>
+                    </ul>
+                    <div class="sep10"> </div>
+                    <span class="fade">目前每30分钟同步一次，添加任务后，请耐心等待^^</span>
+                </div>
+            </div>
+            <div class="sep20"> </div>
+            {%endif%}
             {% endblock%}
         </div>
 
