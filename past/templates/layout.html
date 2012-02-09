@@ -17,8 +17,14 @@
         </a>
         <div id="Navigation">
             <ul>
-                <li><a href="/" class="top">首页</a></li>
+                <li><a href="/" class="top">Home</a></li>
+                {% if g.user %}
                 <li><a href="/user/{{g.user.uid}}" class="top">{{g.user.name}}</a></li>
+                <li><a href="/logout" class="top">Logout</a></li>
+                {% else %}
+                <li><a href="/login" class="top">SignUp</a></li>
+                <li><a href="/login" class="top">Login</a></li>
+                {% endif %}
             </ul>
         </div>
 
@@ -49,7 +55,7 @@
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                         <tbody><tr>
                             <td width="48" valign="top">
-                            <a href="/user/{{g.user.uid}}"><img src="/static/img/avatar.png" border="0"></a></td>
+                            <a href="/user/{{g.user.uid}}"><img src="{{g.user.get_avatar_url()}}" border="0"></a></td>
                             <td width="10" valign="top"></td>
                             <td width="auto" align="left"><span class="bigger"><a href="/user/{{g.user.uid}}">{{g.user.name}}</a></span>
                                 <div class="sep5"></div>
@@ -109,7 +115,7 @@
             <div class="sep5"></div>
             
             <span class="fade">
-                记录你的过去...
+                记录自己的过去...
                 copyright thepast.me && You
             </span>
             <div class="sep10"></div>
