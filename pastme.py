@@ -2,4 +2,6 @@
 
 from past import app
 #app.run(port=80)
-app.run()
+
+if __name__ == "__main__":
+    app.run()
