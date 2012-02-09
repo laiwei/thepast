@@ -1,49 +1,45 @@
-drop database if exists `thepast`;
-create database `thepast` character set utf8;
+-- MySQL dump 10.13  Distrib 5.1.58, for debian-linux-gnu (i686)
+--
+-- Host: localhost    Database: thepast
+-- ------------------------------------------------------
+-- Server version	5.1.58-1ubuntu1
 
-use `thepast`;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-drop table if exists `status`;
-CREATE TABLE `status` (
+--
+-- Table structure for table `oauth2_token`
+--
+
+DROP TABLE IF EXISTS `oauth2_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `oauth2_token` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) unsigned NOT NULL,
-  `origin_id` int(20) unsigned NOT NULL DEFAULT '0',
-  `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `site` varchar(2) NOT NULL,
-  `category` smallint(4) NOT NULL,
-  `title` varchar(150) NOT NULL DEFAULT '',
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_origin` (`origin_id`, `site`, `category`),
-  KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='status';
-
-drop table if exists `user`;
-CREATE TABLE `user` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `uid` varchar(16) NOT NULL DEFAULT '',
-  `name` varchar(63) NOT NULL DEFAULT '',
-  `session_id` varchar(16) DEFAULT NULL,
+  `alias_id` int(11) unsigned NOT NULL,
+  `access_token` varchar(128) NOT NULL DEFAULT '',
+  `refresh_token` varchar(128) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_uid` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='user';
+  UNIQUE KEY `idx_alias_id` (`alias_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `passwd`
+--
 
-drop table if exists `user_alias`;
-CREATE TABLE `user_alias` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(2) NOT NULL DEFAULT '',
-  `user_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `alias` varchar(63) NOT NULL DEFAULT '',
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_alias_type` (`alias`,`type`),
-  KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='alias';
-
-
-drop table if exists `passwd`;
+DROP TABLE IF EXISTS `passwd`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `passwd` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
@@ -53,28 +49,91 @@ CREATE TABLE `passwd` (
   PRIMARY KEY (`id`),
   KEY `idx_uid` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='passwd';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-drop table if exists `oauth2_token`;
-CREATE TABLE `oauth2_token` (
+--
+-- Table structure for table `status`
+--
+
+DROP TABLE IF EXISTS `status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `status` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `alias_id` int(11) unsigned NOT NULL,
-  `access_token` varchar(128) NOT NULL DEFAULT '',
-  `refresh_token` varchar(128) NOT NULL DEFAULT '',
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int(11) unsigned NOT NULL,
+  `origin_id` varchar(20) NOT NULL DEFAULT '0',
+  `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `site` varchar(2) NOT NULL,
+  `category` smallint(4) NOT NULL,
+  `title` varchar(150) NOT NULL DEFAULT '',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_alias_id` (`alias_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
+  UNIQUE KEY `idx_origin` (`origin_id`,`site`,`category`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=473 DEFAULT CHARSET=utf8 COMMENT='status';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `sync_task`
+--
 
-
-drop table if exists `sync_task`;
+DROP TABLE IF EXISTS `sync_task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sync_task` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `category` smallint(4) NOT NULL,
   `user_id` int(11) unsigned NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_cate` (`user_id`, `category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='sync_task';
+  UNIQUE KEY `idx_user_cate` (`user_id`,`category`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='sync_task';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `user`
+--
 
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `uid` varchar(16) NOT NULL DEFAULT '',
+  `name` varchar(63) NOT NULL DEFAULT '',
+  `session_id` varchar(16) DEFAULT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_uid` (`uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='user';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_alias`
+--
+
+DROP TABLE IF EXISTS `user_alias`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_alias` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(2) NOT NULL DEFAULT '',
+  `user_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `alias` varchar(63) NOT NULL DEFAULT '',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_alias_type` (`alias`,`type`),
+  KEY `idx_uid` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COMMENT='alias';
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2012-02-09  9:56:15
