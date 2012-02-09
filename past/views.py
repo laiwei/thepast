@@ -102,7 +102,12 @@ def connect_callback(provider):
         openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_TWITTER:
-        return _twitter_callback(request)
+        user = _twitter_callback(request)
+        print '---debug, twitter callback, user:',user
+        if user:
+            return redirect(url_for('index'))
+        else:
+            return "connect fail"
 
     try:
         token_dict = login_service.get_access_token(code)
@@ -142,15 +147,12 @@ def sync(cates):
 
     if request.form.get("remove"):
         for c in cates:
-            print c, type(c)
             r = SyncTask.gets_by_user_and_cate(g.user, str(c))
-            print r
             for x in r:
                 x.remove()
         return json_encode({'ok':'true'})
 
     uas = UserAlias.gets_by_user_id(g.user.id)
-    print '--- uas:', uas
     r = filter(lambda x: x.type == config.OPENID_TYPE_DICT[provider], uas)
     user_alias = r and r[0]
     
@@ -196,10 +198,7 @@ def _twitter_callback(request):
     user_info = login_service.get_user_info(api)
     
     user = _save_user_and_token(token_dict, user_info, openid_type)
-    if user:
-        return redirect(url_for('index'))
-    else:
-        return "connect fail"
+    return user
     
 ## 保存用户信息到数据库，并保存token
 def _save_user_and_token(token_dict, user_info, openid_type):

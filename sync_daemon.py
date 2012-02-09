@@ -9,13 +9,13 @@ execfile(activate_this, dict(__file__=activate_this))
 
 if __name__ == "__main__":
     while True: 
-        print commands.getoutput("python jobs.py -t old -c 100 -n 1")
         print commands.getoutput("python jobs.py -t old -c 101 -n 1")
+        print commands.getoutput("python jobs.py -t old -c 102 -n 1")
         print commands.getoutput("python jobs.py -t old -c 200 -n 1")
         print commands.getoutput("python jobs.py -t old -c 400 -n 1")
-        print commands.getoutput("python jobs.py -t new -c 100 -n 1")
         print commands.getoutput("python jobs.py -t new -c 101 -n 1")
+        print commands.getoutput("python jobs.py -t new -c 102 -n 1")
         print commands.getoutput("python jobs.py -t new -c 200 -n 1")
         print commands.getoutput("python jobs.py -t new -c 400 -n 1")
 
-        time.sleep(60*10)
+        time.sleep(60*30)
