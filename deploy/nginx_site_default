@@ -1,0 +1,20 @@
+server {
+
+	listen   80; ## listen for ipv4
+	listen   [::]:80 default ipv6only=on; ## listen for ipv6
+
+	server_name  thepast.me;
+
+	access_log  /var/log/nginx/thepast.me.access.log;
+
+    location / { try_files $uri @pastme; }
+    location /static/ {
+        root /home/work/proj/thepast/past;
+    }
+    location @pastme {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/uwsgi.sock;
+    }
+}
+
+

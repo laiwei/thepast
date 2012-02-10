@@ -38,6 +38,7 @@ class User(object):
         row = cursor.fetchone()
         cursor.close()
         if row:
+            print '---row:',row
             u = cls(row[0])
             u.uid = str(row[1])
             u.name = row[2]

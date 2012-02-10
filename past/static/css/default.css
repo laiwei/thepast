@@ -384,3 +384,26 @@ a.node:hover {
     color: #777;
 }
 
+.note {
+    font-family: "Panic Sans", "Menlo", "DejaVu Sans Mono", "Luxi Mono", "Courier New", "Helvetica Neue", "Tahoma", "Verdana", "Hiragino Sans GB", STHeiti !important;
+    font-size: 14px;
+    line-height: 180%;
+}
+
+.page {
+    font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti !important;
+    font-size: 14px;
+    line-height: 180%;
+    padding: 0px 20px 20px 20px;
+}
+
+.status {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.header, .footer {
+    font-size: 12px;
+    line-height: 18px;
+    color: #aaa;
+}
