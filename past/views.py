@@ -93,6 +93,10 @@ def login():
         return redirect(url_for("index"))
     return render_template("login.html")
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
 @app.route("/connect/", defaults={"provider": config.OPENID_DOUBAN})
 @app.route("/connect/<provider>")
 def connect(provider):
