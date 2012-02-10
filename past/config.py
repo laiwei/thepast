@@ -81,5 +81,11 @@ DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
 TWITTER_STATUS = 'http://twitter.com/%s'
 
-from local_config import *
+try:
+    from local_config import *
+except:
+    import warnings
+    warnings.warn('no local config')
+
+
 
