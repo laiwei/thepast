@@ -9,8 +9,9 @@ from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.api_client import Douban, SinaWeibo, Twitter
 from past.corelib import category2provider
-from past.model.status import (Status, DoubanNoteData, 
-        DoubanStatusData, DoubanMiniBlogData, SyncTask)
+from past.model.data import (Status, DoubanNoteData, 
+        DoubanStatusData, DoubanMiniBlogData)
+from past.model.status import SyncTask
 from past.model.user import User, UserAlias, OAuth2Token
 
 log = logging.getLogger(__file__)

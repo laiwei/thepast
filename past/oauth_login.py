@@ -11,7 +11,7 @@ from tweepy.error import TweepError
 import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import httplib2_request
-from past.model.status import SinaWeiboUser, DoubanUser, TwitterUser
+from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser
 
 class OAuthLoginError(Exception):
     def __init__(self, msg):

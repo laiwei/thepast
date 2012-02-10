@@ -7,7 +7,7 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
-from past.model.status import (DoubanStatusData, DoubanNoteData,
+from past.model.data import (DoubanStatusData, DoubanNoteData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData)
 from past.model.user import User,UserAlias, OAuth2Token
 
