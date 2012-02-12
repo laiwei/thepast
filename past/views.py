@@ -1,5 +1,11 @@
 #-*- coding:utf-8 -*-
 import os
+import datetime
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
 from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, make_response, flash
 
@@ -59,7 +65,6 @@ def user(uid):
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=cate)
     status_list = Status.gets(ids)
     return render_template("timeline.html", user=u, status_list=status_list, config=config)
-
 
 @app.route("/settings/profile")
 def profile():
@@ -134,7 +139,6 @@ def connect_callback(provider):
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_TWITTER:
         user = _twitter_callback(request)
-        print '---debug, twitter callback, user:',user
         if user:
             return redirect(url_for('index'))
         else:
@@ -211,7 +215,6 @@ def mypdf():
 
 @app.route("/<uid>/pdf")
 def pdf(uid):
-    import cStringIO as StringIO
     from xhtml2pdf.default import DEFAULT_FONT
     from xhtml2pdf.document import pisaDocument
 
@@ -242,13 +245,14 @@ def pdf(uid):
 
     _html = u"""<html> <body>
         <div id="Top">
-            <img src="%s"/> &nbsp; &nbsp;&nbsp; The Past of Me | 个人杂志计划
+            <img src="%s"/> &nbsp; &nbsp;&nbsp; The Past of Me | 个人杂志计划&nbsp;&nbsp;&nbsp;%s&nbsp;&nbsp;&nbsp;CopyRight©%s
             <br/>
         </div>
         <br/> <br/>
 
         <div class="box">
-    """ %(os.path.join(app.root_path, "static/img/logo.png"), )
+    """ %(os.path.join(app.root_path, "static/img/logo.png"), 
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user.name)
 
     for s in status_list:
         title = s.title
@@ -268,28 +272,25 @@ def pdf(uid):
             text = ''
             links = s.get_data().get_links()
             if links and links.get("image"):
-                text = '''<br/><img src="%s"/><br/>''' %links.get("image")
+                text = '''<img src="%s"/>''' %links.get("image")
         elif s.category == config.CATE_SINA_STATUS:
             retweeted = s.get_data().get_retweeted_status()
             re_mid_pic = retweeted and retweeted.get_middle_pic() or ''
             middle_pic = s.get_data().get_middle_pic()
 
             if retweeted:
-                text += "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() + "<br/>"
+                text += "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content()
                     
             if re_mid_pic or middle_pic:
-                text += '<br/><img src="%s"/><br/>' %(re_mid_pic or middle_pic)
-
-        _html += """
-                <hr/>
-                <div class="cell">
-                    <span class="content">%s</span><br/>
-                    <span class="content">%s</span><br/>
-                    <span class="fade">%s &nbsp;&nbsp;&nbsp; %s</span>
-                </div>
-        """ %(title, text, from_, create_time)
-
-    _html += """ </div> <body> </html> """
+                text += '<br/><br/><img src="%s"/>' %(re_mid_pic or middle_pic)
+        
+        _html += """ <hr/> <div class="cell">"""
+        if title:
+                _html += """<p>%s</p>""" %title
+        if text:
+                _html += """<p>%s</p>""" %text
+        _html += """<span class="fade">%s &nbsp;&nbsp;&nbsp; %s</span>""" %(from_, create_time)
+        _html += """ </div> <body> </html> """
 
     _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback)
 

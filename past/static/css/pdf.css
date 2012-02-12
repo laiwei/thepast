@@ -52,6 +52,12 @@ h4 {
     margin: 0px;
 }
 
+p {
+    font-size: 12px;
+    line-height: 180%;
+    color: #000;
+}
+
 img {
     max-width: 550px;
 }
