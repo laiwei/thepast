@@ -101,7 +101,7 @@
             {%if g.user%}
             <div class="box">
                 <div class="cell">
-                    <span class="bigger">管理我的同步任务</span>
+                    <span class="bigger">管理你的同步任务</span>
                 </div>
                 <div class="inner">
                     <ul>
@@ -114,7 +114,20 @@
             </div>
             <div class="sep20"> </div>
             {%endif%}
+
+            <div class="box">
+                <div class="cell">
+                    <span class="bigger">下载你的PDF版本 (新功能)</span>
+                </div>
+                <div class="inner">
+                    现在，你可以以PDF方式查看自己的内容了，也可以下载，这样就能在手机、电脑上随时翻阅了。 点<a href="/pdf">这里</a>体验下^^
+                    <div class="sep10"> </div>
+                    或者，你可以查看一下<a href="/pdf/{{config.MY_USER_ID}}/pdf">demo</a>，看看效果，欢迎提意见
+                </div>
+            </div>
+            <div class="sep20"> </div>
             {% endblock%}
+
         </div>
 
         <div id="Content">
