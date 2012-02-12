@@ -81,6 +81,11 @@ DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
 TWITTER_STATUS = 'http://twitter.com/%s'
 
+#uid of laiwei
+MY_USER_ID = 4
+#cache
+CACHE_DIR = "/home/work/proj/thepast/past/var/cache"
+
 try:
     from local_config import *
 except:

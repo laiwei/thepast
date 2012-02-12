@@ -7,6 +7,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
+from past.utils import link_callback
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -222,7 +223,6 @@ def pdf(uid):
     css = open(os.path.join(app.root_path, "static/css/pdf.css")).read()
 
     result = StringIO.StringIO()
-    #_html = render_template("about.html")
 
     # get status
     ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count)
@@ -291,7 +291,7 @@ def pdf(uid):
 
     _html += """ </div> <body> </html> """
 
-    _pdf = pisaDocument(_html, result, default_css=css)
+    _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback)
 
     if not _pdf.err:
         result.seek(0)
