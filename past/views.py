@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils import link_callback
+from past.utils import link_callback, wrap_long_line
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -234,14 +234,14 @@ def pdf(uid):
     
     if not g.user:
         ##匿名用户暂时只能看我的作为演示
-        g.count = max(20, g.count)
+        g.count = min(25, g.count)
         user = User.get(config.MY_USER_ID)
     else:
         if g.user.id == user.id:
-            g.count = max(100, g.count)
+            g.count = min(100, g.count)
         else:
-            ##登录用户只能生成别人的20条
-            g.count = max(20, g.count)
+            ##登录用户只能生成别人的25条
+            g.count = min(25, g.count)
 
     _html = u"""<html> <body>
         <div id="Top">
@@ -267,29 +267,37 @@ def pdf(uid):
         elif s.category == config.CATE_TWITTER_STATUS:
             from_ = u'<a href="' + config.TWITTER_STATUS %(s.origin_id) + u'class="node">From：twitter</a>'
         text = s.text
-
+        retweeted_text = ''
+        img = ''
         if s.category == config.CATE_DOUBAN_MINIBLOG:
             text = ''
             links = s.get_data().get_links()
             if links and links.get("image"):
-                text = '''<img src="%s"/>''' %links.get("image")
+                img = links.get("image")
         elif s.category == config.CATE_SINA_STATUS:
             retweeted = s.get_data().get_retweeted_status()
             re_mid_pic = retweeted and retweeted.get_middle_pic() or ''
             middle_pic = s.get_data().get_middle_pic()
 
             if retweeted:
-                text += "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content()
+                retweeted_text = retweeted.get_user().get_nickname() + ": " + retweeted.get_content()
                     
             if re_mid_pic or middle_pic:
-                text += '<br/><br/><img src="%s"/>' %(re_mid_pic or middle_pic)
+                img = re_mid_pic or middle_pic
         
         _html += """ <hr/> <div class="cell">"""
         if title:
-                _html += """<p>%s</p>""" %title
+            title = wrap_long_line(title)
+            _html += """<div class="content">%s</div>""" %title
         if text:
-                _html += """<p>%s</p>""" %text
-        _html += """<span class="fade">%s &nbsp;&nbsp;&nbsp; %s</span>""" %(from_, create_time)
+            text = wrap_long_line(text)
+            _html += """<div class='content'>%s</div>""" %text
+        if retweeted_text:
+            retweeted_text = wrap_long_line(retweeted_text)
+            _html += """<div class='tip'><span class="fade">%s</span></div>""" %retweeted_text
+        if img:
+            _html += """<img src=%s></img>""" %img
+        _html += """<div class="fade">%s &nbsp;&nbsp;&nbsp; %s</div>""" %(from_, create_time)
         _html += """ </div> <body> </html> """
 
     _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback)
