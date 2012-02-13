@@ -230,23 +230,23 @@ def pdf(uid):
 
     result = StringIO.StringIO()
 
-    # get status
-    ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count, cate=g.cate)
-    status_list = Status.gets(ids)
     user = User.get(uid)
-    
     if not g.user:
         ##匿名用户暂时只能看我的作为演示
         g.count = min(25, g.count)
         user = User.get(config.MY_USER_ID)
     else:
         if g.user.id == user.id:
-            if g.count < 50:
+            if g.count < 60:
                 g.count = 60
             g.count = min(100, g.count)
         else:
             ##登录用户只能生成别人的25条
             g.count = min(25, g.count)
+
+    # get status
+    ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count, cate=g.cate)
+    status_list = Status.gets(ids)
 
     _html = u"""<html> <body>
         <div id="Top">
