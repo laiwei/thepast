@@ -75,6 +75,8 @@ class Douban(object):
         contents = self.get("/people/%s/notes" % self.alias, 
                 {"start-index": start, "max-results": count})
         contents = json_decode(contents).get("entry",[]) if contents else []
+        if contents:
+            print '------get douban note,len is:', len(contents)
         return [DoubanNoteData(c) for c in contents]
         
     def get_events(self, start, count):
@@ -98,6 +100,8 @@ class Douban(object):
         contents = self.get("/people/%s/miniblog" % self.alias,
                 {"start-index": start, "max-results": count})
         contents = json_decode(contents).get("entry",[]) if contents else []
+        if contents:
+            print '------get douban miniblog,len is:', len(contents)
         return [DoubanMiniBlogData(c) for c in contents]
 
     #FIXED
@@ -216,8 +220,7 @@ class SinaWeibo(object):
         contents = json_decode(contents).get("statuses", []) if contents else []
         ##debug
         if contents:
-            print '-------sinawebicontent:', contents[-1]
-            print '-------len sinawebicontent:', len(contents)
+            print '-------get sinawebo, len is:', len(contents)
         return [SinaWeiboStatusData(c) for c in contents]
 
 class Twitter(object):
@@ -238,7 +241,7 @@ class Twitter(object):
 
     def get_timeline(self, since_id=None, max_id=None, count=200):
         contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
-        print '-'*20, "twitter timeline"
-        print contents[-1]
+        if contents:
+            print '-------get twitter, len is:', len(contents)
         return [TwitterStatusData(c) for c in contents]
 
