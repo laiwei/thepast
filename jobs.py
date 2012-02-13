@@ -17,7 +17,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 log = logging.getLogger(__file__)
 
 
-def _sync(t, old=False):
+def sync(t, old=False):
     alias = None
     provider = category2provider(t.category)
     if provider == config.OPENID_DOUBAN:
@@ -27,17 +27,16 @@ def _sync(t, old=False):
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_SINA])
     elif provider == config.OPENID_TWITTER:
-        pass
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
     if not alias:
         log.warn("no alias...")
-        return
+        return 0
 
     token = OAuth2Token.get(alias.id)
     if not token:
         log.warn("no access token, break...")
-        return
+        return 0
     
     client = None
     if provider == config.OPENID_DOUBAN:
@@ -48,7 +47,7 @@ def _sync(t, old=False):
         client = Twitter(alias.alias)
     if not client:
         log.warn("get client fail, break...")
-        return
+        return 0
 
     if t.category == config.CATE_DOUBAN_NOTE:
         if old:
@@ -59,6 +58,7 @@ def _sync(t, old=False):
         if note_list:
             for x in note_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+            return len(note_list)
     elif t.category == config.CATE_DOUBAN_MINIBLOG:
         if old:
             start = Status.get_count_by_cate(t.category, t.user_id)
@@ -68,6 +68,7 @@ def _sync(t, old=False):
         if miniblog_list:
             for x in miniblog_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+            return len(miniblog_list)
     elif t.category == config.CATE_DOUBAN_STATUS or t.category == config.CATE_SINA_STATUS:
         if old:
             until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
@@ -78,6 +79,7 @@ def _sync(t, old=False):
         if status_list:
             for x in status_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+            return len(status_list)
     elif t.category == config.CATE_TWITTER_STATUS:
         if old:
             until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
@@ -88,6 +90,8 @@ def _sync(t, old=False):
         if status_list:
             for x in status_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+            return len(status_list)
+    return 0
 
 def sync_helper(cate,old=False):
     log.info("%s syncing old %s... cate=%s" % (datetime.datetime.now(), old, cate))
@@ -101,7 +105,7 @@ def sync_helper(cate,old=False):
     
     log.info("task_list length is %s" % len(task_list))
     for t in task_list:
-        _sync(t, old)
+        sync(t, old)
 
 if __name__ == '__main__':
     parser = OptionParser()

@@ -3,9 +3,15 @@
 {% block content_block %}
 <div class="box">
     <div class="cell">
-        <span class="bigger">Hi, {{g.user.name}}, Welcome to thePast.me</span>
+        <span class="bigger">Hi, Welcome to thepast.me</span>
         <div class="sep10"></div>
     </div>
+
+    {% if not status_list and g.start == 0 %}
+        <div class="cell">
+            <p class="bigger">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</p>
+        </div>
+    {% endif %}
 
     {% for s in status_list %}
     <div class="cell">

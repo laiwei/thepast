@@ -70,12 +70,15 @@
                 </div>
                 {% else %}
                 <div class="cell">
-                    <span class="bigger">Welcome to thePast</span>
+                    <span class="bigger">个人杂志计划</span>
                 </div>
                 {% endif %}
 
                 <div class="inner">
-                    记录自己的过去！ 豆瓣，twitter，新浪微博... 仍在增加中
+                    <ul>
+                        <li>聚合你的豆瓣，twitter，新浪微博... 仍在增加中</li>
+                        <li>以PDF查看聚合后的内容，<a href="/pdf">下载精美排版后的PDF版本</a>，离线阅读</li>
+                    </ul>
                 </div>
             </div>
 
@@ -131,6 +134,21 @@
         </div>
 
         <div id="Content">
+            {% block content_notification %}
+                <div class=box>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class=flashes>
+                            {% for category, message in messages %}
+                              <li class="{{ category }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                
+                </div>
+            {% endblock%}
+
             {% block content_block%}
             {% endblock%}
         </div>

@@ -15,7 +15,7 @@ from past.corelib import auth_user_from_session, set_user_cookie, \
 from past.utils.escape import json_encode, json_decode
 from past.utils import link_callback, wrap_long_line, filters, save_pdf, randbytes
 from past.model.user import User, UserAlias, OAuth2Token
-from past.model.status import SyncTask, Status
+from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
 import api_client
 
@@ -140,6 +140,7 @@ def connect_callback(provider):
     elif provider == config.OPENID_TWITTER:
         user = _twitter_callback(request)
         if user:
+            _add_sync_task_and_push_queue(provider, user)
             return redirect(url_for('index'))
         else:
             return "connect fail"
@@ -159,9 +160,11 @@ def connect_callback(provider):
     
     user = _save_user_and_token(token_dict, user_info, openid_type)
     if user:
+        _add_sync_task_and_push_queue(provider, user)
         return redirect(url_for('index'))
     else:
-        return "connect fail"
+        flash("连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
+        return redirect(url_for("login"))
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 def sync(cates):
@@ -385,4 +388,25 @@ def _save_user_and_token(token_dict, user_info, openid_type):
     
     return g.user
 
+## 添加sync_task任务，并且添加到队列中
+def _add_sync_task_and_push_queue(provider, user):
+        
+        task_ids = [x.category for x in SyncTask.get_by_user(user)]
+
+        if provider == config.OPENID_DOUBAN:
+            if str(config.CATE_DOUBAN_MINIBLOG) not in task_ids:
+                t = SyncTask.add(config.CATE_DOUBAN_MINIBLOG, user.id)
+                TaskQueue.add(t.id, t.kind)
+            if str(config.CATE_DOUBAN_NOTE) not in task_ids:
+                t = SyncTask.add(config.CATE_DOUBAN_NOTE, user.id)
+                TaskQueue.add(t.id, t.kind)
+
+        elif provider == config.OPENID_SINA:
+            if str(config.CATE_SINA_STATUS) not in task_ids:
+                t = SyncTask.add(config.CATE_SINA_STATUS, user.id)
+                TaskQueue.add(t.id, t.kind)
+        elif provider == config.OPENID_TWITTER:
+            if str(config.CATE_TWITTER_STATUS) not in task_ids:
+                t = SyncTask.add(config.CATE_TWITTER_STATUS, user.id)
+                TaskQueue.add(t.id, t.kind)
 

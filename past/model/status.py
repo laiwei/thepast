@@ -3,7 +3,7 @@
 from MySQLdb import IntegrityError
 
 from past import config
-from past.utils.escape import json_encode, json_decode, linkify, MyHTMLParser
+from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.store import connect_redis, connect_db
 from .user import UserAlias
@@ -27,7 +27,7 @@ class Status(object):
         self.create_time = create_time
         self.site = site
         self.category = category
-        self.title = title# and linkify(title) or ""
+        self.title = title
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
         self.raw = json_decode(redis_conn.get(
@@ -158,6 +158,7 @@ class Status(object):
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):
     kv_db_key_task = '/synctask/%s'
+    kind = config.K_SYNCTASK
 
     def __init__(self, id, category, user_id, time):
         self.id = str(id)
@@ -245,3 +246,59 @@ class SyncTask(object):
         k = self.__class__.kv_db_key_task % self.id
         redis_conn.set(k, json_encode(detail))
         return self.get_detail()
+
+class TaskQueue(object):
+    kind = config.K_TASKQUEUE
+
+    def __init__(self, id, task_id, task_kind, time):
+        self.id = str(id)
+        self.task_id = str(task_id)
+        self.task_kind = task_kind
+        self.time = time
+
+    @classmethod
+    def add(cls, task_id, task_kind):
+        task = None
+        cursor = db_conn.cursor()
+        try:
+            cursor.execute("""insert into task_queue
+                    (task_id, task_kind) values (%s,%s)""",
+                    (task_id, task_kind))
+            db_conn.commit()
+            task = cls.get(cursor.lastrowid)
+        except IntegrityError:
+            db_conn.rollback()
+        finally:
+            cursor.close()
+
+        return task
+
+    @classmethod
+    def get(cls, id):
+        task = None
+        cursor = db_conn.cursor()
+        cursor.execute("""select id, task_id, task_kind, time from task_queue
+                where id=%s limit 1""", id) 
+        row = cursor.fetchone()
+        if row:
+            task = cls(*row)
+        cursor.close()
+
+        return task
+    
+    @classmethod
+    def get_all_ids(cls):
+        cursor = db_conn.cursor()
+        cursor.execute("""select id from task_queue order by time""") 
+        r = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        return r
+
+    def remove(self):
+        cursor = db_conn.cursor()
+        cursor.execute("""delete from task_queue
+                where id=%s""", self.id) 
+        db_conn.commit()
+        cursor.close()
+        
+
