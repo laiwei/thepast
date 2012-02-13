@@ -313,7 +313,7 @@ def pdf(uid):
         #resp.headers["content-type"] = "application/pdf"
         resp = make_response()
         resp.headers['Cache-Control'] = 'no-cache'
-        resp.headers['Content-Type'] = 'application/zip'
+        resp.headers['Content-Type'] = 'application/pdf'
         redir = '/down/pdf/' + pdf_filename
         resp.headers['X-Accel-Redirect'] = redir
         return resp
