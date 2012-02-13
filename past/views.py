@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils import link_callback, wrap_long_line
+from past.utils import link_callback, wrap_long_line, filters
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -31,6 +31,7 @@ def before_request():
         g.user_alias = None
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 20))
+    g.cate = request.args.get("cate", None)
 
 @app.teardown_request
 def teardown_request(exception):
@@ -46,8 +47,7 @@ def index():
     if not g.user:
         return redirect(url_for("login"))
 
-    cate = request.args.get("cate", None)
-    ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=cate)
+    ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
@@ -62,7 +62,7 @@ def user(uid):
     
     #TODO:增加可否查看其他用户的权限检查
     cate = request.args.get("cate", None)
-    ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=cate)
+    ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     return render_template("timeline.html", user=u, status_list=status_list, config=config)
 
@@ -228,7 +228,7 @@ def pdf(uid):
     result = StringIO.StringIO()
 
     # get status
-    ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count)
+    ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     user = User.get(uid)
     
@@ -270,7 +270,8 @@ def pdf(uid):
         retweeted_text = ''
         img = ''
         if s.category == config.CATE_DOUBAN_MINIBLOG:
-            text = ''
+            ##miniblog不显示title
+            title = ''
             links = s.get_data().get_links()
             if links and links.get("image"):
                 img = links.get("image")
@@ -288,10 +289,12 @@ def pdf(uid):
         _html += """ <hr/> <div class="cell">"""
         if title:
             title = wrap_long_line(title)
-            _html += """<div class="content">%s</div>""" %title
+            _html += """<div class="bigger">%s</div>""" %title
         if text:
             text = wrap_long_line(text)
-            _html += """<div class='content'>%s</div>""" %text
+            if s.category == config.CATE_DOUBAN_NOTE:
+                text = filters.nl2br(text)
+            _html += """<div class="content">%s</div>""" %text
         if retweeted_text:
             retweeted_text = wrap_long_line(retweeted_text)
             _html += """<div class='tip'><span class="fade">%s</span></div>""" %retweeted_text

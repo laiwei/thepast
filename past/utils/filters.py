@@ -1,11 +1,17 @@
 #!-*- coding:utf8 -*-
 import re
-from jinja2 import evalcontextfilter
 
-_paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+from past.utils import escape
 
-@evalcontextfilter
-def nl2br(eval_ctx, value):
-    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
-                          for p in _paragraph_re.split(value))
+_paragraph_re = re.compile(r'(?:\r\n|\r|\n)')
+
+def nl2br(value):
+    result = u"<br/>\n".join(_paragraph_re.split(value))
     return result
+
+def linkify(text):
+    return escape.linkify(text)
+
+def html_parse(s, preserve):
+    return escape.MyHTMLParser.parse(text, preserve)
+

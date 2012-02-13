@@ -59,7 +59,14 @@ def link_callback(uri, rel):
 def wrap_long_line(text, max_len=60):
     if len(text) <= max_len:
         return text
-
+    out = ""
+    parts = text.split("\n")
+    parts_out = []
+    for x in parts:
+        parts_out.append( _wrap_long_line(x, max_len) )
+    return "\n".join(parts_out)
+    
+def _wrap_long_line(text, max_len):
     out_text = ""
     times = len(text)*1.0 / max_len
     if times > int(times):
@@ -70,7 +77,10 @@ def wrap_long_line(text, max_len=60):
     i = 0
     index = 0
     while i < times:
-        out_text += text[index:index+max_len] + "\n"
+        s = text[index:index+max_len]
+        out_text += s
+        if not ('<' in s or '>' in s):
+            out_text += "\n"
         index += max_len
         i += 1
 

@@ -27,13 +27,9 @@ class Status(object):
         self.create_time = create_time
         self.site = site
         self.category = category
-        self.title = title and linkify(title) or ""
+        self.title = title# and linkify(title) or ""
         self.text = json_decode(redis_conn.get(
                 self.__class__.STATUS_REDIS_KEY % self.id))
-        if self.category not in [config.CATE_DOUBAN_NOTE, config.CATE_DOUBAN_MINIBLOG]:
-            self.text = self.text and linkify(self.text) or ""
-        else:
-            self.text = MyHTMLParser.parse(self.text, preserve=['img', 'a'])
         self.raw = json_decode(redis_conn.get(
                 self.__class__.RAW_STATUS_REDIS_KEY % self.id))
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
