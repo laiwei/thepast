@@ -102,7 +102,6 @@ def sync_helper(cate,old=False):
     log.info("task_list length is %s" % len(task_list))
     for t in task_list:
         _sync(t, old)
-        time.sleep(5)
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -119,7 +118,6 @@ if __name__ == '__main__':
         num = options.num if options.num else 1
         for i in xrange(num):
             sync_helper(cate, old)
-            time.sleep(5)
 
 
 ##python jobs.py -t old -c 200 -n 2

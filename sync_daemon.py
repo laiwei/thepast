@@ -18,4 +18,4 @@ if __name__ == "__main__":
         print commands.getoutput("python jobs.py -t new -c 200 -n 1")
         print commands.getoutput("python jobs.py -t new -c 400 -n 1")
 
-        time.sleep(60*30)
+        time.sleep(60*1)

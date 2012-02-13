@@ -238,6 +238,8 @@ def pdf(uid):
         user = User.get(config.MY_USER_ID)
     else:
         if g.user.id == user.id:
+            if g.count < 50:
+                g.count = 50
             g.count = min(100, g.count)
         else:
             ##登录用户只能生成别人的25条
