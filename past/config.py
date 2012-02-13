@@ -84,7 +84,7 @@ TWITTER_STATUS = 'http://twitter.com/%s'
 #uid of laiwei
 MY_USER_ID = 4
 #cache
-CACHE_DIR = "/home/work/proj/thepast/past/var/cache"
+CACHE_DIR = "/home/work/proj/thepast/var/cache"
 
 try:
     from local_config import *
