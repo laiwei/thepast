@@ -9,7 +9,7 @@ server {
     
     location /down/ {
         internal;
-        root /home/work/proj/thepast/var/down;
+        root /home/work/proj/thepast/var;
     }
 
     location / { try_files $uri @pastme; }

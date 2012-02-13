@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils import link_callback, wrap_long_line, filters, save_pdf
+from past.utils import link_callback, wrap_long_line, filters, save_pdf, randbytes
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -307,7 +307,7 @@ def pdf(uid):
 
     if not _pdf.err:
         result.seek(0)
-        pdf_filename = "thepast.me_pdf_%s.pdf" %user.id
+        pdf_filename = "thepast.me_pdf_%s%s.pdf" %(user.id, randbytes(6))
         save_pdf(result.getvalue(), pdf_filename)
         #resp = make_response(result.getvalue())
         #resp.headers["content-type"] = "application/pdf"
