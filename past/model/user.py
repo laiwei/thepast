@@ -38,7 +38,6 @@ class User(object):
         row = cursor.fetchone()
         cursor.close()
         if row:
-            print '---row:',row
             u = cls(row[0])
             u.uid = str(row[1])
             u.name = row[2]
@@ -80,9 +79,12 @@ class User(object):
         return user
 
     def clear_session(self):
+        self.update_session(None)
+
+    def update_session(self, session_id):
         cursor = db_conn.cursor()
         cursor.execute("""update user set session_id=%s where id=%s""", 
-                (None, self.id))
+                (session_id, self.id))
         cursor.close()
         db_conn.commit()
 

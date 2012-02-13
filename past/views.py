@@ -242,7 +242,7 @@ def pdf(uid):
     else:
         if g.user.id == user.id:
             if g.count < 50:
-                g.count = 50
+                g.count = 60
             g.count = min(100, g.count)
         else:
             ##登录用户只能生成别人的25条
@@ -356,7 +356,6 @@ def _twitter_callback(request):
     
 ## 保存用户信息到数据库，并保存token
 def _save_user_and_token(token_dict, user_info, openid_type):
-    print '----saving',token_dict, user_info, openid_type
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
         if not g.user:
@@ -380,7 +379,6 @@ def _save_user_and_token(token_dict, user_info, openid_type):
     else:
         OAuth2Token.add(ua.id, token_dict.get("access_token"), 
                 token_dict.get("refresh_token", ""))
-
     ##set cookie，保持登录状态
     if not g.user:
         g.user = User.get(ua.user_id)
@@ -391,22 +389,22 @@ def _save_user_and_token(token_dict, user_info, openid_type):
 ## 添加sync_task任务，并且添加到队列中
 def _add_sync_task_and_push_queue(provider, user):
         
-        task_ids = [x.category for x in SyncTask.get_by_user(user)]
+        task_ids = [x.category for x in SyncTask.gets_by_user(user)]
 
         if provider == config.OPENID_DOUBAN:
             if str(config.CATE_DOUBAN_MINIBLOG) not in task_ids:
                 t = SyncTask.add(config.CATE_DOUBAN_MINIBLOG, user.id)
-                TaskQueue.add(t.id, t.kind)
+                t and TaskQueue.add(t.id, t.kind)
             if str(config.CATE_DOUBAN_NOTE) not in task_ids:
                 t = SyncTask.add(config.CATE_DOUBAN_NOTE, user.id)
-                TaskQueue.add(t.id, t.kind)
+                t and TaskQueue.add(t.id, t.kind)
 
         elif provider == config.OPENID_SINA:
             if str(config.CATE_SINA_STATUS) not in task_ids:
                 t = SyncTask.add(config.CATE_SINA_STATUS, user.id)
-                TaskQueue.add(t.id, t.kind)
+                t and TaskQueue.add(t.id, t.kind)
         elif provider == config.OPENID_TWITTER:
             if str(config.CATE_TWITTER_STATUS) not in task_ids:
                 t = SyncTask.add(config.CATE_TWITTER_STATUS, user.id)
-                TaskQueue.add(t.id, t.kind)
+                t and TaskQueue.add(t.id, t.kind)
 

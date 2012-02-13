@@ -9,7 +9,7 @@ execfile(activate_this, dict(__file__=activate_this))
 
 import past
 import jobs
-from past.model.status import TaskQueue, SyncTask
+from past.model.status import TaskQueue, SyncTask, Status
 from past import config
 
 if __name__ == "__main__":
@@ -22,12 +22,20 @@ if __name__ == "__main__":
             if queue and queue.task_kind == config.K_SYNCTASK:
                 print 'syncing task id:', queue.task_id
                 sync_task = SyncTask.get(queue.task_id)
+                max_sync_times = 0
+                min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
                 if sync_task:
                     while True:
-                        r = job.sync(t, old=True)
-                        if r == 0:
+                        if max_sync_times >= 3:
                             break
-            time.sleep(1)
+                        r = jobs.sync(sync_task, old=True)
+                        new_min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
+                        if r == 0 or new_min_id == min_id:
+                            break
+                        min_id = new_min_id
+                        max_sync_times += 1
+            queue.remove()
+            time.sleep(5)
         time.sleep(30)
 
         #print commands.getoutput("python jobs.py -t old -c 101 -n 1")

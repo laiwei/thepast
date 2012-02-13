@@ -1,3 +1,2 @@
 10 06 * * * cd /home/work/proj/thepast/cronjob && sh rm_pdf.sh
 
-0,30 * * * * cd /home/work/proj/thepast/cronjob; python sync_timeline.py >>/home/work/proj/thepast/var/cron_sync_timeline.log 2>&1

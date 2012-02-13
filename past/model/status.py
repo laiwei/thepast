@@ -225,7 +225,6 @@ class SyncTask(object):
     @classmethod
     def gets_by_user_and_cate(cls,user,cate):
         tasks = cls.gets_by_user(user)
-        print tasks
         return [x for x in tasks if str(x.category) == cate]
 
     def remove(self):

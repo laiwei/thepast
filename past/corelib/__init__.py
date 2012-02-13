@@ -19,6 +19,7 @@ def set_user_cookie(user, session_):
     if not user:
         return None
     session_id = user.session_id if user.session_id else randbytes(8)
+    user.update_session(session_id)
     session_[config.SITE_COOKIE] = "%s:%s" % (user.id, session_id)
 
 def logout_user(user):
