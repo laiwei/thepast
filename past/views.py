@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils import link_callback, wrap_long_line, filters
+from past.utils import link_callback, wrap_long_line, filters, save_pdf
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -307,8 +307,15 @@ def pdf(uid):
 
     if not _pdf.err:
         result.seek(0)
-        resp = make_response(result.getvalue())
-        resp.headers["content-type"] = "application/pdf"
+        pdf_filename = "thepast.me_pdf_%s.pdf" %user.id
+        save_pdf(result.getvalue(), pdf_filename)
+        #resp = make_response(result.getvalue())
+        #resp.headers["content-type"] = "application/pdf"
+        resp = make_response()
+        resp.headers['Cache-Control'] = 'no-cache'
+        resp.headers['Content-Type'] = 'application/zip'
+        redir = '/down/pdf/' + pdf_filename
+        resp.headers['X-Accel-Redirect'] = redir
         return resp
     else:
         return 'pdf error: %s' %_pdf.err

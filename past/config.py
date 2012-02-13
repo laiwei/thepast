@@ -83,8 +83,12 @@ TWITTER_STATUS = 'http://twitter.com/%s'
 
 #uid of laiwei
 MY_USER_ID = 4
+
 #cache
 CACHE_DIR = "/home/work/proj/thepast/var/cache"
+
+#file download 
+FILE_DOWNLOAD_DIR = "/home/work/proj/thepast/var/down"
 
 try:
     from local_config import *

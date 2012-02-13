@@ -6,6 +6,11 @@ server {
 	server_name  thepast.me;
 
 	access_log  /var/log/nginx/thepast.me.access.log;
+    
+    location /down/ {
+        internal;
+        root /home/work/proj/thepast/var/down;
+    }
 
     location / { try_files $uri @pastme; }
     location /static/ {

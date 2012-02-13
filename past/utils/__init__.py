@@ -27,6 +27,23 @@ def httplib2_request(uri, method="GET", body='', headers=None,
         headers=headers, redirections=redirections,
         connection_type=connection_type)
 
+def save_pdf(content, filename):
+    
+    pdf_file_dir = os.path.join(config.FILE_DOWNLOAD_DIR, 'pdf')
+    if not os.path.isdir(pdf_file_dir):
+        os.makedirs(pdf_file_dir)
+    if not os.path.isdir(pdf_file_dir):
+        return False
+
+    full_file_name = os.path.join(pdf_file_dir, filename)
+    with open(full_file_name, 'w') as f:
+        f.write(content)
+
+    if os.path.exists(full_file_name) and os.path.getsize(full_file_name) > 0:
+        return True
+
+    return False
+
 def link_callback(uri, rel):
     lower_uri = uri.lower()
     if not (lower_uri.startswith('http://') or 
@@ -51,7 +68,8 @@ def link_callback(uri, rel):
     
     resp, content = httplib2.Http().request(uri)
     if resp.status == 200:
-        open(cache_file, 'w').write(content)
+        with open(cache_file, 'w') as f:
+            f.write(content)
         return cache_file
 
     return uri
