@@ -3,11 +3,13 @@ import os
 import httplib2
 import hashlib
 import urlparse
+import random
+import string
 from base64 import b64encode
 from past import config
 
 def randbytes(bytes_):
-    return b64encode(os.urandom(bytes_)).rstrip('=').replace('+', '')
+    return ''.join(random.sample(string.ascii_letters + string.digits, bytes_))
 
 def httplib2_request(uri, method="GET", body='', headers=None, 
         redirections=httplib2.DEFAULT_MAX_REDIRECTS, 
