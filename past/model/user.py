@@ -128,10 +128,23 @@ class UserAlias(object):
     __str__ = __repr__
 
     @classmethod
+    def get_by_id(cls, id):
+        ua = None
+        cursor = db_conn.cursor()
+        cursor.execute("""select `id`, `type`, alias, user_id from user_alias 
+                where id=%s""", id)
+        row = cursor.fetchone()
+        if row:
+            ua = cls(*row)
+        cursor.close()
+
+        return ua
+
+    @classmethod
     def get(cls, type_, alias):
         ua = None
         cursor = db_conn.cursor()
-        cursor.execute("""select id, user_id from user_alias 
+        cursor.execute("""select `id`, user_id from user_alias 
                 where `type`=%s and alias=%s""", 
                 (type_, alias))
         row = cursor.fetchone()
@@ -153,6 +166,21 @@ class UserAlias(object):
         cursor.close()
 
         return uas
+
+    @classmethod
+    def get_ids(cls, start=0, limit=0):
+        ids = []
+        cursor = db_conn.cursor()
+        if limit == 0:
+            limit = 100000000
+        cursor.execute("""select `id` from user_alias 
+                limit %s, %s""", (start, limit))
+        rows = cursor.fetchall()
+        if rows and len(rows) > 0:
+            ids = [row[0] for row in rows]
+        cursor.close()
+
+        return ids
 
     @classmethod
     def get_by_user_and_type(cls, user_id, type_):
