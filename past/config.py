@@ -82,6 +82,11 @@ DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
 TWITTER_STATUS = 'http://twitter.com/%s'
 
+
+DOUBAN_SITE = "http://www.douban.com"
+SINA_SITE = "http://weibo.com"
+TWITTER_SITE = "http://twitter.com"
+
 #uid of laiwei
 MY_USER_ID = 4
 

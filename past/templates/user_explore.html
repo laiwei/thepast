@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block content_block %}
+
+<div class="box">
+    <div class="cell">
+        <span class="bigger">发现有意思的用户 | 邀请你的朋友，一起来加入"个人杂志计划！"</span>
+        <div class="sep10"></div>
+    </div>
+
+    {%if not users%}
+        <br/>
+        <span class="fade">没有更多用户了，你可以邀请你感兴趣的朋友来一起加入"个人杂志计划"，这样会有更多精彩的内容，可以离线阅读了。
+        </span>
+        <br/> <br/>
+    {%endif%}
+
+    {% for user in users %}
+    <div class="cell" style="height:55px;">
+        <div class="fl">
+            <div style="height:48px;width:48px">
+                <a href="/user/{{user.id}}"><img class="userface" src="{{user.get_icon_url()}}"></a>
+            </div>
+        </div>
+        <div class="fl" style="margin-left:10px;">
+            <span>{{user.name}}</span><br/>
+            {%for ua in user.get_alias()%}
+                {%set homepage_info = ua.get_homepage_url()%}
+                {%if homepage_info%}
+                    <span><a href="{{homepage_info[1]}}">{{homepage_info[0]}}</a></span>&nbsp;
+                {%endif%}
+            {%endfor%}
+        </div>
+        <div class="c"></div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="sep20"></div>
+
+<div class="box">
+    {% if g.start>0 %}
+    <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    {% endif %}
+    <a href="?start={{g.start+g.count}}">下一页</a>
+</div>
+
+<script>
+</script>
+{% endblock %}
+

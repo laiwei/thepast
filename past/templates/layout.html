@@ -18,6 +18,7 @@
         <div id="Navigation">
             <ul>
                 <li><a href="/" class="top">Home</a></li>
+                <li><a href="/user" class="top"><b>Explore</b></a></li>
                 <li><a href="/about" class="top">About</a></li>
                 {% if g.user %}
                 <li><a href="/settings/profile" class="top">{{g.user.name}}</a></li>
@@ -112,11 +113,11 @@
                 <div class="inner">
 
                 你可以关注我的微博或者豆瓣，给我留言，期待你的反馈
-                <br/>
-                <br/>
-                <a target="_blank" href="http://weibo.com/hellolaiwei"> 我的微博 </a>
-                <br/>
-                <a target="_blank" href="http://www.douban.com/people/laiwei"> 我的豆瓣 </a>
+                <div class="sep10"></div>
+                <ul>
+                <li><a target="_blank" href="http://weibo.com/hellolaiwei"> 我的微博 </a></li>
+                <li><a target="_blank" href="http://www.douban.com/people/laiwei"> 我的豆瓣 </a></li>
+                </ul>
                 </div>
             </div>
             <div class="sep20"> </div>

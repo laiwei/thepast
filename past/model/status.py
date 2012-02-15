@@ -106,6 +106,7 @@ class Status(object):
                     order by """ + order + """ desc limit %s,%s""" 
             cursor.execute(sql, (user_id, start, limit))
         rows = cursor.fetchall()
+        cursor.close()
         return [x[0] for x in rows]
     
     @classmethod

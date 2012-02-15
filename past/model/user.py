@@ -4,6 +4,7 @@ from MySQLdb import IntegrityError
 from past.store import connect_db, connect_redis
 from past.utils import randbytes
 from past.utils.escape import json_decode, json_encode
+from past import config
 
 #-- connect db and redis
 db_conn = connect_db()
@@ -51,6 +52,18 @@ class User(object):
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
 
+    @classmethod
+    def get_ids(cls, start=0, limit=20, order="id desc"):
+        cursor = db_conn.cursor()
+        sql = """select id from user 
+                order by """ + order + """ limit %s, %s"""
+        cursor.execute(sql, (start, limit))
+        rows = cursor.fetchall()
+        cursor.close()
+        return [x[0] for x in rows]
+
+    def get_alias(self):
+        return UserAlias.gets_by_user_id(self.id)
     
     @classmethod
     def add(cls, name=None, uid=None, session_id=None):
@@ -220,6 +233,16 @@ class UserAlias(object):
             return None
 
         return cls.bind_to_exists_user(user, type_, alias)
+
+    def get_homepage_url(self):
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
+            return u"豆瓣", "%s/people/%s" %(config.DOUBAN_SITE, self.alias)
+
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
+            return u"微博", "%s/%s" %(config.SINA_SITE, self.alias)
+
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
+            return u"twitter", "%s/%s" %(config.TWITTER_SITE, self.alias)
 
 class OAuth2Token(object):
    

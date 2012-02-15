@@ -51,6 +51,13 @@ def index():
     status_list = Status.gets(ids)
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
+@app.route("/user")
+def user_explore():
+    user_ids = User.get_ids(start=g.start, limit=g.count)
+    users = [User.get(x) for x in user_ids]
+    return render_template("user_explore.html", users=users, config=config)
+    
+
 @app.route("/user/<uid>")
 def user(uid):
     u = User.get(uid)
