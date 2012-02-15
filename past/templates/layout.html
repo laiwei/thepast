@@ -80,28 +80,30 @@
                         <li>以PDF查看聚合后的内容，<a href="/pdf">下载排版后的PDF版本</a>，离线阅读</li>
                     </ul>
                     <div class="sep10"> </div>
-                    或者，看一下<a href="/{{config.MY_USER_ID}}/pdf">demo</a>，看看效果，欢迎提意见
+                    &nbsp;或者，看一下<a href="/{{config.MY_USER_ID}}/pdf">demo</a>，看看效果，欢迎提意见
                 </div>
             </div>
 
             <div class="sep20"> </div>
 
-            <div class="box">
-                <div class="cell">
-                    <span class="bigger">绑定第三方</span>
+            {% if g.user %}
+                <div class="box">
+                    <div class="cell">
+                        <span class="bigger">绑定其他第三方</span>
+                    </div>
+                    <div class="inner">
+                        <ul>
+                            <li><a href="/connect/douban" class="dark" style="display: block;">
+                                豆瓣</a> </li>
+                            <li><a href="/connect/sina" class="dark" style="display: block;">
+                                新浪微博</a> </li>
+                            <li><a href="/connect/twitter" class="dark" style="display: block;">
+                                twitter</a> </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="inner">
-                    <ul>
-                        <li><a href="/connect/douban" class="dark" style="display: block;">
-                            豆瓣</a> </li>
-                        <li><a href="/connect/sina" class="dark" style="display: block;">
-                            新浪微博</a> </li>
-                        <li><a href="/connect/twitter" class="dark" style="display: block;">
-                            twitter</a> </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="sep20"> </div>
+                <div class="sep20"> </div>
+            {% endif %}
 
             <div class="box">
                 <div class="cell">
