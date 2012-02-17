@@ -5,11 +5,23 @@ server {
 
 	server_name  thepast.me;
 
+    add_header  Cache-Control public;
+    expires     max;
+
 	access_log  /var/log/nginx/thepast.me.access.log;
     
-    location /down/ {
+    location = /favicon.ico {
+        return 204;
+    }
+
+    #location /down/ {
+    #    internal;
+    #    root /home/work/proj/thepast/var;
+    #}
+
+    location /down/pdf/ {
         internal;
-        root /home/work/proj/thepast/var;
+        root /home/work/proj/thepast/var/down;
     }
 
     location / { try_files $uri @pastme; }
