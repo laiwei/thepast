@@ -3,6 +3,7 @@
 from past import config 
 from past.model.user import User
 from past.utils import randbytes
+from .cache import cache, pcache
 
 def auth_user_from_session(session_):
     user = None
@@ -38,3 +39,4 @@ def category2provider(cate):
         return config.OPENID_TWITTER
     else:
         return None
+
