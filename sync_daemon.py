@@ -2,6 +2,7 @@
 
 import os
 import time
+import datetime
 import commands
 
 activate_this = '%s/env/bin/activate_this.py' % os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +18,7 @@ if __name__ == "__main__":
 
         try:
             queue_ids = TaskQueue.get_all_ids()
-            print 'queue length:', len(queue_ids) 
+            print '%s queue length: %s' %(datetime.datetime.now(),len(queue_ids)) 
             for qid in queue_ids:
                 queue = TaskQueue.get(qid)
                 if queue and queue.task_kind == config.K_SYNCTASK:

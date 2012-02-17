@@ -23,13 +23,17 @@
             </div>
         </div>
         <div class="fl" style="margin-left:10px;">
-            <span>{{user.name}}</span><br/>
+            <span>{{user.name}}</span>
+            <div class="sep5"></div>
             {%for ua in user.get_alias()%}
                 {%set homepage_info = ua.get_homepage_url()%}
                 {%if homepage_info%}
                     <span><a href="{{homepage_info[1]}}">{{homepage_info[0]}}</a></span>&nbsp;
                 {%endif%}
             {%endfor%}
+            <div class="sep5"></div>
+            <span><a href="/{{user.id}}/pdf">PDF版本下载</a></span>&nbsp;&nbsp;
+            <span><a href="/user/{{user.id}}">去ta的主页</a></span>
         </div>
         <div class="c"></div>
     </div>
