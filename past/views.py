@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils import link_callback, wrap_long_line, filters, save_pdf, randbytes
+from past.utils.pdf import link_callback, save_pdf, is_pdf_file_exists, generate_pdf, get_pdf_filename
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
@@ -224,116 +224,22 @@ def mypdf():
 
 @app.route("/<uid>/pdf")
 def pdf(uid):
-    from xhtml2pdf.default import DEFAULT_FONT
-    from xhtml2pdf.document import pisaDocument
-
-    #########Set FONT################
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    pdfmetrics.registerFont(TTFont('zhfont', os.path.join(app.root_path, 'static/font/yahei-consolas.ttf')))
-    DEFAULT_FONT["helvetica"]="zhfont"
-    css = open(os.path.join(app.root_path, "static/css/pdf.css")).read()
-
-    result = StringIO.StringIO()
-
     user = User.get(uid)
     if not user:
         abort(401, "No such user")
-    g.count = min(40, g.count)
-    g.count = max(200, g.count)
-    #if not g.user:
-    #    ##匿名用户暂时只能看我的作为演示
-    #    g.count = min(100, g.count)
-    #    user = User.get(config.MY_USER_ID)
-    #else:
-    #    if g.user.id == user.id:
-    #        if g.count < 100:
-    #            g.count = 100;
-    #        g.count = min(100, g.count)
-    #    else:
-    #        ##登录用户只能生成别人的25条
-    #        g.count = min(25, g.count)
+    
+    pdf_filename = get_pdf_filename(user.id)
+    if not is_pdf_file_exists(pdf_filename):
+        generate_pdf(pdf_filename, user.id, 0, 10000000)
+    if not is_pdf_file_exists(pdf_filename):
+        abort(400, "generate pdf fail, please try again...")
 
-    # get status
-    ids = Status.get_ids(user_id=uid, start=g.start, limit=g.count, cate=g.cate)
-    status_list = Status.gets(ids)
-
-    _html = u"""<html> <body>
-        <div id="Top">
-            <img src="%s"/> &nbsp; &nbsp;&nbsp; The Past of Me | 个人杂志计划&nbsp;&nbsp;&nbsp;%s&nbsp;&nbsp;&nbsp;CopyRight©%s
-            <br/>
-        </div>
-        <br/> <br/>
-
-        <div class="box">
-    """ %(os.path.join(app.root_path, "static/img/logo.png"), 
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user.name)
-
-    for s in status_list:
-        title = s.title
-        create_time = s.create_time
-        from_ = ''
-        if s.category == config.CATE_DOUBAN_MINIBLOG:
-            from_ = u'<a href="' + config.DOUBAN_MINIBLOG %(s.origin_user_id, s.origin_id) + u'class="node">From：豆瓣广播</a>'
-        elif s.category == config.CATE_DOUBAN_NOTE:
-            from_ = u'<a href="' + config.DOUBAN_NOTE %(s.origin_id,) + u'class="node">From：豆瓣日记</a>'
-        elif s.category == config.CATE_SINA_STATUS:
-            from_ = u'<a href="' + config.WEIBO_STATUS %(s.origin_id) + u'class="node">From：新浪微博</a>'
-        elif s.category == config.CATE_TWITTER_STATUS:
-            from_ = u'<a href="' + config.TWITTER_STATUS %(s.origin_id) + u'class="node">From：twitter</a>'
-        text = s.text
-        retweeted_text = ''
-        img = ''
-        if s.category == config.CATE_DOUBAN_MINIBLOG:
-            ##miniblog不显示title
-            title = ''
-            links = s.get_data().get_links()
-            if links and links.get("image"):
-                img = links.get("image")
-        elif s.category == config.CATE_SINA_STATUS:
-            retweeted = s.get_data().get_retweeted_status()
-            re_mid_pic = retweeted and retweeted.get_middle_pic() or ''
-            middle_pic = s.get_data().get_middle_pic()
-
-            if retweeted:
-                retweeted_text = retweeted.get_user().get_nickname() + ": " + retweeted.get_content()
-                    
-            if re_mid_pic or middle_pic:
-                img = re_mid_pic or middle_pic
-        
-        _html += """ <hr/> <div class="cell">"""
-        if title:
-            title = wrap_long_line(title)
-            _html += """<div class="bigger">%s</div>""" %title
-        if text:
-            text = wrap_long_line(text)
-            if s.category == config.CATE_DOUBAN_NOTE:
-                text = filters.nl2br(text)
-            _html += """<div class="content">%s</div>""" %text
-        if retweeted_text:
-            retweeted_text = wrap_long_line(retweeted_text)
-            _html += """<div class='tip'><span class="fade">%s</span></div>""" %retweeted_text
-        if img:
-            _html += """<img src=%s></img>""" %img
-        _html += """<div class="fade">%s &nbsp;&nbsp;&nbsp; %s</div>""" %(from_, create_time)
-        _html += """ </div> <body> </html> """
-
-    _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback)
-
-    if not _pdf.err:
-        result.seek(0)
-        pdf_filename = "thepast.me_pdf_%s%s.pdf" %(user.id, randbytes(6))
-        save_pdf(result.getvalue(), pdf_filename)
-        #resp = make_response(result.getvalue())
-        #resp.headers["content-type"] = "application/pdf"
-        resp = make_response()
-        resp.headers['Cache-Control'] = 'no-cache'
-        resp.headers['Content-Type'] = 'application/pdf'
-        redir = '/down/pdf/' + pdf_filename
-        resp.headers['X-Accel-Redirect'] = redir
-        return resp
-    else:
-        return 'pdf error: %s' %_pdf.err
+    resp = make_response()
+    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers['Content-Type'] = 'application/pdf'
+    redir = '/down/pdf/' + pdf_filename
+    resp.headers['X-Accel-Redirect'] = redir
+    return resp
 
 def _twitter_callback(request):
     d = config.APIKEY_DICT.get(config.OPENID_TWITTER)

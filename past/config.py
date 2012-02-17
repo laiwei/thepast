@@ -95,6 +95,7 @@ CACHE_DIR = "/home/work/proj/thepast/var/cache"
 
 #file download 
 FILE_DOWNLOAD_DIR = "/home/work/proj/thepast/var/down"
+PDF_FILE_DOWNLOAD_DIR = FILE_DOWNLOAD_DIR + "/pdf"
 
 try:
     from local_config import *
