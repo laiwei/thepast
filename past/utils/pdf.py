@@ -129,6 +129,7 @@ def render(user, status_list):
 
 def link_callback(uri, rel):
     lower_uri = uri.lower()
+    print '%s getting %s' % (datetime.datetime.now(), lower_uri)
     if not (lower_uri.startswith('http://') or 
             lower_uri.startswith('https://') or lower_uri.startswith('ftp://')):
         return uri
@@ -154,6 +155,9 @@ def link_callback(uri, rel):
         with open(cache_file, 'w') as f:
             f.write(content)
         return cache_file
+    else:
+        print 'get %s fail, status_code is %s, so return none' % (uri,resp.status)
+        return ''
 
     return uri
 

@@ -1,7 +1,7 @@
-10 06 * * * cd /home/work/proj/thepast/cronjob && sh rm_pdf.sh
+#10 06 * * * cd /home/work/proj/thepast/cronjob && sh rm_pdf.sh
 
 ##每30分钟同步timeline
 0,30 * * * * cd /home/work/proj/thepast/cronjob; /home/work/proj/thepast/env/bin/python sync_timeline.py >>/home/work/proj/thepast/var/cron_sync_timeline.log 2>&1
 
 ##每天早晨6点10分，生成所有用户的pdf
-10 06 * * * cd /home/work/proj/thepast/cronjob; /home/work/proj/thepast/env/bin/python generate_pdf.py >>/home/work/proj/thepast/var/cron_generate_pdf.log 2>&1
+13 12 * * * cd /home/work/proj/thepast/cronjob; /home/work/proj/thepast/env/bin/python generate_pdf.py >>/home/work/proj/thepast/var/cron_generate_pdf.log 2>&1

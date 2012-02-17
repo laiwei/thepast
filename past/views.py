@@ -233,12 +233,12 @@ def pdf(uid):
         generate_pdf(pdf_filename, user.id, 0, 10000000)
     if not is_pdf_file_exists(pdf_filename):
         abort(400, "generate pdf fail, please try again...")
-    full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, pdf_filename)
 
+    full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, pdf_filename)
     resp = make_response()
     resp.headers['Cache-Control'] = 'no-cache'
-    #resp.headers['Content-Type'] = 'application/pdf'
-    resp.headers['Content-Type'] = 'application/octet-stream'
+    resp.headers['Content-Type'] = 'application/pdf'
+    resp.headers['Content-Disposition'] = 'attachment; filename=%s' % pdf_filename
     resp.headers['Content-Length'] = os.path.getsize(full_file_name)
     redir = '/down/pdf/' + pdf_filename
     resp.headers['X-Accel-Redirect'] = redir
