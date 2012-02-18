@@ -13,7 +13,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
     logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
-from past.utils.pdf import link_callback, save_pdf, is_pdf_file_exists, generate_pdf, get_pdf_filename
+from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin

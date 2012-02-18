@@ -16,7 +16,7 @@ from past.model.status import Status
 from past.utils import wrap_long_line, filters, randbytes
 from past import config
 
-def generate_pdf(filename, uid, start, count, cate=None):
+def generate_pdf(filename, uid, start, count, cate=None, with_head=True, capacity=50*1024):
 
     #########Set FONT################
     from xhtml2pdf.default import DEFAULT_FONT
@@ -28,7 +28,11 @@ def generate_pdf(filename, uid, start, count, cate=None):
     DEFAULT_FONT["helvetica"] = "zhfont"
     css = open(os.path.join(app.root_path, "static/css/pdf.css")).read()
 
-    result = StringIO.StringIO()
+    #result = StringIO.StringIO()
+    full_file_name = get_pdf_full_filename(filename)
+    if not full_file_name:
+        return None
+    result = open(full_file_name, 'wb', 1024*1000)
 
     user = User.get(uid)
     if not user:
@@ -37,45 +41,29 @@ def generate_pdf(filename, uid, start, count, cate=None):
     # get status
     ids = Status.get_ids(user_id=uid, start=start, limit=count, cate=cate)
     status_list = Status.gets(ids)
-
-    _html = render(user, status_list)
-    _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback)
+    _html = render(user, status_list, with_head)
+    _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback, capacity=capacity)
+    result.close()
 
     if not _pdf.err:
-        result.seek(0)
-        save_pdf(result.getvalue(), filename)
-        return result.getvalue()
+        return full_file_name
     else:
         return None
 
-def save_pdf(content, filename):
-    pdf_file_dir = config.PDF_FILE_DOWNLOAD_DIR
+def render(user, status_list, with_head=True):
+    if with_head:
+        _html = u"""<html> <body>
+            <div id="Top">
+                <img src="%s"/> &nbsp; &nbsp;&nbsp; The Past of Me | 个人杂志计划&nbsp;&nbsp;&nbsp;%s&nbsp;&nbsp;&nbsp;CopyRight©%s
+                <br/>
+            </div>
+            <br/> <br/>
 
-    if not os.path.isdir(pdf_file_dir):
-        os.makedirs(pdf_file_dir)
-    if not os.path.isdir(pdf_file_dir):
-        return False
-
-    full_file_name = os.path.join(pdf_file_dir, filename)
-    with open(full_file_name, 'w') as f:
-        f.write(content)
-
-    if os.path.exists(full_file_name) and os.path.getsize(full_file_name) > 0:
-        return True
-
-    return False
-
-def render(user, status_list):
-    _html = u"""<html> <body>
-        <div id="Top">
-            <img src="%s"/> &nbsp; &nbsp;&nbsp; The Past of Me | 个人杂志计划&nbsp;&nbsp;&nbsp;%s&nbsp;&nbsp;&nbsp;CopyRight©%s
-            <br/>
-        </div>
-        <br/> <br/>
-
-        <div class="box">
-    """ % (os.path.join(app.root_path, "static/img/logo.png"), 
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user.name)
+            <div class="box">
+        """ % (os.path.join(app.root_path, "static/img/logo.png"), 
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user.name)
+    else:
+        _html = u"""<html> <body><div class="box">"""
 
     for s in status_list:
         title = s.title
@@ -164,8 +152,18 @@ def link_callback(uri, rel):
 def get_pdf_filename(uid):
     return "thepast.me_%s.pdf" % uid
 
+def get_pdf_full_filename(filename):
+    pdf_file_dir = config.PDF_FILE_DOWNLOAD_DIR
+
+    if not os.path.isdir(pdf_file_dir):
+        os.makedirs(pdf_file_dir)
+    if not os.path.isdir(pdf_file_dir):
+        return False
+
+    return os.path.join(config.PDF_FILE_DOWNLOAD_DIR, filename)
+
 def is_pdf_file_exists(filename):
-    full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, filename)
+    full_file_name = get_pdf_full_filename(filename)
     if os.path.exists(full_file_name) and os.path.getsize(full_file_name) > 0:
         return True
     return False
