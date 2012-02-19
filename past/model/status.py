@@ -106,13 +106,15 @@ class Status(object):
         if not user_id:
             return []
         if cate is not None:
+            if str(cate) == str(config.CATE_DOUBAN_NOTE):
+                return []
             sql = """select id from status where user_id=%s and category=%s
                     order by """ + order + """ desc limit %s,%s""" 
             cursor.execute(sql, (user_id, cate, start, limit))
         else:
-            sql = """select id from status where user_id=%s
+            sql = """select id from status where user_id=%s and category!=%s
                     order by """ + order + """ desc limit %s,%s""" 
-            cursor.execute(sql, (user_id, start, limit))
+            cursor.execute(sql, (user_id, config.CATE_DOUBAN_NOTE, start, limit))
         rows = cursor.fetchall()
         cursor.close()
         return [x[0] for x in rows]
@@ -148,6 +150,17 @@ class Status(object):
         cursor = db_conn.cursor()
         cursor.execute('''select count(1) from status 
             where category=%s and user_id=%s''', (cate, user_id))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return 0
+
+    @classmethod
+    def get_count_by_user(cls, user_id):
+        cursor = db_conn.cursor()
+        cursor.execute('''select count(1) from status 
+            where user_id=%s''', user_id)
         row = cursor.fetchone()
         if row:
             return row[0]
