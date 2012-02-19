@@ -6,7 +6,6 @@ server {
 	server_name  thepast.me;
 
     add_header  Cache-Control public;
-    expires     max;
 
 	access_log  /var/log/nginx/thepast.me.access.log;
     
@@ -21,6 +20,7 @@ server {
 
     location / { try_files $uri @pastme; }
     location /static/ {
+        expires     max;
         root /home/work/proj/thepast/past;
     }
     location @pastme {

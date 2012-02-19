@@ -28,7 +28,7 @@ class User(object):
         redis_cache_conn.delete("user:ids")
         
     @classmethod
-    @cache("user:{%s}")
+    @cache("user:{id}")
     def get(cls, id):
         uid = None
         if isinstance(id, basestring) and not id.isdigit():
