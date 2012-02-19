@@ -54,35 +54,46 @@
         <div id="Rightbar">
             {% block rightbar_block%}
             <div class="box">
-                {% if g.user %}
-                <div class="cell">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tbody><tr>
-                            <td width="48" valign="top">
-                            <a href="/settings/profile"><img src="{{g.user.get_icon_url()}}" border="0"></a></td>
-                            <td width="10" valign="top"></td>
-                            <td width="auto" align="left"><span class="bigger"><a href="/settings/profile">{{g.user.name}}</a></span>
-                                <div class="sep5"></div>
-                                <span class="fade">这就是我们都回不去的昨天...</span>
-                            </td>
-                        </tr>
-                    </tbody></table>
-                    <div class="sep10"></div>
-                </div>
-                {% else %}
-                <div class="cell">
-                    <span class="bigger">个人杂志计划</span>
-                </div>
-                {% endif %}
+                {% set user_ = user or g.user%}
+                {% if user_ %}
+                    <div class="cell">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tbody><tr>
+                                <td width="48" valign="top">
+                                <a href="/user/{{user_.id}}"><img src="{{user_.get_icon_url()}}" border="0"></a></td>
+                                <td width="10" valign="top"></td>
+                                <td width="auto" align="left"><span class="bigger"><a href="/user/{{user_.id}}">{{user_.name}}</a></span>
+                                    <div class="sep5"></div>
+                                    <span class="fade">个人杂志计划第{{user_.id}}号成员</span>
+                                </td>
+                            </tr>
+                        </tbody></table>
+                    </div>
 
-                <div class="inner">
-                    <ul>
-                        <li>聚合你的豆瓣，twitter，新浪微博... 仍在增加中</li>
-                        <li>以PDF查看聚合后的内容，<a href="/pdf">下载排版后的PDF版本</a>，离线阅读</li>
-                    </ul>
-                    <div class="sep10"> </div>
-                    &nbsp;或者，看一下<a href="/{{config.MY_USER_ID}}/pdf">demo</a>，看看效果，欢迎提意见
-                </div>
+                    <div class="inner">
+        
+                        他/她的：{%for ua in user_.get_alias()%}
+                            {%set homepage_info = ua.get_homepage_url()%}
+                            {%if homepage_info%}
+                                <span><a href="{{homepage_info[1]}}">{{homepage_info[0]}}</a></span>&nbsp;
+                            {%endif%}
+                        {%endfor%}
+                        <div class="sep10"></div>
+                        <span><a href="/{{user_.id}}/pdf">下载PDF版</a></span>
+                    </div>
+
+                {% else %}
+                    <div class="cell">
+                        <span class="bigger">个人杂志计划</span>
+                        <div class="inner">
+                            <ul>
+                                <li>聚合你的豆瓣，twitter，新浪微博... 仍在增加中</li>
+                                <li>容，<a href="/pdf">下载排版后的PDF版本</a>，离线阅读</li>
+                            </ul>
+                            <div class="sep10"> </div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
 
             <div class="sep20"> </div>
