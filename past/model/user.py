@@ -1,14 +1,11 @@
 #-*- coding:utf-8 -*-
 
 from MySQLdb import IntegrityError
-from past.store import connect_db, connect_redis
+from past.corelib.cache import cache, pcache
+from past.store import redis_conn, redis_cache_conn, db_conn
 from past.utils import randbytes
 from past.utils.escape import json_decode, json_encode
 from past import config
-
-#-- connect db and redis
-db_conn = connect_db()
-redis_conn = connect_redis()
 
 class User(object):
     
@@ -25,6 +22,13 @@ class User(object):
     __str__ = __repr__
 
     @classmethod
+    def _clear_cache(cls, user_id):
+        if user_id:
+            redis_cache_conn.delete("user:%s" % user_id)
+        redis_cache_conn.delete("user:ids")
+        
+    @classmethod
+    @cache("user:{%s}")
     def get(cls, id):
         uid = None
         if isinstance(id, basestring) and not id.isdigit():
@@ -53,6 +57,7 @@ class User(object):
         return [cls.get(x) for x in ids]
 
     @classmethod
+    @pcache("user:ids")
     def get_ids(cls, start=0, limit=20, order="id desc"):
         cursor = db_conn.cursor()
         sql = """select id from user 
@@ -83,6 +88,7 @@ class User(object):
                 cursor.execute("""update user set uid=%s where id=%s""", 
                     (user_id, user_id))
             db_conn.commit()
+            cls._clear_cache(None)
             user = cls.get(user_id)
         except IntegrityError:
             db_conn.rollback()
@@ -100,6 +106,7 @@ class User(object):
                 (session_id, self.id))
         cursor.close()
         db_conn.commit()
+        User._clear_cache(self.id)
 
     def set_profile(self, profile):
         redis_conn.set('/profile/%s' %self.id, json_encode(profile))

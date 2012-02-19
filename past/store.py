@@ -38,3 +38,9 @@ def connect_db():
 def connect_redis():
     return redis.Redis(config.REDIS_HOST, config.REDIS_PORT)
 
+def connect_redis_cache():
+    return redis.Redis(config.REDIS_CACHE_HOST, config.REDIS_CACHE_PORT)
+
+db_conn = connect_db()
+redis_cache_conn = connect_redis_cache()
+redis_conn = connect_redis()

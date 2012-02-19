@@ -4,6 +4,8 @@ from past import config
 from past.model.user import User
 from past.utils import randbytes
 
+from past.corelib.cache import cache
+
 def auth_user_from_session(session_):
     user = None
     if config.SITE_COOKIE in session_:

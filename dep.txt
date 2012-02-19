@@ -71,3 +71,11 @@ sudo ln -s /usr/lib/i386-linux-gnu/libjpeg.so /usr/lib/
 
 #pip install -U PIL
 pip install --no-index -f http://dist.plone.org/thirdparty/ -U PIL
+
+
+## config cache
+## use redis instead memcached
+### /etc/redis_7379.conf include ^/deploy/redis_cache.conf
+### cp /etc/init.d/redis_6379 /etc/init.d/redis_7379
+### sudo update-rc.d redis_7379 defaults
+

@@ -10,6 +10,8 @@ DB_NAME = "thepast"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
+REDIS_CACHE_HOST = "localhost"
+REDIS_CACHE_PORT = 7379
 
 #-- app config --
 DEBUG = True

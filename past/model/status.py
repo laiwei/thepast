@@ -5,20 +5,18 @@ from MySQLdb import IntegrityError
 from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
-from past.store import connect_redis, connect_db
+from past.store import redis_conn, redis_cache_conn, db_conn
+from past.corelib.cache import cache, pcache
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData
 
 log = logging.getLogger(__file__)
 
-redis_conn = connect_redis()
-db_conn = connect_db()
-
 class Status(object):
     
     STATUS_REDIS_KEY = "/status/text/%s"
     RAW_STATUS_REDIS_KEY = "/status/raw/%s"
-
+    
     def __init__(self, id, user_id, origin_id, 
             create_time, site, category, title=""):
         self.id = str(id)
@@ -40,6 +38,13 @@ class Status(object):
     __str__ = __repr__
 
     @classmethod
+    def _clear_cache(self, user_id, status_id):
+        if status_id:
+            redis_cache_conn.delete("status:%s" % status_id)
+        if user_id:
+            redis_cache_conn.delete("status_ids:user:%s" % user_id)
+
+    @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 
             text=None, raw=None):
         status = None
@@ -55,6 +60,7 @@ class Status(object):
                 redis_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
             if raw is not None:
                 redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
+            cls._clear_cache(user_id, None)
             status = cls.get(status_id)
         except IntegrityError:
             log.warning("add status duplicated, ignore...")
@@ -79,6 +85,7 @@ class Status(object):
                 title, content, raw)
 
     @classmethod
+    @cache("status:{status_id}")
     def get(cls, status_id):
         status = None
         cursor = db_conn.cursor()
@@ -93,6 +100,7 @@ class Status(object):
         return status
 
     @classmethod
+    @pcache("status_ids:user:{user_id}")
     def get_ids(cls, user_id, start=0, limit=20, order="create_time", cate=None):
         cursor = db_conn.cursor()
         if not user_id:
