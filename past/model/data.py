@@ -133,7 +133,11 @@ class AbsData(object):
         self.category = category
         self.data = data or {}
         if isinstance(data, basestring):
-            self.data = json_decode(data)
+            try:
+                self.data = json_decode(data)
+            except Exception, e:
+                print e
+                self.data = {}
 
     def get_data(self):
         return self.data

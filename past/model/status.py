@@ -26,10 +26,8 @@ class Status(object):
         self.site = site
         self.category = category
         self.title = title
-        self.text = json_decode(redis_conn.get(
-                self.__class__.STATUS_REDIS_KEY % self.id))
-        self.raw = json_decode(redis_conn.get(
-                self.__class__.RAW_STATUS_REDIS_KEY % self.id))
+        self.text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
+        self.text = json_decode(self.text) if self.text else ""
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
 
     def __repr__(self):
@@ -44,6 +42,16 @@ class Status(object):
         if user_id:
             redis_cache_conn.delete("status_ids:user:%s" % user_id)
 
+    #@property
+    #def text(self):
+    #    _text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
+    #    return json_decode(_text) if _text else ""
+
+    @property
+    def raw(self):
+        _raw = redis_conn.get(self.__class__.RAW_STATUS_REDIS_KEY % self.id)
+        return json_decode(_raw) if _raw else ""
+        
     @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 
             text=None, raw=None):
