@@ -104,7 +104,7 @@ def profile():
 @require_login
 def logout():
     r = logout_user(g.user)
-    flash("已退出",  "error")
+    flash(u"已退出",  "error")
     return redirect(url_for("login"))
 
 #TODO
@@ -178,7 +178,7 @@ def connect_callback(provider):
         _add_sync_task_and_push_queue(provider, user)
         return redirect(url_for('index'))
     else:
-        flash("连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
+        flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
         return redirect(url_for("login"))
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
