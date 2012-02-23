@@ -18,7 +18,10 @@ pip install flask redis tweepy httplib2
 
 
 ## mysql dump schema
-mysqldump -u root -pmypassword test_database --no-data=true --add-drop-table=false > test_dump.sql  
+mysqldump -u root -pmypassword test_database --no-data=true --add-drop-table=false > schema_dump.sql  
+
+## mysql dump data
+mysqldump -u root -pmypassword test_database --add-drop-table=false > data_dump.sql  
 
 ## import table
 create database `thepast`

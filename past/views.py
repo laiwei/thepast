@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import os
 import datetime
+from functools import wraps
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -21,6 +22,15 @@ from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
 import api_client
 
 from past import app
+
+def require_login(f):
+    @wraps(f)
+    def _(*a, **kw):
+        if not g.user:
+            return redirect(url_for("login"))
+
+        return f(*a, **kw)
+    return _
 
 @app.before_request
 def before_request():
@@ -59,6 +69,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
+@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -74,10 +85,8 @@ def user(uid):
     return render_template("timeline.html", user=u, status_list=status_list, config=config)
 
 @app.route("/settings/profile")
+@require_login
 def profile():
-    if not g.user:
-        return redirect("/login")
-
     u = g.user
     sync_tasks = SyncTask.gets_by_user(u)
     my_sync_cates = [x.category for x in sync_tasks]
@@ -93,11 +102,11 @@ def profile():
             my_sync_cates = my_sync_cates, site_homepage_list=site_homepage_list, config=config)
 
 @app.route("/logout")
+@require_login
 def logout():
-    if not g.user:
-        return "you are not login"
     r = logout_user(g.user)
-    return "logout succ"
+    flash(u"已退出",  "error")
+    return redirect(url_for("login"))
 
 #TODO
 @app.route("/login")
@@ -180,10 +189,11 @@ def connect_callback(provider):
         _add_sync_task_and_push_queue(provider, user)
         return redirect(url_for('index'))
     else:
-        flash("连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
+        flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
         return redirect(url_for("login"))
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
+@require_login
 def sync(cates):
     cates = cates.split("|")
     if not (cates and isinstance(cates, list)):
@@ -227,6 +237,7 @@ def sync(cates):
     return json_encode({'ok':'true'})
 
 @app.route("/pdf")
+@require_login
 def mypdf():
     if not g.user:
         return redirect(url_for("pdf", uid=config.MY_USER_ID))
@@ -234,6 +245,7 @@ def mypdf():
         return redirect(url_for("pdf", uid=g.user.id))
 
 @app.route("/<uid>/pdf")
+@require_login
 def pdf(uid):
     user = User.get(uid)
     if not user:
