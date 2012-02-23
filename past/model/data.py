@@ -34,6 +34,9 @@ class AbsUserData(object):
     def get_icon(self):
         raise NotImplementedError
     
+    def get_email(self):
+        raise NotImplementedError
+
 ## 豆瓣user数据接口
 class DoubanUser(AbsUserData):
     def __init__(self, data):
@@ -71,6 +74,9 @@ class DoubanUser(AbsUserData):
             links[rel] = x.get("@href")
         return links.get("icon", "")
 
+    def get_email(self):
+        return ""
+
 ## 新浪微博user数据接口
 class SinaWeiboUser(AbsUserData):
 
@@ -98,6 +104,9 @@ class SinaWeiboUser(AbsUserData):
     def get_icon(self):
         return self.data.get("profile_image_url", "")
 
+    def get_email(self):
+        return ""
+
 ## Twitter user数据接口
 class TwitterUser(AbsUserData):
 
@@ -124,6 +133,49 @@ class TwitterUser(AbsUserData):
 
     def get_icon(self):
         return self.data.get("profile_image_url", "")
+
+    def get_email(self):
+        return ""
+
+## qq weibo user 数据接口
+class QQWeiboUser(AbsUserData):
+
+    def __init__(self, data):
+        super(QQWeiboUser, self).__init__(data)
+
+    def get_user_id(self):
+        return self.data.get("openid","")
+
+    def get_uid(self):
+        return self.data.get("name", "")
+
+    def get_nickname(self):
+        return self.data.get("nick", "")
+
+    def get_intro(self):
+        return self.data.get("introduction", "")
+
+    def get_signature(self):
+        return ""
+
+    def get_avatar(self):
+        r = self.data.get("head", "")
+        if r:
+            return r + "/100"
+        return r
+
+    def get_icon(self):
+        r = self.data.get("head", "")
+        if r:
+            return r + "/40"
+        return r
+
+    def get_email(self):
+        return self.data.get("email", "")
+
+    def get_birthday(self):
+        return "%s-%s-%s" % (self.data.get("birth_year", ""),
+            self.data.get("birth_month", ""), self.data.get("birth_day"))
 
 ## 第三方数据接口
 class AbsData(object):

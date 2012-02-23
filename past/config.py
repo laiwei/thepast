@@ -29,7 +29,7 @@ K_TASKQUEUE = 1001
 OPENID_DOUBAN = 'douban'
 OPENID_SINA = 'sina'
 OPENID_WORDPRESS = 'wordpress'
-OPENID_QQ = 'qq'
+OPENID_QQ = 'qq' ##qq weibo
 OPENID_GOOGLE = 'google'
 OPENID_FACEBOOK = 'facebook'
 OPENID_TWITTER = 'twitter'
@@ -61,6 +61,11 @@ APIKEY_DICT = {
         "secret" : "",
         "redirect_uri" : "http://thepast.me/connect/twitter/callback",
     },
+    OPENID_QQ: {
+        "key" : "",
+        "secret" : "",
+        "redirect_uri" : "http://thepast.me/connect/qq/callback",
+    },
 }
 
 #-- category of status --
@@ -71,6 +76,7 @@ CATE_DOUBAN_PHOTO = 103
 CATE_SINA_STATUS = 200
 CATE_WORDPRESS_POST = 300
 CATE_TWITTER_STATUS = 400
+CATE_QQWEIBO_STATUS = 500
 
 CATE_LIST = (
     CATE_DOUBAN_NOTE,
@@ -88,6 +94,7 @@ TWITTER_STATUS = 'http://twitter.com/%s'
 DOUBAN_SITE = "http://www.douban.com"
 SINA_SITE = "http://weibo.com"
 TWITTER_SITE = "http://twitter.com"
+QQWEIBO_SITE = "http://t.qq.com"
 
 #uid of laiwei
 MY_USER_ID = 4

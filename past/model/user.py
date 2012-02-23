@@ -251,6 +251,9 @@ class UserAlias(object):
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             return u"twitter", "%s/%s" %(config.TWITTER_SITE, self.alias)
 
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
+            return u"腾讯微博", "%s" %(config.QQWEIBO_SITE,)
+
 class OAuth2Token(object):
    
     def __init__(self, alias_id, access_token, refresh_token):

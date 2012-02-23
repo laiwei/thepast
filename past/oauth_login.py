@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import time
-from warnings import warn
 import urllib
-import cgi
+import urlparse
+import hashlib
+import hmac
+import binascii
 
 import tweepy
 from tweepy.error import TweepError
 
 import config
 from past.utils.escape import json_encode, json_decode
+from past.utils import randbytes
 from past.utils import httplib2_request
-from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser
+from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, QQWeiboUser
 
 class OAuthLoginError(Exception):
     def __init__(self, msg):
@@ -25,6 +28,8 @@ class OAuthLoginError(Exception):
     __repr__ = __str__
 
 class TwitterOAuthLogin(object):
+    provider = config.OPENID_TWITTER
+
     def __init__(self, apikey, apikey_secret, redirect_uri):
         self.consumer_key = apikey
         self.consumer_secret = apikey_secret
@@ -119,7 +124,6 @@ class OAuth2Login(object):
                     %(resp.status, resp.reason, content))
         return json_decode(content)
 
-
 class DoubanLogin(OAuth2Login):
     provider = config.OPENID_DOUBAN   
 
@@ -176,85 +180,183 @@ class SinaLogin(OAuth2Login):
 
         return user
 
-class QQLogin(OAuth2Login):
+##腾讯微博使用的是Oauth1.0授权
+class QQOAuth1Login(object):
     provider = config.OPENID_QQ
 
-    authorize_uri       = 'https://graph.qq.com/oauth2.0/authorize'
-    access_token_uri    = 'https://graph.qq.com/oauth2.0/token' 
-    openid_uri          = 'https://graph.qq.com/oauth2.0/me'
-    user_info_uri       = 'https://graph.qq.com/user/get_user_info'
+    request_token_uri = "https://open.t.qq.com/cgi-bin/request_token"
+    authorize_uri = "https://open.t.qq.com/cgi-bin/authorize"
+    access_token_uri = "https://open.t.qq.com/cgi-bin/access_token"
+    api_uri = "http://open.t.qq.com/api"
 
-    def __init__(self, apikey, apikey_secret, redirect_uri, \
-        scope = 'get_user_info', display = '', state = ''):
+    def __init__(self, apikey=None, apikey_secret=None, redirect_uri=None, 
+            token=None, token_secret=None, openid=None, openkey=None):
 
-        super(QQLogin, self).__init__(apikey, apikey_secret, redirect_uri, scope)
+        self.consumer_key = apikey or config.APIKEY_DICT[config.OPENID_QQ]['key']
+        self.consumer_secret = apikey_secret or config.APIKEY_DICT[config.OPENID_QQ]['secret']
+        self.callback = redirect_uri or config.APIKEY_DICT[config.OPENID_QQ]['redirect_uri']
 
-    def get_access_token(self, authorization_code):
-        qs = {
-            'client_id'     : self.apikey,
-            'client_secret' : self.apikey_secret,
-            'redirect_uri'  : self.redirect_uri,
-            'grant_type'    : 'authorization_code',
-            'code'          : authorization_code,
-        }
-        qs = urllib.urlencode(qs)
-        uri = '%s?%s' %(self.access_token_uri, qs)
-        resp, content = httplib2_request(uri)
+        self.token = token
+        self.token_secret = token_secret
+        self.openid = openid
+        self.openkey = openkey
 
-        if resp.status != 200:
-            raise OAuthLoginError('[QQLogin.get_access_token]msg=http_request_fail:status=%s:reason=%s' %(resp.status, resp.reason))
+    def __repr__(self):
+        return "<QQOAuth1Login consumer_key=%s, consumer_secret=%s, token=%s, token_secret=%s>" \
+            % (self.consumer_key, self.consumer_secret, self.token, self.token_secret)
+    __str__ = __repr__
 
-        r = _parse_qq_response(content)
-        token = r and r.get('access_token')
-        if not token:
-            raise OAuthLoginError('[QQLogin.get_access_token]msg=get_access_token_fail:reason=%s' %content)
+    def save_request_token_to_session(self, session_):
+        t = {"key": self.token,
+            "secret": self.token_secret,}
+        session_['request_token'] = json_encode(t)
+
+    def get_request_token_from_session(self, session_, delete=True):
+        t = session_.get("request_token")
+        token = json_decode(t) if t else {}
+        if delete:
+            self.delete_request_token_from_session(session_)
         return token
 
-    def get_openid(self, access_token):
-        uri = '%s?access_token=%s' %(self.openid_uri, access_token)
-        resp, content = httplib2_request(uri)
+    def delete_request_token_from_session(self, session_):
+        session_.pop("request_token", None)
 
-        if resp.status != 200:
-            raise OAuthLoginError('[QQLogin.get_openid]msg=http_request_fail:status=%s:reason=%s' %(resp.status, resp.reason))
+    def set_token(self, token, token_secret):
+        self.token = token
+        self.token_secret = token_secret
 
-        r = _parse_qq_response(content)
-        openid = r and r.get('openid')
-        if not openid:
-            raise OAuthLoginError('[QQLogin.get_openid]msg=get_openid_fail:reason=%s' %content)
-        return openid
+    ##get unauthorized request_token
+    def get_request_token(self):
+        ##返回结果
+        ##oauth_token=9bae21d3bbe2407da94a4c4e4355cfcb&oauth_token_secret=128b87904122d43cde6b02962d8eeea6&oauth_callback_confirmed=true
+        uri = self.__class__.request_token_uri
+        try:
+            r = self.GET(uri, oauth_callback=self.callback)
+            qs = urlparse.parse_qs(r)
+            self.set_token(qs.get('oauth_token')[0], qs.get('oauth_token_secret')[0])
 
-    def get_user_info(self, access_token, openid):
+            return (self.token, self.token_secret)
+        except OAuthLoginError, e:
+            print e
+        except AttributeError, e:
+            print e
+            
+    ##authorize the request_token
+    def authorize_token(self):
+        ##用户授权之后会返回如下结果
+        ##http://thepast.me/connect/qq/callback
+        ##?oauth_token=0ec955671544495ebf1e368c767d6f4e
+        ##&oauth_verifier=468092
+        ##&openid=51FB995FFE5A42436A6556F67A66A81C
+        ##&openkey=08C42D504F2055C05C3D38D1E816BFE51BF6D09147D98183
+        uri = "%s?oauth_token=%s" % (self.__class__.authorize_uri, self.token)
+        return uri
+    
+    ## 为了和其他几个接口保持一致
+    def get_login_uri(self):
+        self.get_request_token()
+        return self.authorize_token()
+    
+    ##get access_token use authorized_code
+    def get_access_token(self, oauth_verifier):
+        uri = self.__class__.access_token_uri
         qs = {
-            'access_token' : access_token,
-            'oauth_consumer_key' : self.apikey,
-            'openid' : openid,
+            "oauth_token": self.token,
+            "oauth_verifier": oauth_verifier,
         }
-        qs = urllib.urlencode(qs)
-        uri = '%s?%s' %(self.user_info_uri, qs)
-        resp, content = httplib2_request(uri)
+        
+        r = self.GET(uri, **qs)
+        print "access_token:", r
+        d = urlparse.parse_qs(r)
+        self.token = d['oauth_token'][0]
+        self.token_secret = d['oauth_token_secret'][0]
 
+        return (self.token, self.token_secret)
+
+    def get_user_info(self):
+        uri = self.__class__.api_uri + "/user/info"
+        r = self.GET(uri, format="json", oauth_token=self.token)
+        print "--------user info:",r 
+        r = json_decode(r) if r else {}
+        return QQWeiboUser(r.get('data'))
+
+    def GET(self, uri, **kw):
+        return self._request("GET", uri, **kw)
+
+    def POST(self, uri, **kw):
+        return self._request("POST", uri, **kw)
+
+    def DELETE(self):
+        raise NotImplementedError
+
+    def PUT(self):
+        raise NotImplementedError
+
+    def _request(self, method, uri, **kw):
+        signature, qs = QQOAuth1Login.sign(method, uri, self.consumer_key, 
+                self.consumer_secret, self.token_secret, **kw)
+        if method == "GET":
+            full_uri = "%s?%s" % (uri, qs)
+            print '--------get uri:', full_uri
+            resp, content = httplib2_request(full_uri, method)
+        else:
+            resp, content = httplib2_request(uri, method, qs)
+            
         if resp.status != 200:
-            raise OAuthLoginError('[QQLogin.get_user_info]msg=http_request_fail:status=%s:reason=%s' %(resp.status, resp.reason))
+            raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
 
-        r = _parse_qq_response(content)
-        if not r:
-            raise OAuthLoginError('[QQLogin.get_user_info]msg=get_user_info_fail:reason=%s' %content)
-        return r
+        return content
+        
+    @classmethod
+    def sign(cls, method, uri, consumer_key, consumer_secret, token_secret, **kw):
+        
+        part1 = method.upper()
+        part2 = urllib.quote(uri.lower(), safe="")
+        part3 = ""
+        
+        d = {}
+        for k, v in kw.items():
+            d[k] = v
 
-def _parse_qq_response(content):
-    if not content:
-        return {}
-    if content.startswith('callback'):
-        l = content.find('(')
-        r = content.find(')')
-        c = content[l+1:r]
-        return json_decode(c) if c else {}
-    elif content.startswith('{'):
-        return json_decode(content)
-    elif content.find('=')>0:
-        qs = cgi.parse_qs(content)
-        for x in qs:
-            qs[x] = qs[x][0]
-        return qs
-    else:
-        return {}
+        d['oauth_consumer_key'] = consumer_key
+
+        if 'oauth_timestamp' not in d or not d['oauth_timestamp']:
+            d['oauth_timestamp'] = str(int(time.time()))
+
+        if 'oauth_nonce' not in d or not d['oauth_nonce']:
+            d['oauth_nonce'] = randbytes(32)
+
+        if 'oauth_signature_method' not in d or not d['oauth_signature_method']:
+            d['oauth_signature_method'] = 'HMAC-SHA1'
+
+        if 'oauth_version' not in d or not d['oauth_version']:
+            d['oauth_version'] = '1.0'
+
+        d_ = sorted(d.items(), key=lambda x:x[0])
+
+        dd_ = [urllib.urlencode([x]) for x in d_]
+        part3 = urllib.quote("&".join(dd_))
+        print '--------------d_:', d_
+        
+        key = consumer_secret + "&"
+        if token_secret:
+            key += token_secret
+        print '------key:', key
+
+        raw = "%s&%s&%s" % (part1, part2, part3)
+        print '----------raw:', raw
+        
+        if d['oauth_signature_method'] != "HMAC-SHA1":
+            raise
+
+        hashed = hmac.new(key, raw, hashlib.sha1)
+        hashed = binascii.b2a_base64(hashed.digest())[:-1]
+        
+        qs = urllib.urlencode(d_)
+        qs += "&" + urllib.urlencode({"oauth_signature":hashed})
+
+        print '-------------qs:', qs
+
+        return (hashed, qs)
+

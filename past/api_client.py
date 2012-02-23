@@ -158,7 +158,6 @@ class Douban(object):
     def get_photo(self, photo_id):
         return self.get("/photo/%s" % photo_id)
     
-
 class SinaWeibo(object):
     ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
     def __init__(self, alias, access_token, refresh_token=None,
@@ -172,7 +171,7 @@ class SinaWeibo(object):
         self.apikey = config.APIKEY_DICT.get(config.OPENID_SINA).get("key")
    
     def __repr__(self):
-        return '<Douban alias=%s, access_token=%s, refresh_token=%s, \
+        return '<SinaWeibo alias=%s, access_token=%s, refresh_token=%s, \
                 api_host=%s, api_version=%s>' \
                 % (self.alias, self.access_token, self.refresh_token, 
                 self.api_host, self.api_version)
@@ -245,3 +244,34 @@ class Twitter(object):
             print '-------get twitter, len is:', len(contents)
         return [TwitterStatusData(c) for c in contents]
 
+class QQWeibo(object):
+    ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
+    def __init__(self, alias, access_token, refresh_token=None,
+            api_host = "https://graph.qq.com/"):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.alias = alias
+        self.api_host = api_host
+
+        self.apikey = config.APIKEY_DICT.get(config.OPENID_QQ).get("key")
+   
+    def __repr__(self):
+        return '<QQWeibo alias=%s, access_token=%s, refresh_token=%s, \
+                api_host=%s>' \
+                % (self.alias, self.access_token, self.refresh_token, 
+                self.api_host)
+    __str__ = __repr__
+
+
+
+    def get(self, url, extra_dict=None):
+        pass
+
+    def post(self):
+        raise NotImplementedError
+
+    def get_user_info(self):
+        pass
+
+    def get_timeline(self, since_id=None, until_id=None, count=200):
+        pass

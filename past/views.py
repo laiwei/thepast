@@ -11,12 +11,13 @@ from flask import g, session, request, send_from_directory, \
 
 import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
-    logout_user, category2provider
+        logout_user, category2provider
 from past.utils.escape import json_encode, json_decode
 from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
-from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError, TwitterOAuthLogin
+from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
+        TwitterOAuthLogin, QQOAuth1Login
 import api_client
 
 from past import app
@@ -118,6 +119,8 @@ def connect(provider):
         login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_SINA:
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_QQ:
+        login_service = QQOAuth1Login(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_TWITTER:
         login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
     try:
@@ -125,9 +128,11 @@ def connect(provider):
     except OAuthLoginError, e:
         return "auth error:%s" % e
 
-    if provider == config.OPENID_TWITTER:
+    ## when use oauth1, MUST save request_token and secret to SESSION
+    if provider == config.OPENID_TWITTER or provider == config.OPENID_QQ:
         login_service.save_request_token_to_session(session)
-        
+        print '------- connect, client:', login_service
+
     return redirect(login_uri)
 
 ## 这里其实是所有的登陆入口
@@ -143,13 +148,19 @@ def connect_callback(provider):
     elif provider == config.OPENID_SINA:
         openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
         login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_TWITTER:
-        user = _twitter_callback(request)
+    else:
+        ## 处理以oauth1的方式授权的
+        if provider == config.OPENID_QQ:
+            user = _qqweibo_callback(request)
+
+        elif provider == config.OPENID_TWITTER:
+            user = _twitter_callback(request)
+
         if user:
             _add_sync_task_and_push_queue(provider, user)
             return redirect(url_for('index'))
         else:
-            return "connect fail"
+            return "connect to %s fail" % provider
 
     try:
         token_dict = login_service.get_access_token(code)
@@ -163,7 +174,7 @@ def connect_callback(provider):
             token_dict.get("access_token"), token_dict.get("uid"))
     except OAuthLoginError, e:
         abort(401, e.msg)
-    
+
     user = _save_user_and_token(token_dict, user_info, openid_type)
     if user:
         _add_sync_task_and_push_queue(provider, user)
@@ -243,6 +254,31 @@ def pdf(uid):
     redir = '/down/pdf/' + pdf_filename
     resp.headers['X-Accel-Redirect'] = redir
     return resp
+
+def _qqweibo_callback(request):
+    d = config.APIKEY_DICT.get(config.OPENID_QQ)
+    openid_type = config.OPENID_TYPE_DICT[config.OPENID_QQ]
+    login_service = QQOAuth1Login(d['key'], d['secret'], d['redirect_uri'])
+    
+    ## from qqweibo
+    token = request.args.get("oauth_token")
+    verifier = request.args.get("oauth_verifier")
+
+    ## from session
+    token_secret_pair = login_service.get_request_token_from_session(session)
+    if token == token_secret_pair['key']:
+        login_service.set_token(token, token_secret_pair['secret'])
+    ## get access_token from qq
+    token, token_secret  = login_service.get_access_token(verifier)
+    user = login_service.get_user_info()
+
+    token_dict = {}
+    token_dict['access_token'] = token
+    #TODO:这里refresh_token其实就是access_token_secret
+    token_dict['refresh_token'] = token_secret
+    user = _save_user_and_token(token_dict, user, openid_type)
+
+    return user
 
 def _twitter_callback(request):
     d = config.APIKEY_DICT.get(config.OPENID_TWITTER)
@@ -325,5 +361,9 @@ def _add_sync_task_and_push_queue(provider, user):
         elif provider == config.OPENID_TWITTER:
             if str(config.CATE_TWITTER_STATUS) not in task_ids:
                 t = SyncTask.add(config.CATE_TWITTER_STATUS, user.id)
+                t and TaskQueue.add(t.id, t.kind)
+        elif provider == config.OPENID_QQ:
+            if str(config.CATE_QQWEIBO_STATUS) not in task_ids:
+                t = SyncTask.add(config.CATE_QQWEIBO_STATUS, user.id)
                 t and TaskQueue.add(t.id, t.kind)
 
