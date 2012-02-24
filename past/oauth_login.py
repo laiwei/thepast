@@ -44,7 +44,6 @@ class TwitterOAuthLogin(object):
 
     def get_access_token(self, verifier=None):
         self.auth.get_access_token(verifier)
-        print self.auth.access_token.key
         t = {"access_token":self.auth.access_token.key, 
             "access_token_secret": self.auth.access_token.secret,}
         return t
@@ -118,7 +117,6 @@ class OAuth2Login(object):
         }
         qs = urllib.urlencode(qs)
         resp, content = httplib2_request(self.access_token_uri, "POST", body=qs)
-        print '--------resp, content', content, type(content)
         if resp.status != 200:
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
@@ -143,7 +141,6 @@ class DoubanLogin(OAuth2Login):
         uri = "%s?%s" %(self.user_info_uri, urllib.urlencode(qs))
         resp, content = httplib2_request(uri, "GET", 
                 headers = headers)
-        print '--------resp, content', content, type(content)
         if resp.status != 200:
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
@@ -171,7 +168,6 @@ class SinaLogin(OAuth2Login):
         qs = urllib.urlencode(qs)
         uri = "%s?%s" % (self.user_info_uri, qs)
         resp, content = httplib2_request(uri, "GET")
-        print '--------resp, content', content, type(content)
         if resp.status != 200:
             raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
@@ -263,7 +259,6 @@ class QQOAuth1Login(object):
         }
         
         r = self.GET(uri, **qs)
-        print "access_token:", r
         d = urlparse.parse_qs(r)
         self.token = d['oauth_token'][0]
         self.token_secret = d['oauth_token_secret'][0]
@@ -275,7 +270,6 @@ class QQOAuth1Login(object):
         #uri = self.__class__.api_uri + "/user/info"
         #r = self.GET(uri, format="json", oauth_token=self.token)
         r = self.access_resource("GET", "/user/info", {"format":"json"})
-        print "--------user info:",r 
         r = json_decode(r) if r else {}
         return QQWeiboUser(r.get('data'))
 
@@ -306,7 +300,6 @@ class QQOAuth1Login(object):
                 self.consumer_secret, self.token_secret, **kw)
         if method == "GET":
             full_uri = "%s?%s" % (uri, qs)
-            print '--------get uri:', full_uri
             resp, content = httplib2_request(full_uri, method)
         else:
             resp, content = httplib2_request(uri, method, qs)
@@ -346,15 +339,12 @@ class QQOAuth1Login(object):
 
         dd_ = [urllib.urlencode([x]) for x in d_]
         part3 = urllib.quote("&".join(dd_))
-        print '--------------d_:', d_
         
         key = consumer_secret + "&"
         if token_secret:
             key += token_secret
-        print '------key:', key
 
         raw = "%s&%s&%s" % (part1, part2, part3)
-        print '----------raw:', raw
         
         if d['oauth_signature_method'] != "HMAC-SHA1":
             raise
@@ -364,8 +354,6 @@ class QQOAuth1Login(object):
         
         qs = urllib.urlencode(d_)
         qs += "&" + urllib.urlencode({"oauth_signature":hashed})
-
-        print '-------------qs:', qs
 
         return (hashed, qs)
 
