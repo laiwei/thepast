@@ -74,6 +74,21 @@
                 {%if s.category == config.CATE_TWITTER_STATUS%}
                     {{s.text|safe}}
                 {%endif%}
+
+                {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                    {% set middle_pic = s.get_data().get_middle_pic() %}
+                    {{s.text|safe}}
+                    {{ s.get_retweeted_status() }}
+                    
+                    {% if middle_pic %}
+                        <br />
+                        {%for image in middle_pic%]
+                            <img src="{{image}}"/>
+                        {%endfor%}
+                    {% endif %}
+                {%endif%}
+
+
             </div>
         </div>
         </td>
