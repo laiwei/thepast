@@ -8,8 +8,10 @@ from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
 from past.model.data import (DoubanStatusData, DoubanNoteData,
-    DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData)
+    DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
+    QQWeiboStatusData)
 from past.model.user import User,UserAlias, OAuth2Token
+from past.oauth_login import QQOAuth1Login
 
 log = logging.getLogger(__file__)
 
@@ -246,32 +248,52 @@ class Twitter(object):
 
 class QQWeibo(object):
     ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
-    def __init__(self, alias, access_token, refresh_token=None,
-            api_host = "https://graph.qq.com/"):
-        self.access_token = access_token
-        self.refresh_token = refresh_token
-        self.alias = alias
-        self.api_host = api_host
+    def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
+        ua = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_QQ], alias)
+        
+        self.apikey = apikey if apikey is not None else config.APIKEY_DICT[config.OPENID_QQ].get("key")
+        self.apikey_secret = apikey_secret if apikey_secret is not None else config.APIKEY_DICT[config.OPENID_QQ].get("secret")
 
-        self.apikey = config.APIKEY_DICT.get(config.OPENID_QQ).get("key")
-   
-    def __repr__(self):
-        return '<QQWeibo alias=%s, access_token=%s, refresh_token=%s, \
-                api_host=%s>' \
-                % (self.alias, self.access_token, self.refresh_token, 
-                self.api_host)
-    __str__ = __repr__
+        ##TODO:这里的OAuth2Token也变相的存储了OAuth1的token和secret，需要后续改一改
+        token = OAuth2Token.get(ua.id)
+        self.access_token = access_token if access_token is not None else token.access_token
+        self.access_token_secret = access_token_secret if access_token_secret is not None else token.refresh_token
 
+        self.auth = QQOAuth1Login(self.apikey, self.apikey_secret, 
+                token=self.access_token, token_secret=self.access_token_secret)
+    
+    def get_old_timeline(self, pagetime, reqnum=200):
+        return self.get_timeline(reqnum=reqnum, pageflag=1, pagetime=pagetime)
 
+    def get_new_timeline(self, reqnum=20):
+        return self.get_timeline(reqnum=reqnum)
 
-    def get(self, url, extra_dict=None):
-        pass
+    def get_timeline(self, format_="json", reqnum=200, type_=0, contenttype=0, pagetime=0, pageflag=0):
+        qs = {}
+        qs['format'] = format_
+        qs['reqnum'] = reqnum
+        qs['type'] = type_
+        qs['contenttype'] = contenttype
 
-    def post(self):
-        raise NotImplementedError
+        #pageflag: 分页标识（0：第一页，1：向下翻页，2：向上翻页）
+        #lastid: 和pagetime配合使用（第一页：填0，向上翻页：填上一次请求返回的第一条记录id，向下翻页：填上一次请求返回的最后一条记录id）
+        qs['pageflag'] = pageflag
+        qs['pagetime'] = pagetime
+        #qs['lastid'] = lastid
 
-    def get_user_info(self):
-        pass
+        contents = self.auth.access_resource("GET", "/statuses/broadcast_timeline", qs)
+        if not contents:
+            return []
 
-    def get_timeline(self, since_id=None, until_id=None, count=200):
-        pass
+        contents = json_decode(contents)
+        print 'ret:', contents.get("ret")
+
+        if str(contents.get("ret")) != "0":
+            return []
+        
+        data  = contents.get("data")
+        info = data and data.get("info")
+        print '-----status from qqweibo, len is: %s' % len(info)
+
+        return [QQWeiboStatusData(c) for c in info]
+        

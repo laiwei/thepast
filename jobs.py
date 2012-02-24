@@ -7,7 +7,8 @@ from optparse import OptionParser
 from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
-from past.api_client import Douban, SinaWeibo, Twitter
+from past.utils import datetime2timestamp
+from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
 from past.corelib import category2provider
 from past.model.data import (DoubanNoteData, 
         DoubanStatusData, DoubanMiniBlogData)
@@ -29,6 +30,9 @@ def sync(t, old=False):
     elif provider == config.OPENID_TWITTER:
         alias = UserAlias.get_by_user_and_type(t.user_id, 
                 config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
+    elif provider == config.OPENID_QQ:
+        alias = UserAlias.get_by_user_and_type(t.user_id,
+                config.OPENID_TYPE_DICT[config.OPENID_QQ])
     if not alias:
         log.warn("no alias...")
         return 0
@@ -45,6 +49,8 @@ def sync(t, old=False):
         client = SinaWeibo(alias.alias, token.access_token)
     elif provider == config.OPENID_TWITTER:
         client = Twitter(alias.alias)
+    elif provider == config.OPENID_QQ:
+        client = QQWeibo(alias.alias)
     if not client:
         log.warn("get client fail, break...")
         return 0
@@ -87,6 +93,17 @@ def sync(t, old=False):
         else:
             since_id = Status.get_min_origin_id(t.category, t.user_id)
             status_list = client.get_timeline(since_id=since_id)
+        if status_list:
+            for x in status_list:
+                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+            return len(status_list)
+    elif t.category == config.CATE_QQWEIBO_STATUS:
+        if old:
+            oldest_create_time = Status.get_oldest_create_time(t.category, t.user_id)
+            oldest_create_time = datetime2timestamp(oldest_create_time)
+            status_list = client.get_old_timeline(oldest_create_time, reqnum=200)
+        else:
+            status_list = client.get_new_timeline(reqnum=20)
         if status_list:
             for x in status_list:
                 Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))

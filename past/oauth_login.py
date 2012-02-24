@@ -245,10 +245,7 @@ class QQOAuth1Login(object):
     def authorize_token(self):
         ##用户授权之后会返回如下结果
         ##http://thepast.me/connect/qq/callback
-        ##?oauth_token=0ec955671544495ebf1e368c767d6f4e
-        ##&oauth_verifier=468092
-        ##&openid=51FB995FFE5A42436A6556F67A66A81C
-        ##&openkey=08C42D504F2055C05C3D38D1E816BFE51BF6D09147D98183
+        ##?oauth_token=xxx&oauth_verifier=468092&openid=xxx&openkey=xxx
         uri = "%s?oauth_token=%s" % (self.__class__.authorize_uri, self.token)
         return uri
     
@@ -273,12 +270,24 @@ class QQOAuth1Login(object):
 
         return (self.token, self.token_secret)
 
+    #TODO:这个应当移动到api_client相应的地方
     def get_user_info(self):
-        uri = self.__class__.api_uri + "/user/info"
-        r = self.GET(uri, format="json", oauth_token=self.token)
+        #uri = self.__class__.api_uri + "/user/info"
+        #r = self.GET(uri, format="json", oauth_token=self.token)
+        r = self.access_resource("GET", "/user/info", {"format":"json"})
         print "--------user info:",r 
         r = json_decode(r) if r else {}
         return QQWeiboUser(r.get('data'))
+
+    ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
+    ##params为dict，是需要传递的参数
+    def access_resource(self, method, api, params=None):
+        uri = self.__class__.api_uri + api
+
+        if method == "GET":
+            return self.GET(uri, oauth_token=self.token, **params)
+        if method == "POST":
+            return self.POST(uri, oauth_token=self.token, **params)
 
     def GET(self, uri, **kw):
         return self._request("GET", uri, **kw)

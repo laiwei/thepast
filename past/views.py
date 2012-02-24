@@ -339,6 +339,18 @@ def _save_user_and_token(token_dict, user_info, openid_type):
     u.set_avatar_url(user_info.get_avatar())
     u.set_icon_url(user_info.get_icon())
 
+    ##把各个第三方的uid保存到profile里面
+    k = openid_type
+    v = {
+        "uid": user_info.get_uid(), 
+        "intro": user_info.get_intro(),
+        "signature": user_info.get_signature(),
+        "avatar": user_info.get_avatar(),
+        "icon": user_info.get_icon(),
+        "email": user_info.get_email(),
+    }
+    u.set_profile_item(k, json_encode(v))
+
     ##保存access token
     if openid_type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
         OAuth2Token.add(ua.id, token_dict.get("access_token"), 

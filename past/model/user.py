@@ -8,7 +8,6 @@ from past.utils.escape import json_decode, json_encode
 from past import config
 
 class User(object):
-    
     def __init__(self, id):
         self.id = str(id)
         self.uid = None
@@ -122,6 +121,15 @@ class User(object):
         self.set_profile(p)
         return self.get_profile()
 
+    def get_profile_item(self, k):
+        profile = self.get_profile()
+        return profile and profile.get(k)
+
+    ##获取第三方帐号的profile信息
+    def get_thirdparty_profile(self, openid_type):
+        p = self.get_profile_item(openid_type)
+        return json_decode(p) if p else {}
+        
     def get_avatar_url(self):
         return self.get_profile().get("avatar_url", "")
 
@@ -252,7 +260,9 @@ class UserAlias(object):
             return u"twitter", "%s/%s" %(config.TWITTER_SITE, self.alias)
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
-            return u"腾讯微博", "%s" %(config.QQWEIBO_SITE,)
+            ##XXX:腾讯微博比较奇怪
+            return u"腾讯微博", "%s/%s" %(config.QQWEIBO_SITE, 
+                    User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", ""))
 
 class OAuth2Token(object):
    

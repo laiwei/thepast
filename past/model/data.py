@@ -20,22 +20,22 @@ class AbsUserData(object):
         raise NotImplementedError
 
     def get_nickname(self):
-        raise NotImplementedError
+        return ""
 
     def get_intro(self):
-        raise NotImplementedError
+        return ""
 
     def get_signature(self):
-        raise NotImplementedError
+        return ""
 
     def get_avatar(self):
-        raise NotImplementedError
+        return ""
 
     def get_icon(self):
-        raise NotImplementedError
+        return ""
     
     def get_email(self):
-        raise NotImplementedError
+        return ""
 
 ## 豆瓣user数据接口
 class DoubanUser(AbsUserData):
@@ -453,3 +453,51 @@ class TwitterStatusData(AbsData):
     def get_middle_pic(self):
         return ""
 
+
+# qqweibo status
+class QQWeiboStatusData(AbsData):
+    def __init__(self, data):
+        super(QQWeiboStatusData, self).__init__(
+                config.OPENID_TYPE_DICT[config.OPENID_QQ], 
+                config.CATE_QQWEIBO_STATUS, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("id", ""))
+
+    def get_create_time(self):
+        t = self.data.get("timestamp")
+        if not t:
+            return None
+        t = float(t)
+        return datetime.datetime.fromtimestamp(t)
+
+    def get_title(self):
+        return ""
+
+    def get_content(self):
+        return self.data.get("text", "") 
+    
+    def get_retweeted_status(self):
+        return self.data.get("origtext", "") 
+
+    def get_user(self):
+        return None
+
+    def _get_images(self, size):
+        imgs = self.data.get("image", [])
+        if imgs:
+            return ["%s/%s" % (x, size) for x in imgs]
+        return ""
+        
+    def get_origin_pic(self):
+        return self._get_images(size=420)
+
+    def get_thumbnail_pic(self):
+        return self._get_images(size=120)
+
+    def get_middle_pic(self):
+        return self._get_images(size=160)
+
+    def get_from(self):
+        return (self.data.get("from"), self.data.get("fromurl"))
+            

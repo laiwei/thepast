@@ -1,5 +1,7 @@
 #-*- coding:utf-8 -*-
 import os
+import time
+import datetime
 import httplib2
 import random
 import string
@@ -56,3 +58,8 @@ def _wrap_long_line(text, max_len):
 
     return out_text
 
+def datetime2timestamp(datetime_):
+    if not isinstance(datetime_, datetime.datetime):
+        return 0
+
+    return datetime_ and  int(time.mktime(datetime_.timetuple()))

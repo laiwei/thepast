@@ -38,6 +38,8 @@ def category2provider(cate):
         return config.OPENID_WORDPRESS
     elif cate < 500:
         return config.OPENID_TWITTER
+    elif cate < 600:
+        return config.OPENID_QQ
     else:
         return None
 

@@ -152,6 +152,18 @@ class Status(object):
             return row[0]
         else:
             return 0
+
+    ## just for tecent_weibo
+    @classmethod
+    def get_oldest_create_time(cls, cate, user_id):
+        cursor = db_conn.cursor()
+        cursor.execute('''select min(create_time) from status 
+            where category=%s and user_id=%s''', (cate, user_id))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return 0
     
     @classmethod
     def get_count_by_cate(cls, cate, user_id):
