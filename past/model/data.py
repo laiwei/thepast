@@ -484,10 +484,11 @@ class QQWeiboStatusData(AbsData):
         return None
 
     def _get_images(self, size):
-        imgs = self.data.get("image", [])
-        if imgs:
-            return ["%s/%s" % (x, size) for x in imgs]
-        return []
+        r = []
+        imgs = self.data.get("image")
+        if imgs and imgs != "null" and isinstance(imgs, list):
+            r = ["%s/%s" % (x, size) for x in imgs]
+        return r
         
     def get_origin_pic(self):
         return self._get_images(size=420)

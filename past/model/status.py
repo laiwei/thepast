@@ -8,7 +8,7 @@ from past.utils.logger import logging
 from past.store import redis_conn, redis_cache_conn, db_conn
 from past.corelib.cache import cache, pcache
 from .user import UserAlias
-from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData
+from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData, QQWeiboStatusData
 
 log = logging.getLogger(__file__)
 
@@ -194,6 +194,8 @@ class Status(object):
             return DoubanNoteData(self.raw)
         elif self.category == config.CATE_SINA_STATUS:
             return SinaWeiboStatusData(self.raw)
+        elif self.category == config.CATE_QQWEIBO_STATUS:
+            return QQWeiboStatusData(self.raw)
         else:
             return None
 

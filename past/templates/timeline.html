@@ -36,6 +36,8 @@
                 <a href="{{config.WEIBO_STATUS %(s.origin_id)}}" class="node">From：新浪微博</a>
             {% elif s.category == config.CATE_TWITTER_STATUS%}
                 <a href="{{config.TWITTER_STATUS %(s.origin_id)}}" class="node">From：twitter</a>
+            {% elif s.category == config.CATE_QQWEIBO_STATUS%}
+                <a href="{{config.QQWEIBO_STATUS %(s.origin_id)}}" class="node">From：腾讯微博</a>
             {% endif %}
             &nbsp;&nbsp;{{s.create_time}}&nbsp;
         </span>
@@ -78,11 +80,11 @@
                 {%if s.category == config.CATE_QQWEIBO_STATUS%}
                     {% set middle_pic = s.get_data().get_middle_pic() %}
                     {{s.text|safe}}
-                    {{ s.get_retweeted_status() }}
+                    {{ s.get_data().get_retweeted_status() }}
                     
                     {% if middle_pic %}
                         <br />
-                        {%for image in middle_pic%]
+                        {%for image in middle_pic%}
                             <img src="{{image}}"/>
                         {%endfor%}
                     {% endif %}
