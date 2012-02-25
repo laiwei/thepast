@@ -23,7 +23,6 @@ if __name__ == "__main__":
                 print '%s generate pdf for user:%s fail' % (datetime.datetime.now(), uid)
             else:
                 print '%s generate pdf for user:%s succ' % (datetime.datetime.now(), uid)
-            break
         except Exception, e:
             import traceback
             print '%s %s' % (datetime.datetime.now(), traceback.format_exc())

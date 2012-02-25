@@ -60,7 +60,6 @@ def index():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_monthize(status_list)
-    print '----status:', status_list
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
 @app.route("/user")
