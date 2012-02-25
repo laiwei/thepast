@@ -54,6 +54,8 @@ http://thepast.me
 
 贡献者列表：
 -------
+* [laiwei](https://github.com/laiwei) --`项目发起者` 
+* [lmm214](https://github.com/lmm214) --`设计，修改了首页timeline的展示方式` 
 
 
 ChangeList:

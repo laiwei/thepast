@@ -44,6 +44,7 @@ class Status(object):
             redis_cache_conn.delete("status_ids:user:%scate:None" % user_id)
             if cate:
                 redis_cache_conn.delete("status_ids:user:%scate:%s" % (user_id, cate))
+
     #@property
     #def text(self):
     #    _text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
