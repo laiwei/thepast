@@ -34,11 +34,6 @@
                 <div class="message">
                     <!-- 调用时间：时分秒 -->
                     <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-                    <!-- 来源 -->
-                    {%set from_ = s.get_origin_uri()%}
-                    {%if from_%}
-                        <span class="from {{from_[0]}}">&nbsp;<a href="{{from_[1]}}"></a></span>
-                    {%endif%}
                     <!-- 信息内容 + span.from -->
                     <div class="text">
                         {{s.text|safe}}
@@ -50,12 +45,23 @@
                             {% if retweeted %}
                                 {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
                             {% endif %}
+
+                            <!-- 来源 -->
+                            {%set from_ = s.get_origin_uri()%}
+                            {%if from_%}
+                                <span class="from {{from_[0]}}">&nbsp;<a href="{{from_[1]}}"></a></span>
+                            {%endif%}
                                 
                             {% if re_mid_pic or middle_pic %}
                                 <br />
                                 <img src="{{re_mid_pic or middle_pic}}"/>
                             {% endif %}
-
+                        {%else%}
+                            <!-- 来源 -->
+                            {%set from_ = s.get_origin_uri()%}
+                            {%if from_%}
+                                <span class="from {{from_[0]}}">&nbsp;<a href="{{from_[1]}}"></a></span>
+                            {%endif%}
                         {%endif%}
 
                         {% if s.category == config.CATE_DOUBAN_MINIBLOG%}
@@ -65,6 +71,7 @@
                                 <img src="{{links.get("image")}}"/>
                             {% endif %}
                         {% endif%}
+
                     </div>
                     <!-- 信息内容结束 -->
                 </div>

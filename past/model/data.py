@@ -212,6 +212,9 @@ class AbsData(object):
     def get_user(self):
         raise NotImplementedError
 
+    def get_images(self):
+        return []
+
 class DoubanData(AbsData):
     
     def __init__(self, category, data):
@@ -267,6 +270,12 @@ class DoubanMiniBlogData(DoubanData):
             rel = x.get("@rel")
             links[rel] = x.get("@href", "").replace("/spic", "/lpic")
         return links
+
+    def get_images(self):
+        links = self.get_links()
+        if links and links.get("images"):
+            return [links.get("images")]
+        return []
 
 # 相册 
 class DoubanPhotoData(DoubanData):
@@ -418,6 +427,15 @@ class SinaWeiboStatusData(SinaWeiboData):
     def get_middle_pic(self):
         return self.data.get("bmiddle_pic", "")
 
+    def get_images(self, size="middle"):
+        method = "get_%s_pic" % size
+        if hasattr(self, method):
+            i = getattr(self, method)()
+            if i:
+                return [i]
+        return []
+        
+
 # twitter status
 class TwitterStatusData(AbsData):
     def __init__(self, data):
@@ -443,15 +461,6 @@ class TwitterStatusData(AbsData):
 
     def get_user(self):
         return TwitterUser(self.data.get("user"))
-
-    def get_origin_pic(self):
-        return ""
-
-    def get_thumbnail_pic(self):
-        return ""
-
-    def get_middle_pic(self):
-        return ""
 
 
 # qqweibo status
@@ -498,6 +507,14 @@ class QQWeiboStatusData(AbsData):
 
     def get_middle_pic(self):
         return self._get_images(size=460)
+
+    def get_images(self, size="middle"):
+        method = "get_%s_pic" % size
+        if hasattr(self, method):
+            i = getattr(self, method)()
+            if i:
+                return [i]
+        return []
 
     def get_from(self):
         return (self.data.get("from"), self.data.get("fromurl"))

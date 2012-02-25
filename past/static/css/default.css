@@ -425,3 +425,9 @@ a.node:hover {
 .message span{font-size:11px;color:#999;margin-right:5px}
 .message .text{padding-left:88px;}
 .message .from{font-size:9px;color:#CCC;}
+
+span.from{background:url(/static/img/sns.png) no-repeat;display:inline-block;}
+span.from a{display:inline-block;text-indent:-1000px;width:16px;height:16px;}
+span.from.twitter{background-position:0 -16px;}
+span.sina{background-position:0 -32px;}
+span.from.douban{background-position:0 -48px;}

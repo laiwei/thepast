@@ -220,6 +220,16 @@ class Status(object):
         else:
             return None
 
+    def get_retweeted_status(self):
+        d = self.get_data()
+        if hasattr(d, "get_retweeted_status"):
+            return d.get_retweeted_status()
+        return None
+
+    def get_images(self):
+        d = self.get_data()
+
+
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):
     kv_db_key_task = '/synctask/%s'
