@@ -80,7 +80,6 @@
                 {%if s.category == config.CATE_QQWEIBO_STATUS%}
                     {% set middle_pic = s.get_data().get_middle_pic() %}
                     {{s.text|safe}}
-                    {{ s.get_data().get_retweeted_status() }}
                     
                     {% if middle_pic %}
                         <br />

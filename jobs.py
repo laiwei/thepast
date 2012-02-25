@@ -19,6 +19,9 @@ log = logging.getLogger(__file__)
 
 
 def sync(t, old=False):
+    if not t:
+        print 'no such task'
+        return 0
     alias = None
     provider = category2provider(t.category)
     if provider == config.OPENID_DOUBAN:
@@ -122,7 +125,10 @@ def sync_helper(cate,old=False):
     
     log.info("task_list length is %s" % len(task_list))
     for t in task_list:
-        sync(t, old)
+        try:
+            sync(t, old)
+        except Exception, e:
+            print "%s %s" % (datetime.datetime.now(), e)
 
 if __name__ == '__main__':
     parser = OptionParser()

@@ -70,13 +70,15 @@ def render(user, status_list, with_head=True):
         create_time = s.create_time
         from_ = ''
         if s.category == config.CATE_DOUBAN_MINIBLOG:
-            from_ = u'<a href="' + config.DOUBAN_MINIBLOG % (s.origin_user_id, s.origin_id) + u'class="node">From：豆瓣广播</a>'
+            from_ = u'<a href="' + config.DOUBAN_MINIBLOG % (s.origin_user_id, s.origin_id) + u' class="node">From：豆瓣广播</a>'
         elif s.category == config.CATE_DOUBAN_NOTE:
-            from_ = u'<a href="' + config.DOUBAN_NOTE % (s.origin_id,) + u'class="node">From：豆瓣日记</a>'
+            from_ = u'<a href="' + config.DOUBAN_NOTE % (s.origin_id,) + u' class="node">From：豆瓣日记</a>'
         elif s.category == config.CATE_SINA_STATUS:
-            from_ = u'<a href="' + config.WEIBO_STATUS % (s.origin_id) + u'class="node">From：新浪微博</a>'
+            from_ = u'<a href="' + config.WEIBO_STATUS % (s.origin_id) + u' class="node">From：新浪微博</a>'
         elif s.category == config.CATE_TWITTER_STATUS:
-            from_ = u'<a href="' + config.TWITTER_STATUS % (s.origin_id) + u'class="node">From：twitter</a>'
+            from_ = u'<a href="' + config.TWITTER_STATUS % (s.origin_id) + u' class="node">From：twitter</a>'
+        elif s.category == config.CATE_QQWEIBO_STATUS:
+            from_ = u'<a href="' + config.QQWEIBO_STATUS % (s.origin_id) + u' class="node">From：腾讯微博</a>'
         text = s.text
         retweeted_text = ''
         img = ''
@@ -96,6 +98,9 @@ def render(user, status_list, with_head=True):
                     
             if re_mid_pic or middle_pic:
                 img = re_mid_pic or middle_pic
+
+        elif s.category == config.CATE_QQWEIBO_STATUS:
+            img = s.get_data().get_middle_pic()
         
         _html += """ <hr/> <div class="cell">"""
         if title:
@@ -110,7 +115,10 @@ def render(user, status_list, with_head=True):
             retweeted_text = wrap_long_line(retweeted_text)
             _html += """<div class='tip'><span class="fade">%s</span></div>""" % retweeted_text
         if img:
-            _html += """<img src=%s></img>""" % img
+            if not isinstance(img, list):
+                img = [img, ]
+            for x in img:
+                _html += """<img src=%s></img>""" % x
         _html += """<div class="fade">%s &nbsp;&nbsp;&nbsp; %s</div>""" % (from_, create_time)
         _html += """ </div> <body> </html> """
     return _html

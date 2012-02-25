@@ -35,13 +35,15 @@ class Status(object):
             %(self.id, self.user_id, self.origin_id, self.category, self.title)
     __str__ = __repr__
 
+    ##TODO:这个clear_cache需要拆分
     @classmethod
-    def _clear_cache(self, user_id, status_id):
+    def _clear_cache(self, user_id, status_id, cate=None):
         if status_id:
             redis_cache_conn.delete("status:%s" % status_id)
         if user_id:
-            redis_cache_conn.delete("status_ids:user:%s" % user_id)
-
+            redis_cache_conn.delete("status_ids:user:%scate:None" % user_id)
+            if cate:
+                redis_cache_conn.delete("status_ids:user:%scate:%s" % (user_id, cate))
     #@property
     #def text(self):
     #    _text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
@@ -68,7 +70,7 @@ class Status(object):
                 redis_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
             if raw is not None:
                 redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
-            cls._clear_cache(user_id, None)
+            cls._clear_cache(user_id, None, cate=category)
             status = cls.get(status_id)
         except IntegrityError:
             log.warning("add status duplicated, ignore...")
@@ -108,7 +110,7 @@ class Status(object):
         return status
 
     @classmethod
-    @pcache("status_ids:user:{user_id}")
+    @pcache("status_ids:user:{user_id}cate:{cate}")
     def get_ids(cls, user_id, start=0, limit=20, order="create_time", cate=None):
         cursor = db_conn.cursor()
         if not user_id:

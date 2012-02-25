@@ -26,6 +26,8 @@ if __name__ == "__main__":
             if queue and queue.task_kind == config.K_SYNCTASK:
                 print 'syncing task id:', queue.task_id
                 sync_task = SyncTask.get(queue.task_id)
+                if not sync_task:
+                    continue
                 max_sync_times = 0
                 min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
                 if sync_task:

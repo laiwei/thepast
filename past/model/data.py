@@ -491,13 +491,13 @@ class QQWeiboStatusData(AbsData):
         return r
         
     def get_origin_pic(self):
-        return self._get_images(size=420)
+        return self._get_images(size=2000)
 
     def get_thumbnail_pic(self):
-        return self._get_images(size=120)
+        return self._get_images(size=160)
 
     def get_middle_pic(self):
-        return self._get_images(size=160)
+        return self._get_images(size=460)
 
     def get_from(self):
         return (self.data.get("from"), self.data.get("fromurl"))
