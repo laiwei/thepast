@@ -8,7 +8,7 @@ from past.utils.logger import logging
 from past.store import redis_conn, redis_cache_conn, db_conn
 from past.corelib.cache import cache, pcache
 from .user import UserAlias
-from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData, QQWeiboStatusData
+from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
 
 log = logging.getLogger(__file__)
 
@@ -197,8 +197,26 @@ class Status(object):
             return DoubanNoteData(self.raw)
         elif self.category == config.CATE_SINA_STATUS:
             return SinaWeiboStatusData(self.raw)
+        elif self.category == config.CATE_TWITTER_STATUS:
+            return TwitterStatusData(self.raw)
         elif self.category == config.CATE_QQWEIBO_STATUS:
             return QQWeiboStatusData(self.raw)
+        else:
+            return None
+
+    def get_origin_uri(self):
+        if self.category == config.CATE_DOUBAN_MINIBLOG:
+            ua = UserAlias.get_by_user_and_type(self.user_id, config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+            if ua:
+                return (u"豆瓣广播", config.DOUBAN_MINIBLOG % (ua.alias, self.origin_id))
+        elif self.category == config.CATE_DOUBAN_NOTE:
+            return (u"豆瓣日记", config.DOUBAN_NOTE % self.origin_id)
+        elif self.category == config.CATE_SINA_STATUS:
+            return (u"新浪微博", config.WEIBO_STATUS % self.origin_id)
+        elif self.category == config.CATE_TWITTER_STATUS:
+            return (u"Twitter", config.TWITTER_STATUS % self.origin_id)
+        elif self.category == config.CATE_QQWEIBO_STATUS:
+            return (u"腾讯微博", config.QQWEIBO_STATUS % self.origin_id)
         else:
             return None
 

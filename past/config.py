@@ -83,6 +83,7 @@ CATE_LIST = (
     CATE_DOUBAN_MINIBLOG,
     CATE_SINA_STATUS,
     CATE_TWITTER_STATUS,
+    CATE_QQWEIBO_STATUS,
 )
 
 DOUBAN_NOTE = 'http://douban.com/note/%s'

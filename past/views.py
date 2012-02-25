@@ -59,6 +59,8 @@ def index():
 
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
+    status_list  = statuses_monthize(status_list)
+    print '----status:', status_list
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
 @app.route("/user")
@@ -69,7 +71,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
-@require_login
+#@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -82,6 +84,7 @@ def user(uid):
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
+    status_list  = statuses_monthize(status_list)
     return render_template("timeline.html", user=u, status_list=status_list, config=config)
 
 @app.route("/settings/profile")
@@ -391,3 +394,19 @@ def _add_sync_task_and_push_queue(provider, user):
                 t = SyncTask.add(config.CATE_QQWEIBO_STATUS, user.id)
                 t and TaskQueue.add(t.id, t.kind)
 
+## 把status_list构造为month，day的层级结构
+def statuses_monthize(status_list):
+    output = {}
+    for s in status_list:
+        year_month = "%s-%s" % (s.create_time.year, s.create_time.month)
+        day = str(s.create_time.day)
+        
+        if year_month not in output:
+            output[year_month] = {day:[s]}
+        else:
+            if day not in output[year_month]:
+                output[year_month][day] = [s]
+            else:
+                output[year_month][day].append(s)
+
+    return output

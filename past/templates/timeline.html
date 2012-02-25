@@ -13,91 +13,74 @@
         <br/> <br/>
     {% endif %}
 
-    {% for s in status_list %}
-    <div class="cell">
-        <table><tbody>
-        <tr>
-        <td valign="top" class="avatar">
-        <a href="#"><img src="{{user.get_icon_url()}}" border="0"></a></td>
+    {%set sorted_months = status_list.keys()|sort(reverse=True)%}
+    {%for m in sorted_months%}
+	<!-- 一月循环开始 -->
+	<div class="month">
+		<!-- 调用时间：XX年XX月 -->
+		<h2 class="title">{{m.replace("-","年")}}月</h2>
+		
+        {%set days_status = status_list[m]%}
+        {%set sorted_days = days_status.keys()|sort(reverse=True)%}
+        {%for d in sorted_days%}
+		<!-- 日循环开始 -->
+		<ul class="articles">
+			<!-- 调用日期： XX日 -->
+			<div class="day"> › {{d}}日</div>
+			
+            {%for s in days_status[d]%}
+            <!-- 每条信息输出楷书 -->
+            <li class="clearfix">
+                <div class="message">
+                    <!-- 调用时间：时分秒 -->
+                    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+                    <!-- 信息内容 + span.from -->
+                    <div class="text">
+                        {{s.text|safe}}
 
-        <td style="padding-left: 12px" valign="top">
+                        {%if s.category == config.CATE_SINA_STATUS%}
+                            {% set retweeted = s.get_data().get_retweeted_status() %}
+                            {% set re_mid_pic = retweeted and retweeted.get_middle_pic() or '' %}
+                            {% set middle_pic = s.get_data().get_middle_pic() %}
+                            {% if retweeted %}
+                                {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
+                            {% endif %}
+                                
+                            {% if re_mid_pic or middle_pic %}
+                                <br />
+                                <img src="{{re_mid_pic or middle_pic}}"/>
+                            {% endif %}
 
-        <div class="sep3"></div>
-        {% if s.category == config.CATE_DOUBAN_NOTE%}
-            <span class="bigger" style="font-size: 16px; line-height: 130%"><a href="#">{{s.title|safe}}</a></span>
-            <div class="sep5"></div>
-        {% endif %}
-        <span class="created">
-            {% if s.category == config.CATE_DOUBAN_MINIBLOG %}
-            <a href="{{config.DOUBAN_MINIBLOG %(s.origin_user_id, s.origin_id)}}" class="node">From：豆瓣广播</a>
-            {% elif s.category == config.CATE_DOUBAN_NOTE%}
-            <a href="{{config.DOUBAN_NOTE %(s.origin_id,)}}" class="node">From：豆瓣日记</a>
-            {% elif s.category == config.CATE_SINA_STATUS%}
-                <a href="{{config.WEIBO_STATUS %(s.origin_id)}}" class="node">From：新浪微博</a>
-            {% elif s.category == config.CATE_TWITTER_STATUS%}
-                <a href="{{config.TWITTER_STATUS %(s.origin_id)}}" class="node">From：twitter</a>
-            {% elif s.category == config.CATE_QQWEIBO_STATUS%}
-                <a href="{{config.QQWEIBO_STATUS %(s.origin_id)}}" class="node">From：腾讯微博</a>
-            {% endif %}
-            &nbsp;&nbsp;{{s.create_time}}&nbsp;
-        </span>
+                        {%endif%}
 
-        <div class="inner">
-            <div class="content topic_content">
-                {%if s.category == config.CATE_SINA_STATUS%}
-                    {{s.text|safe}}
-                    {% set retweeted = s.get_data().get_retweeted_status() %}
-                    {% set re_mid_pic = retweeted and retweeted.get_middle_pic() or '' %}
-                    {% set middle_pic = s.get_data().get_middle_pic() %}
+                        {% if s.category == config.CATE_DOUBAN_MINIBLOG%}
+                            {% set links = s.get_data().get_links() %}
+                            {% if links and links.get("image") %}
+                                <br />
+                                <img src="{{links.get("image")}}"/>
+                            {% endif %}
+                        {% endif%}
+                        {%set from_ = s.get_origin_uri()%}
+                        {%if from_%}
+                            <span class="from">&nbsp;<a href="{{from_[1]}}">{{from_[0]}}</a></span>
+                        {%endif%}
+                    </div>
+                    <!-- 信息内容结束 -->
+                </div>
+            </li>
+            <!-- 每条信息输出结束 -->
+            {%endfor%}
 
-                    {% if retweeted %}
-                        {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
-                    {% endif %}
-                    
-                    {% if re_mid_pic or middle_pic %}
-                        <br />
-                        <img src="{{re_mid_pic or middle_pic}}"/>
-                    {% endif %}
-                {%endif%}
+		</ul>
+		<!-- 日循环结束 -->
+        {%endfor%}
 
-                {%if s.category == config.CATE_DOUBAN_NOTE%}
-                    {{s.text|nl2br|safe}}
-                {%endif%}
+	</div>
+	<!-- 月循环结束 -->
+    {%endfor%}
 
-                {%if s.category == config.CATE_DOUBAN_MINIBLOG%}
-                    {{s.text|safe}}
-                    {% set links = s.get_data().get_links() %}
-                    {% if links and links.get("image") %}
-                        <br />
-                        <img src="{{links.get("image")}}"/>
-                    {% endif %}
-                {%endif%}
-
-                {%if s.category == config.CATE_TWITTER_STATUS%}
-                    {{s.text|safe}}
-                {%endif%}
-
-                {%if s.category == config.CATE_QQWEIBO_STATUS%}
-                    {% set middle_pic = s.get_data().get_middle_pic() %}
-                    {{s.text|safe}}
-                    
-                    {% if middle_pic %}
-                        <br />
-                        {%for image in middle_pic%}
-                            <img src="{{image}}"/>
-                        {%endfor%}
-                    {% endif %}
-                {%endif%}
-
-
-            </div>
-        </div>
-        </td>
-        </tr>
-        </tbody></table>
-    </div>
-    {% endfor %}
 </div>
+
 <div class="sep10"></div>
 <div class="box">
     {% if g.start>0 %}

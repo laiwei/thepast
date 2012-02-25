@@ -408,4 +408,20 @@ a.node:hover {
     color: #aaa;
 }
 
+/*new add css by linmumu 2012-02-25 17:21*/
+.clearfix { display: block; }
 
+/* float clearing for everyone else */
+* html .clearfix{height: 1%;overflow: visible;}
+*+html .clearfix{min-height: 1%;}
+.clearfix:after{clear: both;content: ".";display: block;height: 0;visibility: hidden;font-size: 0;}
+.month{font-size:14px;margin:10px 0 25px;}
+.month h2{font-size:32px;font-weight:bold;margin-bottom:10px;border-bottom:1px solid #E2E2E2;}
+.articles{margin:10px;}
+.articles li{line-height:14px;margin-top:15px;display:inline;}
+.articles .day{width:68px;float:left;}
+.time{float:left;background:#EEE;border-radius:2px;padding:2px 4px;font-size:11px;color:#999;}
+.message{padding-left:68px;line-height:18px;font-size: 13px;}
+.message span{font-size:11px;color:#999;margin-right:5px}
+.message .text{padding-left:88px;}
+.message .from{font-size:9px;color:#CCC;}
