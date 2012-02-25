@@ -34,6 +34,11 @@
                 <div class="message">
                     <!-- 调用时间：时分秒 -->
                     <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+                    <!-- 来源 -->
+                    {%set from_ = s.get_origin_uri()%}
+                    {%if from_%}
+                        <span class="from {{from_[0]}}">&nbsp;<a href="{{from_[1]}}"></a></span>
+                    {%endif%}
                     <!-- 信息内容 + span.from -->
                     <div class="text">
                         {{s.text|safe}}
@@ -60,10 +65,6 @@
                                 <img src="{{links.get("image")}}"/>
                             {% endif %}
                         {% endif%}
-                        {%set from_ = s.get_origin_uri()%}
-                        {%if from_%}
-                            <span class="from">&nbsp;<a href="{{from_[1]}}">{{from_[0]}}</a></span>
-                        {%endif%}
                     </div>
                     <!-- 信息内容结束 -->
                 </div>

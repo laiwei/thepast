@@ -208,15 +208,15 @@ class Status(object):
         if self.category == config.CATE_DOUBAN_MINIBLOG:
             ua = UserAlias.get_by_user_and_type(self.user_id, config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
             if ua:
-                return (u"豆瓣广播", config.DOUBAN_MINIBLOG % (ua.alias, self.origin_id))
+                return (config.OPENID_DOUBAN, config.DOUBAN_MINIBLOG % (ua.alias, self.origin_id))
         elif self.category == config.CATE_DOUBAN_NOTE:
-            return (u"豆瓣日记", config.DOUBAN_NOTE % self.origin_id)
+            return (config.OPENID_DOUBAN, config.DOUBAN_NOTE % self.origin_id)
         elif self.category == config.CATE_SINA_STATUS:
-            return (u"新浪微博", config.WEIBO_STATUS % self.origin_id)
+            return (config.OPENID_SINA, config.WEIBO_STATUS % self.origin_id)
         elif self.category == config.CATE_TWITTER_STATUS:
-            return (u"Twitter", config.TWITTER_STATUS % self.origin_id)
+            return (config.OPENID_TWITTER, config.TWITTER_STATUS % self.origin_id)
         elif self.category == config.CATE_QQWEIBO_STATUS:
-            return (u"腾讯微博", config.QQWEIBO_STATUS % self.origin_id)
+            return (config.OPENID_QQ, config.QQWEIBO_STATUS % self.origin_id)
         else:
             return None
 

@@ -265,7 +265,7 @@ class DoubanMiniBlogData(DoubanData):
         _links = self.data.get("link", [])
         for x in _links:
             rel = x.get("@rel")
-            links[rel] = x.get("@href")
+            links[rel] = x.get("@href", "").replace("/spic", "/lpic")
         return links
 
 # 相册 
