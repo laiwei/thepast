@@ -215,7 +215,7 @@ class Status(object):
         elif self.category == config.CATE_DOUBAN_NOTE:
             return (config.OPENID_DOUBAN, config.DOUBAN_NOTE % self.origin_id)
         elif self.category == config.CATE_SINA_STATUS:
-            return (config.OPENID_SINA, config.WEIBO_STATUS % self.origin_id)
+            return (config.OPENID_SINA, "")
         elif self.category == config.CATE_TWITTER_STATUS:
             return (config.OPENID_TWITTER, d.get_origin_uri())
         elif self.category == config.CATE_QQWEIBO_STATUS:
