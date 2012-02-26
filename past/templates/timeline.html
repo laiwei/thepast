@@ -52,7 +52,7 @@
                         <!-- 来源 -->
                         {%set from_ = s.get_origin_uri()%}
                         {%if from_%}
-                            <span class="from {{from_[0]}}">&nbsp;<a href="{{from_[1]}}"></a></span>
+                            <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
                         {%endif%}
 
                         {% if images %}
