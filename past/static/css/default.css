@@ -415,8 +415,7 @@ a.node:hover {
 * html .clearfix{height: 1%;overflow: visible;}
 *+html .clearfix{min-height: 1%;}
 
-.clearfix:after{clear: both;content: ".";display: block;height: 0;visibility: hidden;font-size: 0;} 
-
+.clearfix:after{clear: both;content: ".";display: block;height: 0;visibility: hidden;font-size: 0;}
 
 .month{font-size:14px;margin:10px 0 25px;}
 .month h2{font-size:26px;font-weight:bold;margin-bottom:10px;border-bottom:1px solid #E2E2E2;}
@@ -429,7 +428,6 @@ a.node:hover {
 .message .text{padding-left:88px;}
 .message .text img{margin:5px 0;}
 .message .from{font-size:9px;color:#CCC;}
-
 
 span.from{
     background:url("/static/img/sns.png") no-repeat;
