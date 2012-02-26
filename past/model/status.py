@@ -52,7 +52,7 @@ class Status(object):
 
     @property
     def raw(self):
-        _raw = redis_conn.get(self.__class__.RAW_STATUS_REDIS_KEY % self.id)
+        _raw = redis_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
         return json_decode(_raw) if _raw else ""
         
     @classmethod

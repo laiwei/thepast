@@ -8,6 +8,8 @@ from past.utils.escape import json_decode, json_encode
 from past import config
 
 class User(object):
+    RAW_USER_REDIS_KEY = "/user/raw/%s"
+
     def __init__(self, id):
         self.id = str(id)
         self.uid = None
@@ -19,6 +21,11 @@ class User(object):
         return "<User id=%s, name=%s, uid=%s, session_id=%s>" \
                 % (self.id, self.name, self.uid, self.session_id)
     __str__ = __repr__
+
+    @property
+    def raw(self):
+        _raw = redis_conn.get(User.RAW_USER_REDIS_KEY % self.id)
+        return json_decode(_raw) if _raw else ""
 
     @classmethod
     def _clear_cache(cls, user_id):

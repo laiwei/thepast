@@ -94,13 +94,16 @@ def profile():
     sync_tasks = SyncTask.gets_by_user(u)
     my_sync_cates = [x.category for x in sync_tasks]
     site_homepage_list = []
+    ##FIXME:twitter和腾讯微博的地址不对
     for ua in g.user_alias:
         if ua.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
             site_homepage_list.append({'site':u'豆瓣', 'homepage':'http://www.douban.com/people/%s' %ua.alias})
         elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
             site_homepage_list.append({'site':u'新浪微博', 'homepage':'http://www.weibo.com/%s' %ua.alias})
         elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
-            site_homepage_list.append({'site':u'twitter', 'homepage':'http://www.twitter.com/%s' %ua.alias})
+            site_homepage_list.append({'site':u'twitter', 'homepage':'http://www.twitter.com/!#/%s' %ua.alias})
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
+            site_homepage_list.append({'site':u'腾讯微博', 'homepage':'http://t.qq.com/t/%s' %ua.alias})
     return render_template("profile.html", user=u, 
             my_sync_cates = my_sync_cates, site_homepage_list=site_homepage_list, config=config)
 
