@@ -85,9 +85,7 @@ def render(user, status_list, with_head=True):
         if s.category == config.CATE_DOUBAN_MINIBLOG:
             ##miniblog不显示title
             title = ''
-            links = s.get_data().get_links()
-            if links and links.get("image"):
-                img = links.get("image")
+            img = s.get_data().get_images()
         elif s.category == config.CATE_SINA_STATUS:
             retweeted = s.get_data().get_retweeted_status()
             re_mid_pic = retweeted and retweeted.get_middle_pic() or ''

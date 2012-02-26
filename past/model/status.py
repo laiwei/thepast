@@ -205,16 +205,19 @@ class Status(object):
             return None
 
     def get_origin_uri(self):
+        d = self.get_data()
         if self.category == config.CATE_DOUBAN_MINIBLOG:
-            ua = UserAlias.get_by_user_and_type(self.user_id, config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+            ua = UserAlias.get_by_user_and_type(self.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
             if ua:
-                return (config.OPENID_DOUBAN, config.DOUBAN_MINIBLOG % (ua.alias, self.origin_id))
+                return (config.OPENID_DOUBAN, 
+                        config.DOUBAN_MINIBLOG % (ua.alias, self.origin_id))
         elif self.category == config.CATE_DOUBAN_NOTE:
             return (config.OPENID_DOUBAN, config.DOUBAN_NOTE % self.origin_id)
         elif self.category == config.CATE_SINA_STATUS:
             return (config.OPENID_SINA, config.WEIBO_STATUS % self.origin_id)
         elif self.category == config.CATE_TWITTER_STATUS:
-            return (config.OPENID_TWITTER, config.TWITTER_STATUS % self.origin_id)
+            return (config.OPENID_TWITTER, d.get_origin_uri())
         elif self.category == config.CATE_QQWEIBO_STATUS:
             return (config.OPENID_QQ, config.QQWEIBO_STATUS % self.origin_id)
         else:

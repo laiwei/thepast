@@ -10,8 +10,7 @@ from past.utils.logger import logging
 from past.utils import datetime2timestamp
 from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
 from past.corelib import category2provider
-from past.model.data import (DoubanNoteData, 
-        DoubanStatusData, DoubanMiniBlogData)
+from past.model.data import (DoubanNoteData, DoubanMiniBlogData)
 from past.model.status import Status, SyncTask
 from past.model.user import User, UserAlias, OAuth2Token
 

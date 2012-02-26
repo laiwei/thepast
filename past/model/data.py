@@ -188,32 +188,47 @@ class AbsData(object):
             try:
                 self.data = json_decode(data)
             except Exception, e:
-                print e
+                import traceback; print traceback.format_exc()
                 self.data = {}
 
+    ## 注释以微博为例
+    ##原始的数据，json_decode之后的
     def get_data(self):
         return self.data
     
+    ##原微博的id
     def get_origin_id(self):
         raise NotImplementedError
-
+    
+    ##原微博的创建时间
     def get_create_time(self):
         raise NotImplementedError
-
+    
+    ##如果有title的话，比如豆瓣广播
     def get_title(self):
-        raise NotImplementedError
+        return ""
 
+    ##原微博的内容
     def get_content(self):
-        raise NotImplementedError
+        return ""
 
+    ##原微博本身是个转发，获取被转发的内容
     def get_retweeted_status(self):
-        raise NotImplementedError
+        return None
 
-    def get_user(self):
-        raise NotImplementedError
-
+    ##原微博附带的图片，返回结果为list
     def get_images(self):
         return []
+    
+    ##原微博的作者，如果能获取到的话
+    ##XXX
+    def get_user(self):
+        return None
+
+    ##原微博的uri，可以点过去查看（有可能获取不到或者很麻烦，比如sina就很变态）
+    ###XXX
+    def get_origin_uri(self):
+        return ""
 
 class DoubanData(AbsData):
     
@@ -263,7 +278,7 @@ class DoubanMiniBlogData(DoubanData):
     def get_content(self):
         return self.data.get("content", {}).get("$t")
     
-    def get_links(self):
+    def _get_links(self):
         links = {}
         _links = self.data.get("link", [])
         for x in _links:
@@ -272,118 +287,10 @@ class DoubanMiniBlogData(DoubanData):
         return links
 
     def get_images(self):
-        links = self.get_links()
+        links = self._get_links()
         if links and links.get("images"):
             return [links.get("images")]
         return []
-
-# 相册 
-class DoubanPhotoData(DoubanData):
-    def __init__(self, data):
-        super(DoubanPhotoData, self).__init__(
-                config.CATE_DOUBAN_PHOTO, data)
-
-    def get_origin_id(self):
-        id_ = self.data.get("id", {}).get("$t")
-        if id_:
-            return (id_.rstrip("/").split("/"))[-1]
-        return None
-
-    def get_create_time(self):
-        return self.data.get("published",{}).get("$t")
-
-    def get_title(self):
-        return self.data.get("title", {}).get("$t")
-
-    def get_content(self):
-        return self.data.get("content", {}).get("$t")
-
-    def get_large_img_src(self):
-        links = self.data.get("link", [])
-        for x in links:
-            if x.get("@rel") == "image":
-                return x.get("@href")
-    
-    def get_thumb_img_src(self):
-        links = self.data.get("link", [])
-        for x in links:
-            if x.get("@rel") == "thumb":
-                return x.get("@href")
-
-# 我说 
-class DoubanStatusData(DoubanData):
-    
-    def __init__(self, data):
-        super(DoubanStatusData, self).__init__(
-                config.CATE_DOUBAN_STATUS, data)
-
-    def get_origin_id(self):
-        return self.data.get("id")
-
-    def get_create_time(self):
-        return self.data.get("created_at")
-
-    def get_title(self):
-        return ""
-
-    def get_content(self):
-        return self.data.get("text")
-
-    def get_attachments(self):
-        attachs =  self.data.get("attachments")
-        return [DoubanStatusAttachment(x) for x in attachs]
-
-
-class DoubanStatusAttachment(object):
-    
-    def __init__(self, data):
-        self.data = data
-
-    def get_title(self):
-        return self.data.get("title")
-
-    def get_href(self):
-        return self.data.get("expaned_href")
-
-    def get_caption(self):
-        return self.data.get("caption")
-
-    def get_description(self):
-        return self.data.get("discription")
-
-    def get_media(self):
-        medias = self.data.get("media")
-        return [DoubanStatusAttachmentMedia(x) for x in medias]
-
-    def get_props(self):
-        props = self.data.get("properties", {}) 
-        return props
-
-class DoubanStatusAttachmentMedia(object):
-    
-    def __init__(self, data):
-        self.data = data
-
-    def get_type(self):
-        return self.data.get("type")
-    
-    def get_media_src(self):
-        return self.data.get("src")
-
-    def get_href(self):
-        return self.data.get("href")
-
-    def get_size(self):
-        return self.data.get("size")
-
-    ## just for music
-    def get_title(self):
-        return self.data.get("title")
-
-    ##-- just for flash
-    def get_imgsrc(self):
-        return self.data.get("imgsrc")
-
 
 class SinaWeiboData(AbsData):
     
@@ -462,6 +369,13 @@ class TwitterStatusData(AbsData):
     def get_user(self):
         return TwitterUser(self.data.get("user"))
 
+    def get_origin_uri(self):
+        u = self.get_user()
+        if u:
+            uid = u.get_user_id()
+            status_id = self.get_origin_id()
+            return config.TWITTER_STATUS % (uid, status_id)
+        return None
 
 # qqweibo status
 class QQWeiboStatusData(AbsData):
@@ -489,9 +403,6 @@ class QQWeiboStatusData(AbsData):
     def get_retweeted_status(self):
         return self.data.get("origtext", "") 
 
-    def get_user(self):
-        return None
-
     def _get_images(self, size):
         r = []
         imgs = self.data.get("image")
@@ -511,11 +422,8 @@ class QQWeiboStatusData(AbsData):
     def get_images(self, size="middle"):
         method = "get_%s_pic" % size
         if hasattr(self, method):
-            i = getattr(self, method)()
-            if i:
-                return [i]
+            return getattr(self, method)()
         return []
 
-    def get_from(self):
-        return (self.data.get("from"), self.data.get("fromurl"))
-            
+    def get_origin_uri(self):
+        return self.data.get("fromurl")

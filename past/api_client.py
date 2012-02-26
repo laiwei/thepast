@@ -7,7 +7,7 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
-from past.model.data import (DoubanStatusData, DoubanNoteData,
+from past.model.data import (DoubanNoteData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
     QQWeiboStatusData)
 from past.model.user import User,UserAlias, OAuth2Token
@@ -105,19 +105,6 @@ class Douban(object):
         if contents:
             print '------get douban miniblog,len is:', len(contents)
         return [DoubanMiniBlogData(c) for c in contents]
-
-    #FIXED
-    def get_timeline(self, since_id=None, until_id=None):
-        d = {}
-        if since_id is not None:
-            d["since_id"] = since_id 
-        if until_id is not None:
-            d["until_id"] = until_id
-
-        contents = self.get("/shuo/statuses/user_timeline/%s" \
-                % self.alias, d)
-        contents = json_decode(contents) if contents else []
-        return [DoubanStatusData(c) for c in contents]
 
     """
         GET /people/{userID}/collection?cat=book
