@@ -229,9 +229,6 @@ class Status(object):
             return d.get_retweeted_status()
         return None
 
-    def get_images(self):
-        d = self.get_data()
-
 
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):

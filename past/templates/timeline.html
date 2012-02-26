@@ -29,6 +29,7 @@
 			<div class="day"> › {{d}}日</div>
 			
             {%for s in days_status[d]%}
+            {%if s.text %}
             <!-- 每条信息输出楷书 -->
             <li>
                 <div class="message">
@@ -67,6 +68,7 @@
                 </div>
             </li>
             <!-- 每条信息输出结束 -->
+            {%endif%}
             {%endfor%}
 
 		</ul>

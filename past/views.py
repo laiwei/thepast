@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import os
 import datetime
+import re
 from functools import wraps
 try:
     import cStringIO as StringIO
@@ -13,7 +14,7 @@ from flask import g, session, request, send_from_directory, \
 import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
         logout_user, category2provider
-from past.utils.escape import json_encode, json_decode
+from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
@@ -406,6 +407,27 @@ def statuses_monthize(status_list):
             if day not in output[year_month]:
                 output[year_month][day] = [s]
             else:
-                output[year_month][day].append(s)
-
+                ## 去重
+                repeat = False
+                for s2 in output[year_month][day]:
+                    if status_cmp(s, s2):
+                        repeat = True
+                        break
+                if not repeat:
+                    output[year_month][day].append(s)
     return output
+
+def status_cmp(s1,s2,offset=20):
+    bear_text1 = clear_html_element(s1.text).replace(u"《", "").replace(u"》", "")
+    bear_text2 = clear_html_element(s2.text).replace(u"《", "").replace(u"》", "")
+    bear_text1 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bear_text1)
+    bear_text2 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bear_text2)
+    bear_text1 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bear_text1)
+    bear_text2 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bear_text2)
+    if bear_text1 == bear_text2:
+        return True
+
+    if bear_text1.startswith(bear_text2[:offset]):
+        return True
+
+    return False

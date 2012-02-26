@@ -288,8 +288,8 @@ class DoubanMiniBlogData(DoubanData):
 
     def get_images(self):
         links = self._get_links()
-        if links and links.get("images"):
-            return [links.get("images")]
+        if links and links.get("image"):
+            return [links.get("image")]
         return []
 
 class SinaWeiboData(AbsData):
