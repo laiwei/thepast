@@ -48,7 +48,7 @@ class Status(object):
         ##FIXME:abs(self.create_time - other.create_time) <= datetime.timedelta(1) 
         if self.user_id == other.user_id \
                 and abs(self.create_time.day - other.create_time.day) == 0 \
-                and  self.bare_text == other.bare_text:
+                and  self.bare_text[:15] == other.bare_text[:15]:
             return True
         return False
 
@@ -56,16 +56,18 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        s = u"%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
+        s = u"%s%s%s" % (self.user_id, self.bare_text[:15], self.create_time.day)
         d = hashlib.md5()
         d.update(s.encode("utf8"))
         return int(d.hexdigest(),16)
         
     def _generate_bare_text(self, offset=150):
         bare_text = self.text[:offset]
-        bare_text = clear_html_element(bare_text).replace(u"《", "").replace(u"》", "")
+        bare_text = clear_html_element(bare_text).replace(u"《", "").replace(u"》", "").replace("amp;","")
+        bare_text = re.sub("\s", "", bare_text)
         bare_text = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text)
+        bare_text = re.sub("http://url.cn/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text)
         return bare_text  
 
