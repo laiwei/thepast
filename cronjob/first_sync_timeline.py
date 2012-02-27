@@ -46,13 +46,5 @@ if __name__ == "__main__":
             time.sleep(5)
         time.sleep(30)
     except Exception, e:
-        print '----except: %s' %e
-
-        #print commands.getoutput("python jobs.py -t old -c 101 -n 1")
-        #print commands.getoutput("python jobs.py -t old -c 102 -n 1")
-        #print commands.getoutput("python jobs.py -t old -c 200 -n 1")
-        #print commands.getoutput("python jobs.py -t old -c 400 -n 1")
-        #print commands.getoutput("python jobs.py -t new -c 101 -n 1")
-        #print commands.getoutput("python jobs.py -t new -c 102 -n 1")
-        #print commands.getoutput("python jobs.py -t new -c 200 -n 1")
-        #print commands.getoutput("python jobs.py -t new -c 400 -n 1")
+        import traceback
+        print '%s %s' % (datetime.datetime.now(), traceback.format_exc())

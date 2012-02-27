@@ -21,95 +21,109 @@ def sync(t, old=False):
     if not t:
         print 'no such task'
         return 0
-    alias = None
-    provider = category2provider(t.category)
-    if provider == config.OPENID_DOUBAN:
-        alias = UserAlias.get_by_user_and_type(t.user_id, 
-                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
-    elif provider == config.OPENID_SINA:
-        alias = UserAlias.get_by_user_and_type(t.user_id, 
-                config.OPENID_TYPE_DICT[config.OPENID_SINA])
-    elif provider == config.OPENID_TWITTER:
-        alias = UserAlias.get_by_user_and_type(t.user_id, 
-                config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
-    elif provider == config.OPENID_QQ:
-        alias = UserAlias.get_by_user_and_type(t.user_id,
-                config.OPENID_TYPE_DICT[config.OPENID_QQ])
-    if not alias:
-        log.warn("no alias...")
-        return 0
+    log.info("the sync task is :%s" % t)
+    try:
+        alias = None
+        provider = category2provider(t.category)
+        if provider == config.OPENID_DOUBAN:
+            alias = UserAlias.get_by_user_and_type(t.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+        elif provider == config.OPENID_SINA:
+            alias = UserAlias.get_by_user_and_type(t.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_SINA])
+        elif provider == config.OPENID_TWITTER:
+            alias = UserAlias.get_by_user_and_type(t.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
+        elif provider == config.OPENID_QQ:
+            alias = UserAlias.get_by_user_and_type(t.user_id,
+                    config.OPENID_TYPE_DICT[config.OPENID_QQ])
+        if not alias:
+            log.warn("no alias...")
+            return 0
 
-    token = OAuth2Token.get(alias.id)
-    if not token:
-        log.warn("no access token, break...")
-        return 0
-    
-    client = None
-    if provider == config.OPENID_DOUBAN:
-        client = Douban(alias.alias, token.access_token, token.refresh_token)
-    elif provider == config.OPENID_SINA:
-        client = SinaWeibo(alias.alias, token.access_token)
-    elif provider == config.OPENID_TWITTER:
-        client = Twitter(alias.alias)
-    elif provider == config.OPENID_QQ:
-        client = QQWeibo(alias.alias)
-    if not client:
-        log.warn("get client fail, break...")
-        return 0
+        token = OAuth2Token.get(alias.id)
+        if not token:
+            log.warn("no access token, break...")
+            return 0
+        
+        client = None
+        if provider == config.OPENID_DOUBAN:
+            client = Douban(alias.alias, token.access_token, token.refresh_token)
+        elif provider == config.OPENID_SINA:
+            client = SinaWeibo(alias.alias, token.access_token)
+        elif provider == config.OPENID_TWITTER:
+            client = Twitter(alias.alias)
+        elif provider == config.OPENID_QQ:
+            client = QQWeibo(alias.alias)
+        if not client:
+            log.warn("get client fail, break...")
+            return 0
 
-    if t.category == config.CATE_DOUBAN_NOTE:
-        if old:
-            start = Status.get_count_by_cate(t.category, t.user_id)
-        else:
-            start = 0
-        note_list = client.get_notes(start, 50)
-        if note_list:
-            for x in note_list:
-                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-            return len(note_list)
-    elif t.category == config.CATE_DOUBAN_MINIBLOG:
-        if old:
-            start = Status.get_count_by_cate(t.category, t.user_id)
-        else:
-            start = 0
-        miniblog_list = client.get_miniblogs(start, 50)
-        if miniblog_list:
-            for x in miniblog_list:
-                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-            return len(miniblog_list)
-    elif t.category == config.CATE_DOUBAN_STATUS or t.category == config.CATE_SINA_STATUS:
-        if old:
-            until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
-            status_list = client.get_timeline(until_id=until_id)
-        else:
-            since_id = Status.get_min_origin_id(t.category, t.user_id)
-            status_list = client.get_timeline(since_id=since_id)
-        if status_list:
-            for x in status_list:
-                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-            return len(status_list)
-    elif t.category == config.CATE_TWITTER_STATUS:
-        if old:
-            until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
-            status_list = client.get_timeline(max_id=until_id)
-        else:
-            since_id = Status.get_min_origin_id(t.category, t.user_id)
-            status_list = client.get_timeline(since_id=since_id)
-        if status_list:
-            for x in status_list:
-                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-            return len(status_list)
-    elif t.category == config.CATE_QQWEIBO_STATUS:
-        if old:
-            oldest_create_time = Status.get_oldest_create_time(t.category, t.user_id)
-            oldest_create_time = datetime2timestamp(oldest_create_time)
-            status_list = client.get_old_timeline(oldest_create_time, reqnum=200)
-        else:
-            status_list = client.get_new_timeline(reqnum=20)
-        if status_list:
-            for x in status_list:
-                Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-            return len(status_list)
+        if t.category == config.CATE_DOUBAN_NOTE:
+            if old:
+                start = Status.get_count_by_cate(t.category, t.user_id)
+            else:
+                start = 0
+            note_list = client.get_notes(start, 50)
+            if note_list:
+                for x in note_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(note_list)
+        elif t.category == config.CATE_DOUBAN_MINIBLOG:
+            if old:
+                start = Status.get_count_by_cate(t.category, t.user_id)
+            else:
+                start = 0
+            miniblog_list = client.get_miniblogs(start, 50)
+            if miniblog_list:
+                for x in miniblog_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(miniblog_list)
+        elif t.category == config.CATE_SINA_STATUS:
+            if old:
+                until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
+                log.info("will get sinaweibo order than %s..." % until_id)
+                status_list = client.get_timeline(until_id=until_id)
+            else:
+                since_id = Status.get_min_origin_id(t.category, t.user_id)
+                log.info("will get sinaweibo newer than %s..." % since_id)
+                status_list = client.get_timeline(since_id=since_id)
+            if status_list:
+                log.info("get sinaweibo succ, len is %s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+        elif t.category == config.CATE_TWITTER_STATUS:
+            if old:
+                until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
+                log.info("will get tweets order than %s..." % until_id)
+                status_list = client.get_timeline(max_id=until_id)
+            else:
+                since_id = Status.get_min_origin_id(t.category, t.user_id)
+                log.info("will get tweets newer than %s..." % since_id)
+                status_list = client.get_timeline(since_id=since_id)
+            if status_list:
+                log.info("get tweets succ, len is %s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+        elif t.category == config.CATE_QQWEIBO_STATUS:
+            if old:
+                oldest_create_time = Status.get_oldest_create_time(t.category, t.user_id)
+                log.info("will get qqweibo order than %s" % oldest_create_time)
+                if oldest_create_time is not None:
+                    oldest_create_time = datetime2timestamp(oldest_create_time)
+                status_list = client.get_old_timeline(oldest_create_time, reqnum=200)
+            else:
+                log.info("will get qqweibo new timeline")
+                status_list = client.get_new_timeline(reqnum=20)
+            if status_list:
+                log.info("get qqweibo succ, result length is:%s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+    except:
+        import traceback; print traceback.format_exc()
     return 0
 
 def sync_helper(cate,old=False):
@@ -127,7 +141,8 @@ def sync_helper(cate,old=False):
         try:
             sync(t, old)
         except Exception, e:
-            print "%s %s" % (datetime.datetime.now(), e)
+            import traceback
+            print "%s %s" % (datetime.datetime.now(), traceback.format_exc())
 
 if __name__ == '__main__':
     parser = OptionParser()

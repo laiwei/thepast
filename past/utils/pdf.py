@@ -66,19 +66,15 @@ def render(user, status_list, with_head=True):
         _html = u"""<html> <body><div class="box">"""
 
     for s in status_list:
+        if not s:
+            continue
         title = s.title
         create_time = s.create_time
-        from_ = ''
-        if s.category == config.CATE_DOUBAN_MINIBLOG:
-            from_ = u'<a href="' + config.DOUBAN_MINIBLOG % (s.origin_user_id, s.origin_id) + u' class="node">From：豆瓣广播</a>'
-        elif s.category == config.CATE_DOUBAN_NOTE:
-            from_ = u'<a href="' + config.DOUBAN_NOTE % (s.origin_id,) + u' class="node">From：豆瓣日记</a>'
-        elif s.category == config.CATE_SINA_STATUS:
-            from_ = u'<a href="' + config.WEIBO_STATUS % (s.origin_id) + u' class="node">From：新浪微博</a>'
-        elif s.category == config.CATE_TWITTER_STATUS:
-            from_ = u'<a href="' + config.TWITTER_STATUS % (s.origin_id) + u' class="node">From：twitter</a>'
-        elif s.category == config.CATE_QQWEIBO_STATUS:
-            from_ = u'<a href="' + config.QQWEIBO_STATUS % (s.origin_id) + u' class="node">From：腾讯微博</a>'
+        from_ = s.get_origin_uri()
+        if from_:
+            from_ = u'<a href="' + from_[1] + u' class="node">From: ' + from_[0] + '</a>'
+        else:
+            from_ = u''
         text = s.text
         retweeted_text = ''
         img = ''

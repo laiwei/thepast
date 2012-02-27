@@ -391,7 +391,7 @@ def statuses_monthize(status_list):
     output = {}
     for s in status_list:
         year_month = "%s-%s" % (s.create_time.year, s.create_time.month)
-        day = str(s.create_time.day)
+        day = s.create_time.day
         
         if year_month not in output:
             output[year_month] = {day:[s]}

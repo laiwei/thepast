@@ -43,7 +43,8 @@ class Status(object):
     __str__ = __repr__
 
     def __eq__(self, other):
-        ##同一用户，在一天之内发表的，相似的内容，认为是重复的^^
+        ##同一用户，在一天之内发表的，相似的内容，认为是重复的^^, 
+        ##对于23点和凌晨1点这种跨天的没有考虑
         ##FIXME:abs(self.create_time - other.create_time) <= datetime.timedelta(1) 
         if self.user_id == other.user_id \
                 and abs(self.create_time.day - other.create_time.day) == 0 \
@@ -107,7 +108,7 @@ class Status(object):
             cls._clear_cache(user_id, None, cate=category)
             status = cls.get(status_id)
         except IntegrityError:
-            log.warning("add status duplicated, ignore...")
+            #log.warning("add status duplicated, ignore...")
             db_conn.rollback()
         finally:
             cursor.close()
@@ -170,24 +171,26 @@ class Status(object):
     @classmethod
     def get_max_origin_id(cls, cate, user_id):
         cursor = db_conn.cursor()
-        cursor.execute('''select max(origin_id) from status 
-            where category=%s and user_id=%s''', (cate, user_id))
+        cursor.execute('''select origin_id from status 
+            where category=%s and user_id=%s 
+            order by length(origin_id) desc, origin_id desc limit 1''', (cate, user_id))
         row = cursor.fetchone()
         if row:
             return row[0]
         else:
-            return 0
+            return None
 
     @classmethod
     def get_min_origin_id(cls, cate, user_id):
         cursor = db_conn.cursor()
-        cursor.execute('''select min(origin_id) from status 
-            where category=%s and user_id=%s''', (cate, user_id))
+        cursor.execute('''select origin_id from status 
+            where category=%s and user_id=%s 
+            order by length(origin_id), origin_id limit 1''', (cate, user_id))
         row = cursor.fetchone()
         if row:
             return row[0]
         else:
-            return 0
+            return None
 
     ## just for tecent_weibo
     @classmethod
@@ -199,7 +202,7 @@ class Status(object):
         if row:
             return row[0]
         else:
-            return 0
+            return None
     
     @classmethod
     def get_count_by_cate(cls, cate, user_id):

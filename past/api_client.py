@@ -208,7 +208,7 @@ class SinaWeibo(object):
         contents = json_decode(contents).get("statuses", []) if contents else []
         ##debug
         if contents:
-            print '-------get sinawebo, len is:', len(contents)
+            print '---get sinawebo succ, result length is:', len(contents)
         return [SinaWeiboStatusData(c) for c in contents]
 
 class Twitter(object):
@@ -229,8 +229,6 @@ class Twitter(object):
 
     def get_timeline(self, since_id=None, max_id=None, count=200):
         contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
-        if contents:
-            print '-------get twitter, len is:', len(contents)
         return [TwitterStatusData(c) for c in contents]
 
 class QQWeibo(object):
@@ -264,23 +262,29 @@ class QQWeibo(object):
 
         #pageflag: 分页标识（0：第一页，1：向下翻页，2：向上翻页）
         #lastid: 和pagetime配合使用（第一页：填0，向上翻页：填上一次请求返回的第一条记录id，向下翻页：填上一次请求返回的最后一条记录id）
+        #pagetime 本页起始时间（第一页：填0，向上翻页：填上一次请求返回的第一条记录时间，向下翻页：填上一次请求返回的最后一条记录时间）
         qs['pageflag'] = pageflag
-        qs['pagetime'] = pagetime
-        #qs['lastid'] = lastid
+        qs['pagetime'] = pagetime if pagetime is not None else 0
 
         contents = self.auth.access_resource("GET", "/statuses/broadcast_timeline", qs)
         if not contents:
             return []
 
-        contents = json_decode(contents)
-        print 'ret:', contents.get("ret")
+        try:
+            contents_ = json_decode(contents)
+        except:
+            ##XXX:因为腾讯的json数据很2，导致有时候decode的时候会失败，一般都是因为双引号没有转义的问题
+            import re
+            r = re.sub('=\\"[^ >]*"( |>)', '', contents)
+            contents_ = json_decode(r)
+        contents = contents_
 
         if str(contents.get("ret")) != "0":
             return []
         
         data  = contents.get("data")
         info = data and data.get("info")
-        print '-----status from qqweibo, len is: %s' % len(info)
+        print '---status from qqweibo, len is: %s' % len(info)
 
         return [QQWeiboStatusData(c) for c in info]
         
