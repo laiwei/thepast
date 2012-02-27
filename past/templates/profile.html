@@ -11,12 +11,16 @@
     <span class="fade">{{g.user.name}}, ThePast第{{g.user.id}}号成员，加入于{{g.user.create_time}}</span>
     <div class="sep10"></div>
     <table><tbody>
-        {% for x in site_homepage_list %}
-        <tr><td width="30%"><span class="fade">{{x['site']}}:</span></td>
-            <td><span class="fade"><a href="{{x['homepage']}}">{{x['homepage']}}</a></span>
-            <div class="sep10"></div>
-            </td></tr>
-        {% endfor %}
+        {%for ua in g.user.get_alias()%}
+            {%set homepage_info = ua.get_homepage_url()%}
+            {%if homepage_info%}
+                <tr><td width="30%"><span class="fade">{{homepage_info[0]}}:</span></td>
+                    <td><span class="fade"><a href="{{homepage_info[1]}}">{{homepage_info[1]}}</a></span>
+                    <div class="sep10"></div>
+                    </td></tr>
+            {%endif%}
+        {%endfor%}
+
     </tbody></table>
     </div>
 </div>

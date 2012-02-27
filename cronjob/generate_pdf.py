@@ -18,7 +18,7 @@ if __name__ == "__main__":
         try:
             pdf_filename = get_pdf_filename(uid)
             print pdf_filename
-            generate_pdf(pdf_filename, uid, 0, 100000, capacity=-1)
+            generate_pdf(pdf_filename, uid, 0, 1000, capacity=-1)
             if not is_pdf_file_exists(pdf_filename):
                 print '%s generate pdf for user:%s fail' % (datetime.datetime.now(), uid)
             else:

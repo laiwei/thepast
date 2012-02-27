@@ -95,7 +95,7 @@ TWITTER_STATUS = 'http://twitter.com/#!/%s/status/%s'
 
 DOUBAN_SITE = "http://www.douban.com"
 SINA_SITE = "http://weibo.com"
-TWITTER_SITE = "http://twitter.com"
+TWITTER_SITE = "http://twitter.com/#!"
 QQWEIBO_SITE = "http://t.qq.com"
 
 #uid of laiwei

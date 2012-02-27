@@ -263,8 +263,10 @@ class UserAlias(object):
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
             return u"微博", "%s/%s" %(config.SINA_SITE, self.alias)
 
+        ##FIXME:twitter的显示的不对
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
-            return u"twitter", "%s/%s" %(config.TWITTER_SITE, self.alias)
+            u = User.get(self.user_id)
+            return u"twitter", "%s/%s" %(config.TWITTER_SITE, u.name)
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
             ##XXX:腾讯微博比较奇怪

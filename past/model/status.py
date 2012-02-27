@@ -1,9 +1,12 @@
 #-*- coding:utf-8 -*-
 
+import datetime
+import hashlib
+import re
 from MySQLdb import IntegrityError
 
 from past import config
-from past.utils.escape import json_encode, json_decode
+from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import redis_conn, redis_cache_conn, db_conn
 from past.corelib.cache import cache, pcache
@@ -29,11 +32,41 @@ class Status(object):
         self.text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
         self.text = json_decode(self.text) if self.text else ""
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
+        if self.site == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
+            self.create_time += datetime.timedelta(seconds=8*3600)
+
+        self.bare_text = self._generate_bare_text()
 
     def __repr__(self):
         return "<Status id=%s, user_id=%s, origin_id=%s, cate=%s, title=%s>" \
             %(self.id, self.user_id, self.origin_id, self.category, self.title)
     __str__ = __repr__
+
+    def __eq__(self, other):
+        ##同一用户，在一天之内发表的，相似的内容，认为是重复的^^
+        ##FIXME:abs(self.create_time - other.create_time) <= datetime.timedelta(1) 
+        if self.user_id == other.user_id \
+                and abs(self.create_time.day - other.create_time.day) == 0 \
+                and  self.bare_text == other.bare_text:
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        s = "%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
+        d = hashlib.md5()
+        d.update(s)
+        return int(d.hexdigest(),16)
+        
+    def _generate_bare_text(self, offset=150):
+        bare_text = self.text[:offset]
+        bare_text = clear_html_element(bare_text).replace(u"《", "").replace(u"》", "")
+        bare_text = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text)
+        bare_text = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text)
+        bare_text = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text)
+        return bare_text  
 
     ##TODO:这个clear_cache需要拆分
     @classmethod

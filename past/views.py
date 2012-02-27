@@ -41,7 +41,7 @@ def before_request():
     else:
         g.user_alias = None
     g.start = int(request.args.get('start', 0))
-    g.count = int(request.args.get('count', 20))
+    g.count = int(request.args.get('count', 30))
     g.cate = request.args.get("cate", None)
 
 @app.teardown_request
@@ -71,7 +71,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
-#@require_login
+@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -93,19 +93,8 @@ def profile():
     u = g.user
     sync_tasks = SyncTask.gets_by_user(u)
     my_sync_cates = [x.category for x in sync_tasks]
-    site_homepage_list = []
-    ##FIXME:twitter和腾讯微博的地址不对
-    for ua in g.user_alias:
-        if ua.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
-            site_homepage_list.append({'site':u'豆瓣', 'homepage':'http://www.douban.com/people/%s' %ua.alias})
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
-            site_homepage_list.append({'site':u'新浪微博', 'homepage':'http://www.weibo.com/%s' %ua.alias})
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
-            site_homepage_list.append({'site':u'twitter', 'homepage':'http://www.twitter.com/!#/%s' %ua.alias})
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
-            site_homepage_list.append({'site':u'腾讯微博', 'homepage':'http://t.qq.com/t/%s' %ua.alias})
     return render_template("profile.html", user=u, 
-            my_sync_cates = my_sync_cates, site_homepage_list=site_homepage_list, config=config)
+            my_sync_cates = my_sync_cates, config=config)
 
 @app.route("/logout")
 @require_login
@@ -421,16 +410,18 @@ def statuses_monthize(status_list):
     return output
 
 def status_cmp(s1,s2,offset=20):
-    bear_text1 = clear_html_element(s1.text).replace(u"《", "").replace(u"》", "")
-    bear_text2 = clear_html_element(s2.text).replace(u"《", "").replace(u"》", "")
-    bear_text1 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bear_text1)
-    bear_text2 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bear_text2)
-    bear_text1 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bear_text1)
-    bear_text2 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bear_text2)
-    if bear_text1 == bear_text2:
+    bare_text1 = clear_html_element(s1.text).replace(u"《", "").replace(u"》", "")
+    bare_text2 = clear_html_element(s2.text).replace(u"《", "").replace(u"》", "")
+    bare_text1 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text1)
+    bare_text2 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text2)
+    bare_text1 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text1)
+    bare_text2 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text2)
+    bare_text1 = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text1)
+    bare_text2 = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text2)
+    if bare_text1 == bare_text2:
         return True
 
-    if bear_text1.startswith(bear_text2[:offset]):
+    if bare_text1.startswith(bare_text2[:offset]):
         return True
 
     return False
