@@ -60,7 +60,7 @@ def index():
 
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
-    status_list  = statuses_monthize(status_list)
+    status_list  = statuses_timelize(status_list)
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
 
 @app.route("/user")
@@ -84,7 +84,7 @@ def user(uid):
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
-    status_list  = statuses_monthize(status_list)
+    status_list  = statuses_timelize(status_list)
     return render_template("timeline.html", user=u, status_list=status_list, config=config)
 
 @app.route("/settings/profile")
@@ -387,41 +387,33 @@ def _add_sync_task_and_push_queue(provider, user):
                 t and TaskQueue.add(t.id, t.kind)
 
 ## 把status_list构造为month，day的层级结构
-def statuses_monthize(status_list):
-    output = {}
+def statuses_timelize(status_list):
+
+    hashed = {}
     for s in status_list:
+        hash_s = hash(s)
+        if hash_s not in hashed:
+            hashed[hash_s] = RepeatedStatus(s)
+        else:
+            hashed[hash_s].status_list.append(s)
+
+    output = {}
+    for hash_s, repeated in hashed.items():
+        s = repeated.status_list[0]
         year_month = "%s-%s" % (s.create_time.year, s.create_time.month)
         day = s.create_time.day
-        
+
         if year_month not in output:
-            output[year_month] = {day:[s]}
+            output[year_month] = {day:[repeated]}
         else:
             if day not in output[year_month]:
-                output[year_month][day] = [s]
+                output[year_month][day] = [repeated]
             else:
-                ## 去重
-                repeat = False
-                for s2 in output[year_month][day]:
-                    if status_cmp(s, s2):
-                        repeat = True
-                        break
-                if not repeat:
-                    output[year_month][day].append(s)
+                output[year_month][day].append(repeated)
+
     return output
 
-def status_cmp(s1,s2,offset=20):
-    bare_text1 = clear_html_element(s1.text).replace(u"《", "").replace(u"》", "")
-    bare_text2 = clear_html_element(s2.text).replace(u"《", "").replace(u"》", "")
-    bare_text1 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text1)
-    bare_text2 = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text2)
-    bare_text1 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text1)
-    bare_text2 = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text2)
-    bare_text1 = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text1)
-    bare_text2 = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text2)
-    if bare_text1 == bare_text2:
-        return True
-
-    if bare_text1.startswith(bare_text2[:offset]):
-        return True
-
-    return False
+class RepeatedStatus(object):
+    def __init__(self, status):
+        self.create_time = status.create_time
+        self.status_list = [status]

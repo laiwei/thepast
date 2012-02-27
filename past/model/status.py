@@ -56,9 +56,9 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        s = "%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
+        s = u"%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
         d = hashlib.md5()
-        d.update(s)
+        d.update(s.encode("utf8"))
         return int(d.hexdigest(),16)
         
     def _generate_bare_text(self, offset=150):

@@ -20,56 +20,66 @@
 		<!-- 调用时间：XX年XX月 -->
 		<h2 class="title">{{m.replace("-","年")}}月</h2>
 		
-        {%set days_status = status_list[m]%}
-        {%set sorted_days = days_status.keys()|sort(reverse=True)%}
+        {%set days_statuses = status_list[m]%}
+        {%set sorted_days = days_statuses.keys()|sort(reverse=True)%}
         {%for d in sorted_days%}
 		<!-- 日循环开始 -->
 		<ul class="articles">
 			<!-- 调用日期： XX日 -->
 			<div class="day"> › {{d}}日</div>
 			
-            {%for s in days_status[d]%}
-            {%if s.text %}
-            <!-- 每条信息输出楷书 -->
-            <li>
-                <div class="message">
-                    <!-- 调用时间：时分秒 -->
-                    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-                    <!-- 信息内容 + span.from -->
-                    {% set images = s.get_data().get_images() or [] %}
-                    <div class="text">
-                        {{s.text|safe}}
+{%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
+    {%set s = repeated_status.status_list[0]%}
 
-                        {%if s.category == config.CATE_SINA_STATUS%}
-                            {% set retweeted = s.get_data().get_retweeted_status() %}
-                            {% set re_mid_pic = retweeted and retweeted.get_images() or [] %}
-                            {% set images = images + re_mid_pic %}
-                            {% if retweeted %}
-                                {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
-                            {% endif %}
+    <!-- 每条信息输出楷书 -->
+    <li>
+        <div class="message">
+            <!-- 调用时间：时分秒 -->
+            <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+            <!-- 信息内容 + span.from -->
+            {% set images = s.get_data().get_images() or [] %}
+            <div class="text">
+                {{s.text|safe}}
 
-                        {%endif%}
+                {%if s.category == config.CATE_SINA_STATUS%}
+                    {% set retweeted = s.get_data().get_retweeted_status() %}
+                    {% set re_mid_pic = retweeted and retweeted.get_images() or [] %}
+                    {% set images = images + re_mid_pic %}
+                    {% if retweeted %}
+                    {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
+                    {% endif %}
 
-                        <!-- 来源 -->
-                        {%set from_ = s.get_origin_uri()%}
-                        {%if from_%}
-                            <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-                        {%endif%}
+                {%endif%}
 
-                        {% if images %}
-                            {%for image in images%}
-                                <br />
-                                <img src="{{image}}"/>
-                            {%endfor%}
-                        {% endif %}
+                {%if not s.text and s.category == config.CATE_QQWEIBO_STATUS%}
+                    {% set retweeted = s.get_data().get_retweeted_status() %}
+                    {% if retweeted %}
+                        {{ "//" + retweeted }} 
+                    {% endif %}
+                {%endif%}
 
-                    </div>
-                    <!-- 信息内容结束 -->
-                </div>
-            </li>
-            <!-- 每条信息输出结束 -->
-            {%endif%}
-            {%endfor%}
+                <!-- 来源 -->
+                {%for s in repeated_status.status_list%}
+                    {%set from_ = s.get_origin_uri()%}
+                    {%if from_%}
+                        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+                    {%endif%}
+                {%endfor%}
+
+                <!-- 图片 -->
+                {% if images %}
+                    {%for image in images%}
+                        <br />
+                        <img src="{{image}}"/>
+                    {%endfor%}
+                {% endif %}
+
+            </div>
+            <!-- 信息内容结束 -->
+        </div>
+    </li>
+    <!-- 每条信息输出结束 -->
+{%endfor%}
 
 		</ul>
 		<!-- 日循环结束 -->
