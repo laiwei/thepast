@@ -1,10 +1,8 @@
-html {}
-
 body {
     padding: 0px;
     margin: 0px;
     font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti !important;
-    background-color: #fff;
+    background-image: url("/static/img/bg.png");
 }
 
 h1 {
@@ -172,7 +170,8 @@ table .vborder1 {
 
 #Top {
    height: 80px;
-   background-color: #F0F0F0;
+   box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+   border-bottom: 1px solid #F0F0F0;
 }
 
 #TopMain {
@@ -222,8 +221,6 @@ table .vborder1 {
 }
 
 #Wrapper {
-    background-color: #fff;
-    background-image: url("/static/img/bg.png");
 }
 
 #Main {
@@ -249,10 +246,6 @@ table .vborder1 {
     padding: 10px;
 }
 
-#Bottom {
-    background-color: #fff;
-}
-
 #BottomMain {
     margin: 0px auto 0px auto;
     width: 920px;
@@ -263,18 +256,10 @@ table .vborder1 {
 
 /* CLASSes */
 .box {
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -o-border-radius: 3px;
-    border-radius: 3px;
-
-    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-    -o-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
-
-    background-color: #fff;
-    border: 2px solid #fff;
+    box-shadow: 0 0px 3px rgba(0, 0, 0, 0.25);
+    background-color: #fdfdfd;
+    border: 1px solid #f0f0f0;
+	padding: 4px;
 }
 
 .glass {
@@ -326,6 +311,7 @@ table .vborder1 {
 
 .fade { 
     color: #999;
+	font-size: 14px;
 }
 
 .sep20 {height:20px;}
