@@ -169,17 +169,17 @@ table .vborder1 {
 }
 
 /* IDes */
+
 #Top {
-    height: 40px;
-    background-color: #F0F0F0;
-    background-image: url("/static/img/bg_top_light.png");
+   height: 80px;
+   background-color: #F0F0F0;
 }
 
 #TopMain {
-    width: 960px;
-    height: 40px;
-    text-align: center;
-    margin: 0px auto 0px auto;
+   width: 960px;
+   height: 80px;
+   text-align: center;
+   margin: 0px auto 0px auto;
 }
 
 #Search {

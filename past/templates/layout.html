@@ -13,7 +13,7 @@
     <div id="TopMain">
         <a href="/"> 
             <img src="{{url_for('static', filename='img/logo.png')}}" 
-                border="0" style="display: block; float: left; margin-top: 9px; margin-left: 20px;">
+                border="0" style="display: block; float: left; margin-left: 10px;">
         </a>
         <div id="Navigation">
             <ul>
@@ -140,7 +140,6 @@
 
         <div id="Content">
             {% block content_notification %}
-                <div class=box>
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         <ul class=flashes>
@@ -150,7 +149,6 @@
                     {% endif %}
                 {% endwith %}
                 
-                </div>
             {% endblock%}
 
             {% block content_block%}
