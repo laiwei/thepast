@@ -32,8 +32,10 @@
                 {%endif%}
             {%endfor%}
             <div class="sep5"></div>
-            <span><a href="/{{user.id}}/pdf">PDF版本下载</a></span>&nbsp;&nbsp;
-            <span><a href="/user/{{user.id}}">去ta的主页</a></span>
+            <span><a href="/user/{{user.id}}">去ta的主页</a></span>&nbsp;&nbsp;
+            {%if user.is_pdf_ready()%}
+                <span><a href="/{{user.id}}/pdf">PDF版本下载</a></span>
+            {%endif%}
         </div>
         <div class="c"></div>
     </div>

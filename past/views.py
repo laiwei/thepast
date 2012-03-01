@@ -15,7 +15,7 @@ import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
         logout_user, category2provider
 from past.utils.escape import json_encode, json_decode, clear_html_element
-from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename
+from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename, is_user_pdf_file_exists
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
@@ -244,11 +244,13 @@ def mypdf():
 def pdf(uid):
     user = User.get(uid)
     if not user:
-        abort(401, "No such user")
+        abort(404, "No such user")
     
     pdf_filename = get_pdf_filename(user.id)
     if not is_pdf_file_exists(pdf_filename):
-        generate_pdf(pdf_filename, user.id, 0, 10000000)
+        #generate_pdf(pdf_filename, user.id, 0, 10000000)
+        #abort(404, u"请明天来下载吧，因为我的内存吃不消了，只能晚上生成PDF^^")
+        abort(404, "Please wait one day to  download the PDF version, because the vps memory is limited")
     if not is_pdf_file_exists(pdf_filename):
         abort(400, "generate pdf fail, please try again...")
 

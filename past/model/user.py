@@ -149,6 +149,10 @@ class User(object):
     def set_icon_url(self, url):
         return self.set_profile_item("icon_url", url)
 
+    def is_pdf_ready(self):
+        from past.utils.pdf import is_user_pdf_file_exists
+        return is_user_pdf_file_exists(self.id)
+
 class UserAlias(object):
 
     def __init__(self, id_, type_, alias, user_id):

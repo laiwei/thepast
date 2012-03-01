@@ -169,3 +169,7 @@ def is_pdf_file_exists(filename):
     if os.path.exists(full_file_name) and os.path.getsize(full_file_name) > 0:
         return True
     return False
+
+def is_user_pdf_file_exists(uid):
+    f = get_pdf_filename(uid)
+    return is_pdf_file_exists(f)

@@ -79,7 +79,11 @@
                             {%endif%}
                         {%endfor%}
                         <div class="sep10"></div>
-                        <span><a href="/{{user_.id}}/pdf">下载PDF版</a></span>
+                        {%if user_.is_pdf_ready()%}
+                            <span><a href="/{{user_.id}}/pdf">PDF版本下载</a></span>
+                        {%else%}
+                            <span>明天再来下载PDF吧，因为内存吃不消^^</span>
+                        {%endif%}
                     </div>
 
                 {% else %}
