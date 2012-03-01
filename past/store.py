@@ -2,6 +2,7 @@
 
 import os
 import commands
+import datetime
 
 import MySQLdb
 import redis
@@ -41,6 +42,33 @@ def connect_redis():
 def connect_redis_cache():
     return redis.Redis(config.REDIS_CACHE_HOST, config.REDIS_CACHE_PORT)
 
-db_conn = connect_db()
+class DB(object):
+    
+    def __init__(self):
+        self._conn = None
+
+    def connect(self):
+        self._conn = connect_db()
+
+    def execute(self, *a, **kw):
+        cursor = kw.get('cursor')
+        try:
+            cursor = cursor or self._conn.cursor()
+            cursor.execute(*a, **kw)
+        except (AttributeError, MySQLdb.OperationalError):
+            print 'ebug, %s re-connect to mysql' % datetime.datetime.now()
+            self._conn and self._conn.close()
+            self.connect()
+            cursor = self._conn.cursor()
+            cursor.execute(*a, **kw)
+        return cursor
+        
+    def commit(self):
+        return self._conn and self._conn.commit()
+
+    def rollback(self):
+        return self._conn and self._conn.rollback()
+        
+db_conn = DB()
 redis_cache_conn = connect_redis_cache()
 redis_conn = connect_redis()

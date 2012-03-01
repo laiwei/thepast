@@ -95,9 +95,9 @@ class Status(object):
     def add(cls, user_id, origin_id, create_time, site, category, title, 
             text=None, raw=None):
         status = None
-        cursor = db_conn.cursor()
+        cursor = None
         try:
-            cursor.execute("""insert into status 
+            cursor = db_conn.execute("""insert into status 
                     (user_id, origin_id, create_time, site, category, title)
                     values (%s,%s,%s,%s,%s,%s)""",
                     (user_id, origin_id, create_time, site, category, title))
@@ -113,7 +113,7 @@ class Status(object):
             #log.warning("add status duplicated, ignore...")
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return status
 
@@ -135,21 +135,20 @@ class Status(object):
     @cache("status:{status_id}")
     def get(cls, status_id):
         status = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select user_id, origin_id, create_time, site, 
+        cursor = db_conn.execute("""select user_id, origin_id, create_time, site, 
                 category, title from status 
                 where id=%s""", status_id)
         row = cursor.fetchone()
         if row:
             status = cls(status_id, *row)
-        cursor.close()
+        cursor and cursor.close()
 
         return status
 
     @classmethod
     @pcache("status_ids:user:{user_id}cate:{cate}")
     def get_ids(cls, user_id, start=0, limit=20, order="create_time", cate=None):
-        cursor = db_conn.cursor()
+        cursor = None
         if not user_id:
             return []
         if cate is not None:
@@ -157,13 +156,13 @@ class Status(object):
                 return []
             sql = """select id from status where user_id=%s and category=%s
                     order by """ + order + """ desc limit %s,%s""" 
-            cursor.execute(sql, (user_id, cate, start, limit))
+            cursor = db_conn.execute(sql, (user_id, cate, start, limit))
         else:
             sql = """select id from status where user_id=%s and category!=%s
                     order by """ + order + """ desc limit %s,%s""" 
-            cursor.execute(sql, (user_id, config.CATE_DOUBAN_NOTE, start, limit))
+            cursor = db_conn.execute(sql, (user_id, config.CATE_DOUBAN_NOTE, start, limit))
         rows = cursor.fetchall()
-        cursor.close()
+        cursor and cursor.close()
         return [x[0] for x in rows]
     
     @classmethod
@@ -172,11 +171,11 @@ class Status(object):
 
     @classmethod
     def get_max_origin_id(cls, cate, user_id):
-        cursor = db_conn.cursor()
-        cursor.execute('''select origin_id from status 
+        cursor = db_conn.execute('''select origin_id from status 
             where category=%s and user_id=%s 
             order by length(origin_id) desc, origin_id desc limit 1''', (cate, user_id))
         row = cursor.fetchone()
+        cursor and cursor.close()
         if row:
             return row[0]
         else:
@@ -184,11 +183,11 @@ class Status(object):
 
     @classmethod
     def get_min_origin_id(cls, cate, user_id):
-        cursor = db_conn.cursor()
-        cursor.execute('''select origin_id from status 
+        cursor = db_conn.execute('''select origin_id from status 
             where category=%s and user_id=%s 
             order by length(origin_id), origin_id limit 1''', (cate, user_id))
         row = cursor.fetchone()
+        cursor and cursor.close()
         if row:
             return row[0]
         else:
@@ -197,10 +196,10 @@ class Status(object):
     ## just for tecent_weibo
     @classmethod
     def get_oldest_create_time(cls, cate, user_id):
-        cursor = db_conn.cursor()
-        cursor.execute('''select min(create_time) from status 
+        cursor = db_conn.execute('''select min(create_time) from status 
             where category=%s and user_id=%s''', (cate, user_id))
         row = cursor.fetchone()
+        cursor and cursor.close()
         if row:
             return row[0]
         else:
@@ -208,10 +207,10 @@ class Status(object):
     
     @classmethod
     def get_count_by_cate(cls, cate, user_id):
-        cursor = db_conn.cursor()
-        cursor.execute('''select count(1) from status 
+        cursor = db_conn.execute('''select count(1) from status 
             where category=%s and user_id=%s''', (cate, user_id))
         row = cursor.fetchone()
+        cursor and cursor.close()
         if row:
             return row[0]
         else:
@@ -219,10 +218,10 @@ class Status(object):
 
     @classmethod
     def get_count_by_user(cls, user_id):
-        cursor = db_conn.cursor()
-        cursor.execute('''select count(1) from status 
+        cursor = db_conn.execute('''select count(1) from status 
             where user_id=%s''', user_id)
         row = cursor.fetchone()
+        cursor and cursor.close()
         if row:
             return row[0]
         else:
@@ -287,9 +286,9 @@ class SyncTask(object):
     @classmethod
     def add(cls, category, user_id):
         task = None
-        cursor = db_conn.cursor()
+        cursor = None
         try:
-            cursor.execute("""insert into sync_task
+            cursor = db_conn.execute("""insert into sync_task
                     (category, user_id) values (%s,%s)""",
                     (category, user_id))
             db_conn.commit()
@@ -298,29 +297,27 @@ class SyncTask(object):
         except IntegrityError:
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return task
 
     @classmethod
     def get(cls, id):
         task = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select category,user_id,time from sync_task
+        cursor = db_conn.execute("""select category,user_id,time from sync_task
                 where id=%s limit 1""", id) 
         row = cursor.fetchone()
         if row:
             task = cls(id, *row)
-        cursor.close()
+        cursor and cursor.close()
 
         return task
     
     @classmethod
     def get_ids(cls):
-        cursor = db_conn.cursor()
-        cursor.execute("""select id from sync_task""") 
+        cursor = db_conn.execute("""select id from sync_task""") 
         r = [row[0] for row in cursor.fetchall()]
-        cursor.close()
+        cursor and cursor.close()
         return r
     
     @classmethod
@@ -329,10 +326,9 @@ class SyncTask(object):
 
     @classmethod
     def gets_by_user(cls, user):
-        cursor = db_conn.cursor()
-        cursor.execute("""select id from sync_task where user_id = %s""", user.id)
+        cursor = db_conn.execute("""select id from sync_task where user_id = %s""", user.id)
         rows = cursor.fetchall()
-        cursor.close()
+        cursor and cursor.close()
         return [cls.get(row[0] )for row in rows]
 
     @classmethod
@@ -341,11 +337,10 @@ class SyncTask(object):
         return [x for x in tasks if str(x.category) == cate]
 
     def remove(self):
-        cursor = db_conn.cursor()
-        cursor.execute("""delete from sync_task
+        cursor = db_conn.execute("""delete from sync_task
                 where id=%s""", self.id) 
         db_conn.commit()
-        cursor.close()
+        cursor and cursor.close()
         return None
     
     def get_detail(self):
@@ -371,9 +366,9 @@ class TaskQueue(object):
     @classmethod
     def add(cls, task_id, task_kind):
         task = None
-        cursor = db_conn.cursor()
+        cursor = None
         try:
-            cursor.execute("""insert into task_queue
+            cursor = db_conn.execute("""insert into task_queue
                     (task_id, task_kind) values (%s,%s)""",
                     (task_id, task_kind))
             db_conn.commit()
@@ -381,36 +376,33 @@ class TaskQueue(object):
         except IntegrityError:
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return task
 
     @classmethod
     def get(cls, id):
         task = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select id, task_id, task_kind, time from task_queue
+        cursor = db_conn.execute("""select id, task_id, task_kind, time from task_queue
                 where id=%s limit 1""", id) 
         row = cursor.fetchone()
         if row:
             task = cls(*row)
-        cursor.close()
+        cursor and cursor.close()
 
         return task
     
     @classmethod
     def get_all_ids(cls):
-        cursor = db_conn.cursor()
-        cursor.execute("""select id from task_queue order by time""") 
+        cursor = db_conn.execute("""select id from task_queue order by time""") 
         r = [row[0] for row in cursor.fetchall()]
-        cursor.close()
+        cursor and cursor.close()
         return r
 
     def remove(self):
-        cursor = db_conn.cursor()
-        cursor.execute("""delete from task_queue
+        cursor = db_conn.execute("""delete from task_queue
                 where id=%s""", self.id) 
         db_conn.commit()
-        cursor.close()
+        cursor and cursor.close()
         
 

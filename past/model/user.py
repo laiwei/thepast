@@ -39,15 +39,15 @@ class User(object):
         uid = None
         if isinstance(id, basestring) and not id.isdigit():
             uid = id
-        cursor = db_conn.cursor()
+        cursor = None
         if uid:
-            cursor.execute("""select id, uid,name,session_id,time 
+            cursor = db_conn.execute("""select id, uid,name,session_id,time 
                 from user where uid=%s""", uid)
         else:
-            cursor.execute("""select id, uid,name,session_id,time 
+            cursor = db_conn.execute("""select id, uid,name,session_id,time 
                 from user where id=%s""", id)
         row = cursor.fetchone()
-        cursor.close()
+        cursor and cursor.close()
         if row:
             u = cls(row[0])
             u.uid = str(row[1])
@@ -65,12 +65,11 @@ class User(object):
     @classmethod
     @pcache("user:ids")
     def get_ids(cls, start=0, limit=20, order="id desc"):
-        cursor = db_conn.cursor()
         sql = """select id from user 
                 order by """ + order + """ limit %s, %s"""
-        cursor.execute(sql, (start, limit))
+        cursor = db_conn.execute(sql, (start, limit))
         rows = cursor.fetchall()
-        cursor.close()
+        cursor and cursor.close()
         return [x[0] for x in rows]
 
     def get_alias(self):
@@ -78,7 +77,7 @@ class User(object):
     
     @classmethod
     def add(cls, name=None, uid=None, session_id=None):
-        cursor = db_conn.cursor()
+        cursor = None
         user = None
 
         name = "" if name is None else name
@@ -86,20 +85,20 @@ class User(object):
         session_id = session_id if session_id else randbytes(8)
 
         try:
-            cursor.execute("""insert into user (uid, name, session_id) 
+            cursor = db_conn.execute("""insert into user (uid, name, session_id) 
                 values (%s, %s, %s)""", 
                 (uid, name, session_id))
             user_id = cursor.lastrowid
             if uid == "":
-                cursor.execute("""update user set uid=%s where id=%s""", 
-                    (user_id, user_id))
+                cursor = db_conn.execute("""update user set uid=%s where id=%s""", 
+                    (user_id, user_id), cursor=cursor)
             db_conn.commit()
             cls._clear_cache(None)
             user = cls.get(user_id)
         except IntegrityError:
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return user
 
@@ -108,9 +107,9 @@ class User(object):
 
     def update_session(self, session_id):
         cursor = db_conn.cursor()
-        cursor.execute("""update user set session_id=%s where id=%s""", 
+        db_conn.execute("""update user set session_id=%s where id=%s""", 
                 (session_id, self.id))
-        cursor.close()
+        cursor and cursor.close()
         db_conn.commit()
         User._clear_cache(self.id)
 
@@ -169,55 +168,51 @@ class UserAlias(object):
     @classmethod
     def get_by_id(cls, id):
         ua = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select `id`, `type`, alias, user_id from user_alias 
+        cursor = db_conn.execute("""select `id`, `type`, alias, user_id from user_alias 
                 where id=%s""", id)
         row = cursor.fetchone()
         if row:
             ua = cls(*row)
-        cursor.close()
+        cursor and cursor.close()
 
         return ua
 
     @classmethod
     def get(cls, type_, alias):
         ua = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select `id`, user_id from user_alias 
+        cursor = db_conn.execute("""select `id`, user_id from user_alias 
                 where `type`=%s and alias=%s""", 
                 (type_, alias))
         row = cursor.fetchone()
         if row:
             ua = cls(row[0], type_, alias, row[1])
-        cursor.close()
+        cursor and cursor.close()
 
         return ua
 
     @classmethod
     def gets_by_user_id(cls, user_id):
         uas = []
-        cursor = db_conn.cursor()
-        cursor.execute("""select `id`, `type`, alias from user_alias 
+        cursor = db_conn.execute("""select `id`, `type`, alias from user_alias 
                 where user_id=%s""", user_id)
         rows = cursor.fetchall()
         if rows and len(rows) > 0:
             uas = [cls(row[0], row[1], row[2], user_id) for row in rows]
-        cursor.close()
+        cursor and cursor.close()
 
         return uas
 
     @classmethod
     def get_ids(cls, start=0, limit=0):
         ids = []
-        cursor = db_conn.cursor()
         if limit == 0:
             limit = 100000000
-        cursor.execute("""select `id` from user_alias 
+        cursor = db_conn.execute("""select `id` from user_alias 
                 limit %s, %s""", (start, limit))
         rows = cursor.fetchall()
         if rows and len(rows) > 0:
             ids = [row[0] for row in rows]
-        cursor.close()
+        cursor and cursor.close()
 
         return ids
 
@@ -236,16 +231,16 @@ class UserAlias(object):
             return None
 
         ua = None
-        cursor = db_conn.cursor()
+        cursor = None
         try:
-            cursor.execute("""insert into user_alias (`type`,alias,user_id) 
+            cursor = db_conn.execute("""insert into user_alias (`type`,alias,user_id) 
                     values (%s, %s, %s)""", (type_, alias, user.id))
             db_conn.commit()
             ua = cls.get(type_, alias)
         except IntegrityError:
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return ua
 
@@ -287,22 +282,21 @@ class OAuth2Token(object):
     @classmethod
     def get(cls, alias_id):
         ot = None
-        cursor = db_conn.cursor()
-        cursor.execute("""select access_token, refresh_token  
+        cursor = db_conn.execute("""select access_token, refresh_token  
                 from oauth2_token where alias_id=%s order by time desc limit 1""", 
                 (alias_id,))
         row = cursor.fetchone()
         if row:
             ot = cls(alias_id, row[0], row[1])
-
+        cursor and cursor.close()
         return ot
 
     @classmethod
     def add(cls, alias_id, access_token, refresh_token):
         ot = None
-        cursor = db_conn.cursor()
+        cursor = None
         try:
-            cursor.execute("""replace into oauth2_token 
+            cursor = db_conn.execute("""replace into oauth2_token 
                     (alias_id, access_token, refresh_token)
                     values (%s, %s, %s)""", 
                     (alias_id, access_token, refresh_token))
@@ -311,7 +305,7 @@ class OAuth2Token(object):
         except IntegrityError:
             db_conn.rollback()
         finally:
-            cursor.close()
+            cursor and cursor.close()
 
         return ot
 
