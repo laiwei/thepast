@@ -51,7 +51,7 @@ class DB(object):
         self._conn = connect_db()
 
     def execute(self, *a, **kw):
-        cursor = kw.get('cursor')
+        cursor = kw.pop('cursor', None)
         try:
             cursor = cursor or self._conn.cursor()
             cursor.execute(*a, **kw)
