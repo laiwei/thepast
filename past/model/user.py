@@ -106,8 +106,7 @@ class User(object):
         self.update_session(None)
 
     def update_session(self, session_id):
-        cursor = db_conn.cursor()
-        db_conn.execute("""update user set session_id=%s where id=%s""", 
+        cursor = db_conn.execute("""update user set session_id=%s where id=%s""", 
                 (session_id, self.id))
         cursor and cursor.close()
         db_conn.commit()
