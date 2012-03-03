@@ -17,12 +17,12 @@ for id_ in all_alias_ids:
     print ua
 
     if ua.type == 'D':
-        SyncTask.add(config.CATE_DOUBAN_NOTE, ua.user_id)
-        SyncTask.add(config.CATE_DOUBAN_MINIBLOG, ua.user_id)
+        SyncTask.add(config.CATE_DOUBAN_STATUS, ua.user_id)
+        #SyncTask.add(config.CATE_DOUBAN_MINIBLOG, ua.user_id)
 
-    if ua.type == 'S':
-        SyncTask.add(config.CATE_SINA_STATUS, ua.user_id)
+    #if ua.type == 'S':
+    #    SyncTask.add(config.CATE_SINA_STATUS, ua.user_id)
 
-    if ua.type == 'T':
-        SyncTask.add(config.CATE_TWITTER_STATUS, ua.user_id)
+    #if ua.type == 'T':
+    #    SyncTask.add(config.CATE_TWITTER_STATUS, ua.user_id)
 

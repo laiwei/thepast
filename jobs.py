@@ -86,7 +86,7 @@ def sync(t, old=False):
                 status_list = client.get_timeline(until_id=origin_min_id)
             else:
                 log.info("will get douban status newer than %s..." % origin_min_id)
-                status_list = client.get_timeline(since_id=origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id, count=20)
             if status_list:
                 log.info("get douban status succ, len is %s" % len(status_list))
                 for x in status_list:
@@ -99,7 +99,7 @@ def sync(t, old=False):
                 status_list = client.get_timeline(until_id=origin_min_id)
             else:
                 log.info("will get sinaweibo newer than %s..." % origin_min_id)
-                status_list = client.get_timeline(since_id=origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id, count=20)
             if status_list:
                 log.info("get sinaweibo succ, len is %s" % len(status_list))
                 for x in status_list:
@@ -112,7 +112,7 @@ def sync(t, old=False):
                 status_list = client.get_timeline(max_id=origin_min_id)
             else:
                 log.info("will get tweets newer than %s..." % origin_min_id)
-                status_list = client.get_timeline(since_id=origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id, count=20)
             if status_list:
                 log.info("get tweets succ, len is %s" % len(status_list))
                 for x in status_list:

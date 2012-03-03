@@ -72,7 +72,7 @@ class Douban(object):
     def get_note(self, note_id):
         return self.get("/note/%s" % note_id)
 
-    def get_timeline(self, since_id=None, until_id=None, count=100, user_id=None):
+    def get_timeline(self, since_id=None, until_id=None, count=200, user_id=None):
         user_id = user_id or self.alias
         qs = {}
         qs['count'] = count
