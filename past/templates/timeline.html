@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 
+{% import "status.html" as status_tmpl_helper %}
+
 {% block content_block %}
 <div class="box">
     <div class="cell">
@@ -31,54 +33,26 @@
 {%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
     {%set s = repeated_status.status_list[0]%}
 
-    <!-- 每条信息输出楷书 -->
     <li>
         <div class="message">
-            <!-- 调用时间：时分秒 -->
-            <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-            <!-- 信息内容 + span.from -->
-            {% set images = s.get_data().get_images() or [] %}
-            <div class="text">
-                {{s.text|safe}}
+            {%if s.category == config.CATE_DOUBAN_STATUS%}
+                {{status_tmpl_helper.douban_status(s)}}
+            {%endif%}
 
-                {%if s.category == config.CATE_SINA_STATUS%}
-                    {% set retweeted = s.get_data().get_retweeted_status() %}
-                    {% set re_mid_pic = retweeted and retweeted.get_images() or [] %}
-                    {% set images = images + re_mid_pic %}
-                    {% if retweeted %}
-                    {{ "//@" + retweeted.get_user().get_nickname() + " " + retweeted.get_content() }} 
-                    {% endif %}
+            {%if s.category == config.CATE_SINA_STATUS%}
+                {{status_tmpl_helper.sina_status(s)}}
+            {%endif%}
 
-                {%endif%}
+            {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                {{status_tmpl_helper.qq_weibo_status(s)}}
+            {%endif%}
 
-                {%if not s.text and s.category == config.CATE_QQWEIBO_STATUS%}
-                    {% set retweeted = s.get_data().get_retweeted_status() %}
-                    {% if retweeted %}
-                        {{ "//" + retweeted }} 
-                    {% endif %}
-                {%endif%}
+            {%if s.category == config.CATE_TWITTER_STATUS%}
+                {{status_tmpl_helper.twitter_status(s)}}
+            {%endif%}
 
-                <!-- 来源 -->
-                {%for s in repeated_status.status_list%}
-                    {%set from_ = s.get_origin_uri()%}
-                    {%if from_%}
-                        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-                    {%endif%}
-                {%endfor%}
-
-                <!-- 图片 -->
-                {% if images %}
-                    {%for image in images%}
-                        <br />
-                        <img src="{{image}}"/>
-                    {%endfor%}
-                {% endif %}
-
-            </div>
-            <!-- 信息内容结束 -->
         </div>
     </li>
-    <!-- 每条信息输出结束 -->
 {%endfor%}
 
 		</ul>

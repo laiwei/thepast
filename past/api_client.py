@@ -7,7 +7,7 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
-from past.model.data import (DoubanNoteData,
+from past.model.data import (DoubanNoteData, DoubanStatusData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
     QQWeiboStatusData)
 from past.model.user import User,UserAlias, OAuth2Token
@@ -72,6 +72,20 @@ class Douban(object):
     def get_note(self, note_id):
         return self.get("/note/%s" % note_id)
 
+    def get_timeline(self, since_id=None, until_id=None, count=100, user_id=None):
+        user_id = user_id or self.alias
+        qs = {}
+        qs['count'] = count
+        if since_id is not None:
+            qs['since_id'] = since_id
+        if until_id is not None:
+            qs['until_id'] = until_id
+        qs = urllib.urlencode(qs)
+        contents = self.get("/shuo/statuses/user_timeline/%s?%s" % (user_id, qs))
+        contents = json_decode(contents) if contents else []
+
+        return [DoubanStatusData(c) for c in contents]
+        
     #FIXED
     def get_notes(self, start, count):
         contents = self.get("/people/%s/notes" % self.alias, 

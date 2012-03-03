@@ -1,0 +1,139 @@
+{% macro douban_status(s) -%}
+<!-- 调用时间：时分秒 -->
+<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+
+<div class="text">
+    <!-- 正文 -->
+    {{s.text}}
+
+    <!-- 来源 -->
+    {%set from_ = s.get_origin_uri()%}
+    {%if from_%}
+        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+    {%endif%}
+
+    <!-- 附件 -->
+    {%set atts = s.get_data() and s.get_data().get_attachments()%}
+    {%if atts%}
+        {%for att in atts%}
+        <div class="quote">
+            <span class="inq">
+            <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+            <div class="sep3"></div>
+            {{att.get_description()}}
+            </span>
+        </div>
+        {%endfor%}
+    {%endif%}
+
+    <!-- retweeted -->
+    {% set re = s.get_retweeted_data() %}
+    {% if re %}
+        {{re.get_content()}}
+
+        {%set atts = re.get_attachments()%}
+        {%if atts%}
+            {%for att in atts%}
+            <div class="quote">
+                <span class="inq">
+                <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+                <div class="sep3"></div>
+                {{att.get_description()}}
+                </span>
+            </div>
+            {%endfor%}
+        {%endif%}
+
+        {% set images = re.get_images() or [] %}
+        {% if images %}
+            {%for image in images%}
+                <div class="sep3"></div>
+                <img src="{{image}}"/>
+            {%endfor%}
+        {% endif %}
+
+    {% endif %}
+
+    <!-- 图片 -->
+    {% set images = s.get_data().get_images() or [] %}
+    {% if images %}
+        {%for image in images%}
+            <div class="sep3"></div>
+            <img src="{{image}}"/>
+        {%endfor%}
+    {% endif %}
+</div>
+    
+{%- endmacro %}
+
+
+{% macro sina_status(s) -%}
+<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+
+<div class="text">
+    {{s.text}}
+
+    {% set images = s.get_data().get_images() or [] %}
+    {% set re = s.get_retweeted_data() %}
+    {% set re_images = re and re.get_images() or [] %}
+    {% set images = images + re_images %}
+    {% if re %}
+    {{ "//@" + re.get_user().get_nickname() + " " + re.get_content() }} 
+    {% endif %}
+
+    {%set from_ = s.get_origin_uri()%}
+    {%if from_%}
+        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+    {%endif%}
+
+    {% if images %}
+        {%for image in images%}
+            <div class="sep3"></div>
+            <img src="{{image}}"/>
+        {%endfor%}
+    {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro twitter_status(s) -%}
+<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+
+<div class="text">
+
+    {{s.text}}
+
+    {%set from_ = s.get_origin_uri()%}
+    {%if from_%}
+        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+    {%endif%}
+</div>    
+{%- endmacro %}
+
+{% macro qq_weibo_status(s) -%}
+<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+
+<div class="text">
+    {%if s.text %}
+        {{s.text|safe}}
+    {%endif%}
+
+    {% set re = s.get_retweeted_data() %}
+    {% if not s.text and re %}
+        {{ "//" + re }} 
+    {% endif %}
+
+    {%set from_ = s.get_origin_uri()%}
+    {%if from_%}
+        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+    {%endif%}
+
+    {% set images = s.get_data().get_images() or [] %}
+    {% if images %}
+        {%for image in images%}
+            <div class="sep3"></div>
+            <img src="{{image}}"/>
+        {%endfor%}
+    {% endif %}
+</div>
+{%- endmacro %}
+

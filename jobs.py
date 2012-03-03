@@ -79,29 +79,40 @@ def sync(t, old=False):
                 for x in miniblog_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 return len(miniblog_list)
-        elif t.category == config.CATE_SINA_STATUS:
+        elif t.category == config.CATE_DOUBAN_STATUS:
+            origin_min_id = Status.get_min_origin_id(t.category, t.user_id)
             if old:
-                until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
-                log.info("will get sinaweibo order than %s..." % until_id)
-                status_list = client.get_timeline(until_id=until_id)
+                log.info("will get douban status order than %s..." % origin_min_id)
+                status_list = client.get_timeline(until_id=origin_min_id)
             else:
-                since_id = Status.get_min_origin_id(t.category, t.user_id)
-                log.info("will get sinaweibo newer than %s..." % since_id)
-                status_list = client.get_timeline(since_id=since_id)
+                log.info("will get douban status newer than %s..." % origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id)
+            if status_list:
+                log.info("get douban status succ, len is %s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                
+        elif t.category == config.CATE_SINA_STATUS:
+            origin_min_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
+            if old:
+                log.info("will get sinaweibo order than %s..." % origin_min_id)
+                status_list = client.get_timeline(until_id=origin_min_id)
+            else:
+                log.info("will get sinaweibo newer than %s..." % origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id)
             if status_list:
                 log.info("get sinaweibo succ, len is %s" % len(status_list))
                 for x in status_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 return len(status_list)
         elif t.category == config.CATE_TWITTER_STATUS:
+            origin_min_id = Status.get_min_origin_id(t.category, t.user_id)
             if old:
-                until_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
-                log.info("will get tweets order than %s..." % until_id)
-                status_list = client.get_timeline(max_id=until_id)
+                log.info("will get tweets order than %s..." % origin_min_id)
+                status_list = client.get_timeline(max_id=origin_min_id)
             else:
-                since_id = Status.get_min_origin_id(t.category, t.user_id)
-                log.info("will get tweets newer than %s..." % since_id)
-                status_list = client.get_timeline(since_id=since_id)
+                log.info("will get tweets newer than %s..." % origin_min_id)
+                status_list = client.get_timeline(since_id=origin_min_id)
             if status_list:
                 log.info("get tweets succ, len is %s" % len(status_list))
                 for x in status_list:

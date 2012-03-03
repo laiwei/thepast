@@ -11,7 +11,8 @@ from past.utils.logger import logging
 from past.store import redis_conn, redis_cache_conn, db_conn
 from past.corelib.cache import cache, pcache
 from .user import UserAlias
-from .data import DoubanMiniBlogData, DoubanNoteData, SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
+from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
+        SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
 
 log = logging.getLogger(__file__)
 
@@ -238,12 +239,14 @@ class Status(object):
             return TwitterStatusData(self.raw)
         elif self.category == config.CATE_QQWEIBO_STATUS:
             return QQWeiboStatusData(self.raw)
+        elif self.category == config.CATE_DOUBAN_STATUS:
+            return DoubanStatusData(self.raw)
         else:
             return None
 
     def get_origin_uri(self):
         d = self.get_data()
-        if self.category == config.CATE_DOUBAN_MINIBLOG:
+        if self.category == config.CATE_DOUBAN_MINIBLOG or self.category == config.CATE_DOUBAN_STATUS:
             ua = UserAlias.get_by_user_and_type(self.user_id, 
                     config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
             if ua:
@@ -260,10 +263,10 @@ class Status(object):
         else:
             return None
 
-    def get_retweeted_status(self):
+    def get_retweeted_data(self):
         d = self.get_data()
-        if hasattr(d, "get_retweeted_status"):
-            return d.get_retweeted_status()
+        if hasattr(d, "get_retweeted_data"):
+            return d.get_retweeted_data()
         return None
 
 

@@ -71,7 +71,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
-@require_login
+#@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -368,11 +368,8 @@ def _add_sync_task_and_push_queue(provider, user):
         task_ids = [x.category for x in SyncTask.gets_by_user(user)]
 
         if provider == config.OPENID_DOUBAN:
-            if str(config.CATE_DOUBAN_MINIBLOG) not in task_ids:
-                t = SyncTask.add(config.CATE_DOUBAN_MINIBLOG, user.id)
-                t and TaskQueue.add(t.id, t.kind)
-            if str(config.CATE_DOUBAN_NOTE) not in task_ids:
-                t = SyncTask.add(config.CATE_DOUBAN_NOTE, user.id)
+            if str(config.CATE_DOUBAN_STATUS) not in task_ids:
+                t = SyncTask.add(config.CATE_DOUBAN_STATUS, user.id)
                 t and TaskQueue.add(t.id, t.kind)
 
         elif provider == config.OPENID_SINA:

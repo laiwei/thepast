@@ -9,7 +9,10 @@ from past.utils.escape import json_decode
 class AbsUserData(object):
 
     def __init__(self, data):
-        self.data = data or {}
+        if data:
+            self.data = data
+        else:
+            self.data = {}
         if isinstance(data, basestring):
             self.data = json_decode(data)
 
@@ -74,8 +77,31 @@ class DoubanUser(AbsUserData):
             links[rel] = x.get("@href")
         return links.get("icon", "")
 
-    def get_email(self):
+## 豆瓣user2数据接口
+class DoubanUser2(AbsUserData):
+    def __init__(self, data):
+        super(DoubanUser2, self).__init__(data)
+
+    def get_user_id(self):
+        return self.data.get("id")
+
+    def get_uid(self):
+        return self.data.get("uid")
+
+    def get_nickname(self):
+        return self.data.get("screen_name")
+
+    def get_intro(self):
+        return self.data.get("description")
+
+    def get_signature(self):
         return ""
+
+    def get_avatar(self):
+        return self.data.get("large_avatar")
+
+    def get_icon(self):
+        return self.data.get("small_avatar")
 
 ## 新浪微博user数据接口
 class SinaWeiboUser(AbsUserData):
@@ -213,7 +239,7 @@ class AbsData(object):
         return ""
 
     ##原微博本身是个转发，获取被转发的内容
-    def get_retweeted_status(self):
+    def get_retweeted_data(self):
         return None
 
     ##原微博附带的图片，返回结果为list
@@ -292,6 +318,83 @@ class DoubanMiniBlogData(DoubanData):
             return [links.get("image")]
         return []
 
+# 豆瓣新广播（豆瓣说）
+class DoubanStatusData(DoubanData):
+    def __init__(self, data):
+        super(DoubanStatusData, self).__init__(
+            config.CATE_DOUBAN_STATUS, data)
+
+    def get_origin_id(self):
+        return str(self.data.get("id", ""))
+
+    def get_create_time(self):
+        return self.data.get("created_at")
+
+    def get_content(self):
+        return self.data.get("text", "")
+
+    def get_retweeted_data(self):
+        r = self.data.get("reshared_status")
+        if r:
+            return DoubanStatusData(r)
+        else:
+            return None
+
+    def get_images(self):
+        o = []
+        atts = self.get_attachments()
+        for att in atts:
+            medias = att and att.get_medias()
+            for x in medias:
+                if x and x.get_type() == 'image':
+                    o.append(x.get_src())   
+        return o
+
+    def get_user(self):
+        r = self.data.get("user")
+        if r:
+            return DoubanUser2(r)
+        else:
+            return None
+
+    def get_origin_uri(self):
+        u = self.get_user()
+        if u:
+            uid = u.get_uid()
+            return config.DOUBAN_STATUS % (uid, self.get_origin_id())
+
+    ### 特有的方法：
+    def get_target_type(self):
+        return self.data.get("target_type")
+
+    def get_attachments(self):
+        rs = self.data.get("attachments", [])
+        return [_Attachment(r) for r in rs]
+
+class _Attachment(object):
+    def __init__(self, data):
+        self.data = data or {}
+
+    def get_description(self):
+        return self.data.get("description")
+    def get_title(self):
+        return self.data.get("title")
+    def get_href(self):
+        return self.data.get("expaned_href") or self.data.get("href")
+    def get_medias(self):
+        rs = self.data.get("media", [])
+        return [_Media(x) for x in rs]
+
+
+class _Media(object):
+    def __init__(self, data):
+        self.data = data or {}
+
+    def get_type(self):
+        return self.data.get("type")
+    def get_src(self):
+        return self.data.get("original_src", "").replace("/spic/", "/lpic/")
+    
 class SinaWeiboData(AbsData):
     
     def __init__(self, category, data):
@@ -317,7 +420,7 @@ class SinaWeiboStatusData(SinaWeiboData):
     def get_content(self):
         return self.data.get("text", "") 
     
-    def get_retweeted_status(self):
+    def get_retweeted_data(self):
         re = self.data.get("retweeted_status")
         if re:
             return SinaWeiboStatusData(re)
@@ -363,7 +466,7 @@ class TwitterStatusData(AbsData):
     def get_content(self):
         return self.data.get("text", "") 
     
-    def get_retweeted_status(self):
+    def get_retweeted_data(self):
         return None
 
     def get_user(self):
@@ -400,7 +503,7 @@ class QQWeiboStatusData(AbsData):
     def get_content(self):
         return self.data.get("text", "") 
     
-    def get_retweeted_status(self):
+    def get_retweeted_data(self):
         return self.data.get("origtext", "") 
 
     def _get_images(self, size):

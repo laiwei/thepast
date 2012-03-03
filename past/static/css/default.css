@@ -38,7 +38,7 @@ h4 {
 }
 
 img {
-    max-width: 550px;
+    max-width: 450px;
 }
 form {
     display: inline;
@@ -394,6 +394,21 @@ a.node:hover {
     color: #aaa;
 }
 
+.quote {
+    overflow: hidden;
+    padding: 0 24px 5px 12px;
+    margin: 8px 0 0 0px;
+    background: url(/static/img/quotel.gif) no-repeat left 4px;
+    width: auto;
+    word-wrap: break-word;
+}
+.quote .inq{
+    display: inline;
+    background: url(/static/img/quoter.gif) no-repeat right bottom;
+    color: #333;
+    padding-right: 15px;
+    display: inline-block;
+}
 /*new add css by linmumu 2012-02-25 17:21*/
 .clearfix { display: block; }
 
@@ -407,9 +422,9 @@ a.node:hover {
 .month h2{font-size:26px;font-weight:bold;margin-bottom:10px;border-bottom:1px solid #E2E2E2;}
 .articles{margin:10px;}
 .articles li{line-height:14px;margin-bottom:15px;list-style-type: none;}
-.articles .day{width:68px;float:left;}
+.articles .day{width:38px;float:left;}
 .time{float:left;background:#EEE;border-radius:2px;padding:2px 4px;font-size:11px;color:#999;}
-.message{padding-left:68px;line-height:18px;font-size: 13px;}
+.message{padding-left:38px;line-height:18px;font-size: 13px;}
 .message span{font-size:11px;color:#999;margin-right:5px}
 .message .text{padding-left:88px;}
 .message .text img{margin:5px 0;}

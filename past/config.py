@@ -88,6 +88,7 @@ CATE_LIST = (
 
 DOUBAN_NOTE = 'http://douban.com/note/%s'
 DOUBAN_MINIBLOG = 'http://douban.com/people/%s/status/%s'
+DOUBAN_STATUS = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
 QQWEIBO_STATUS = 'http://t.qq.com/t/%s'
 TWITTER_STATUS = 'http://twitter.com/#!/%s/status/%s'
