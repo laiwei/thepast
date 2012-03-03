@@ -65,56 +65,30 @@ def render(user, status_list, with_head=True):
     else:
         _html = u"""<html> <body><div class="box">"""
 
+    from jinja2 import Environment, PackageLoader
+    env = Environment(loader=PackageLoader('past', 'templates'))
+    env.filters['wrap_long_line'] = wrap_long_line
+    t = env.get_template('status.html')
+    m = t.module
     for s in status_list:
         if not s:
             continue
-        title = s.title
-        create_time = s.create_time
-        from_ = s.get_origin_uri()
-        if from_:
-            from_ = u'<a href="' + from_[1] + u' class="node">From: ' + from_[0] + '</a>'
-        else:
-            from_ = u''
-        text = s.text
-        retweeted_text = ''
-        img = ''
-        if s.category == config.CATE_DOUBAN_MINIBLOG:
-            ##miniblog不显示title
-            title = ''
-            img = s.get_data().get_images()
+        if s.category == config.CATE_DOUBAN_STATUS:
+            r = m.douban_status(s, pdf=True)
         elif s.category == config.CATE_SINA_STATUS:
-            retweeted = s.get_data().get_retweeted_status()
-            re_mid_pic = retweeted and retweeted.get_middle_pic() or ''
-            middle_pic = s.get_data().get_middle_pic()
-
-            if retweeted:
-                retweeted_text = retweeted.get_user().get_nickname() + ": " + retweeted.get_content()
-                    
-            if re_mid_pic or middle_pic:
-                img = re_mid_pic or middle_pic
-
+            r = m.sina_status(s, pdf=True)
+        elif s.category == config.CATE_TWITTER_STATUS:
+            r = m.twitter_status(s, pdf=True)
         elif s.category == config.CATE_QQWEIBO_STATUS:
-            img = s.get_data().get_middle_pic()
-        
-        _html += """ <hr/> <div class="cell">"""
-        if title:
-            title = wrap_long_line(title)
-            _html += """<div class="bigger">%s</div>""" % title
-        if text:
-            text = wrap_long_line(text)
-            if s.category == config.CATE_DOUBAN_NOTE:
-                text = filters.nl2br(text)
-            _html += """<div class="content">%s</div>""" % text
-        if retweeted_text:
-            retweeted_text = wrap_long_line(retweeted_text)
-            _html += """<div class='tip'><span class="fade">%s</span></div>""" % retweeted_text
-        if img:
-            if not isinstance(img, list):
-                img = [img, ]
-            for x in img:
-                _html += """<img src=%s></img>""" % x
-        _html += """<div class="fade">%s &nbsp;&nbsp;&nbsp; %s</div>""" % (from_, create_time)
-        _html += """ </div> <body> </html> """
+            r = m.qq_weibo_status(s, pdf=True)
+        else:
+            r = ''
+        if not r:
+            continue
+        _html += """<div class="cell">"""
+        _html += r
+        _html += """<hr/></div>"""
+    _html += """</div></body></html>"""
     return _html
 
 def link_callback(uri, rel):

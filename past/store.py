@@ -56,7 +56,7 @@ class DB(object):
             cursor = cursor or self._conn.cursor()
             cursor.execute(*a, **kw)
         except (AttributeError, MySQLdb.OperationalError):
-            print 'ebug, %s re-connect to mysql' % datetime.datetime.now()
+            print 'debug, %s re-connect to mysql' % datetime.datetime.now()
             self._conn and self._conn.close()
             self.connect()
             cursor = self._conn.cursor()

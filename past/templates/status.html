@@ -1,10 +1,18 @@
-{% macro douban_status(s) -%}
+{% macro douban_status(s, pdf=False) -%}
 <!-- 调用时间：时分秒 -->
-<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{%if pdf%}
+    <div class="time">From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+{%else%}
+    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{%endif%}
 
 <div class="text">
     <!-- 正文 -->
-    {{s.text}}
+    {%if pdf%}
+        {{s.text|wrap_long_line}}
+    {%else%}
+        {{s.text}}
+    {%endif%}
 
     <!-- 来源 -->
     {%set from_ = s.get_origin_uri()%}
@@ -18,9 +26,17 @@
         {%for att in atts%}
         <div class="quote">
             <span class="inq">
-            <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-            <div class="sep3"></div>
-            {{att.get_description()}}
+            {%if pdf%}
+                <div class='tip'><span class="fade">
+                    {{att.get_title()|wrap_long_line}}
+                    <div class="sep3"></div>
+                    {{att.get_description()|wrap_long_line}}
+                </span></div>
+            {%else%}
+                <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+                <div class="sep3"></div>
+                {{att.get_description()}}
+            {%endif%}
             </span>
         </div>
         {%endfor%}
@@ -36,9 +52,17 @@
             {%for att in atts%}
             <div class="quote">
                 <span class="inq">
-                <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-                <div class="sep3"></div>
-                {{att.get_description()}}
+                {%if pdf%}
+                    <div class='tip'><span class="fade">
+                        {{att.get_title()|wrap_long_line}}
+                        <div class="sep3"></div>
+                        {{att.get_description()|wrap_long_line}}
+                    </span></div>
+                {%else%}
+                    <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+                    <div class="sep3"></div>
+                    {{att.get_description()}}
+                {%endif%}
                 </span>
             </div>
             {%endfor%}
@@ -67,24 +91,41 @@
 {%- endmacro %}
 
 
-{% macro sina_status(s) -%}
-<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{% macro sina_status(s, pdf=False) -%}
+{%if pdf%}
+    <div class="time">From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+{%else%}
+    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{%endif%}
 
 <div class="text">
-    {{s.text}}
+    {%if pdf%}
+        {{s.text|wrap_long_line}}
+    {%else%}
+        {{s.text}}
+    {%endif%}
+
+    {%set from_ = s.get_origin_uri()%}
+    {%if from_%}
+        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
+    {%endif%}
 
     {% set images = s.get_data().get_images() or [] %}
     {% set re = s.get_retweeted_data() %}
     {% set re_images = re and re.get_images() or [] %}
     {% set images = images + re_images %}
     {% if re %}
-    {{ "//@" + re.get_user().get_nickname() + " " + re.get_content() }} 
+        {%set re_text = "//@" + re.get_user().get_nickname() + " " + re.get_content() %} 
+        {%if pdf%}
+            <div class='tip'><span class="fade">
+                {{re_text|wrap_long_line}}
+            </span></div>
+        {%else%}
+            <div class="quote">
+                <span class="inq">{{re_text}}</span>
+            </div>
+        {%endif%}
     {% endif %}
-
-    {%set from_ = s.get_origin_uri()%}
-    {%if from_%}
-        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-    {%endif%}
 
     {% if images %}
         {%for image in images%}
@@ -95,12 +136,20 @@
 </div>
 {%- endmacro %}
 
-{% macro twitter_status(s) -%}
-<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{% macro twitter_status(s, pdf=False) -%}
+{%if pdf%}
+    <div class="time">From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+{%else%}
+    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{%endif%}
 
 <div class="text">
 
-    {{s.text}}
+    {%if pdf%}
+        {{s.text|wrap_long_line}}
+    {%else%}
+        {{s.text}}
+    {%endif%}
 
     {%set from_ = s.get_origin_uri()%}
     {%if from_%}
@@ -109,12 +158,18 @@
 </div>    
 {%- endmacro %}
 
-{% macro qq_weibo_status(s) -%}
-<div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{% macro qq_weibo_status(s, pdf=False) -%}
+{%if pdf%}
+    <div class="time">From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+{%else%}
+    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+{%endif%}
 
 <div class="text">
-    {%if s.text %}
-        {{s.text|safe}}
+    {%if pdf%}
+        {{s.text|wrap_long_line|safe}}
+    {%else%}
+        {{s.text}}
     {%endif%}
 
     {% set re = s.get_retweeted_data() %}
