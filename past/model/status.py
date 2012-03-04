@@ -272,7 +272,6 @@ class Status(object):
 
 ## Sycktask: 用户添加的同步任务
 class SyncTask(object):
-    kv_db_key_task = '/synctask/%s'
     kind = config.K_SYNCTASK
 
     def __init__(self, id, category, user_id, time):
@@ -346,17 +345,6 @@ class SyncTask(object):
         cursor and cursor.close()
         return None
     
-    def get_detail(self):
-        k = self.__class__.kv_db_key_task % self.id
-        d = redis_conn.get(k)
-        d = json_decode(d) if d else {}
-        return d
-
-    def update_detail(self, detail):
-        k = self.__class__.kv_db_key_task % self.id
-        redis_conn.set(k, json_encode(detail))
-        return self.get_detail()
-
 class TaskQueue(object):
     kind = config.K_TASKQUEUE
 

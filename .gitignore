@@ -5,6 +5,7 @@ local_config.py
 env/
 build/
 third-src/
+third/
 var/
 
 nohup.out

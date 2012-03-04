@@ -82,3 +82,11 @@ pip install --no-index -f http://dist.plone.org/thirdparty/ -U PIL
 ### cp /etc/init.d/redis_6379 /etc/init.d/redis_7379
 ### sudo update-rc.d redis_7379 defaults
 
+##mongo db
+## sudo apt-get install mongodb-server
+wget http://fastdl.mongodb.org/linux/mongodb-linux-i686-2.0.3.tgz
+sudo mkdir -p /data/db
+tar xzf mongodb-linux-i686-2.0.3.tgz
+./mongodb-xxxx/bin/mongod &
+
+pip install pymongo
