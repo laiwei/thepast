@@ -88,6 +88,7 @@ def render(user, status_list, with_head=True):
         _html += """<div class="cell">"""
         _html += r
         _html += """<hr/></div>"""
+        s._clear_cache(user_id = s.user_id, status_id = s.id)
     _html += """</div></body></html>"""
     return _html
 

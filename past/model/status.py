@@ -8,7 +8,7 @@ from MySQLdb import IntegrityError
 from past import config
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
-from past.store import redis_conn, redis_cache_conn, db_conn
+from past.store import mongo_conn, redis_cache_conn, db_conn
 from past.corelib.cache import cache, pcache
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
@@ -30,7 +30,7 @@ class Status(object):
         self.site = site
         self.category = category
         self.title = title
-        self.text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
+        self.text = mongo_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
         self.text = json_decode(self.text) if self.text else ""
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
         if self.site == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
@@ -84,12 +84,12 @@ class Status(object):
 
     #@property
     #def text(self):
-    #    _text = redis_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
+    #    _text = mongo_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
     #    return json_decode(_text) if _text else ""
 
     @property
     def raw(self):
-        _raw = redis_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
+        _raw = mongo_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
         return json_decode(_raw) if _raw else ""
         
     @classmethod
@@ -105,9 +105,9 @@ class Status(object):
             db_conn.commit()
             status_id = cursor.lastrowid
             if text is not None:
-                redis_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
+                mongo_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
             if raw is not None:
-                redis_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
+                mongo_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
             cls._clear_cache(user_id, None, cate=category)
             status = cls.get(status_id)
         except IntegrityError:

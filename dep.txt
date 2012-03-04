@@ -90,3 +90,14 @@ tar xzf mongodb-linux-i686-2.0.3.tgz
 ./mongodb-xxxx/bin/mongod &
 
 pip install pymongo
+
+## about mongodb
+http://www.mongodb.org/display/DOCS/Advanced+Queries#AdvancedQueries
+http://www.mongodb.org/display/DOCS/Optimization
+##index
+http://www.mongodb.org/display/DOCS/Indexes
+http://blog.nosqlfan.com/html/271.html
+
+db.thepast.getIndexes
+db.thepast.ensureIndex({k:1})
+

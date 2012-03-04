@@ -67,10 +67,7 @@ class MongoDB(object):
         return None
     
     def set(self, k, v):
-        if self.get(k):
-            self._conn.update({"k":k}, {"$set":{"v":v}}, multi=True)
-        else:
-            self._conn.save({"k":k, "v":v})
+        self._conn.update({"k":k},{"k":k, "v":v}, upsert=True)
 
     def remove(self, k):
         self._conn.remove({"k":k})
