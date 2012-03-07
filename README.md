@@ -61,6 +61,10 @@ http://thepast.me
 
 ChangeList:
 -------
+* `2012-03-04`: 使用mongodb代替redis做数据持久化存储,并将redis中的37万条数据转存到mongodb中
+* `2012-03-04`: 使用豆瓣新广播的api，代替旧的miniblog API
+* `2012-03-01`: mysql connect增加了mysql gone away之后的重试机制
+* `2012-02-28`: 使用了新的logo，感谢木木[lmm214](https://github.com/lmm214)的设计
 * `2012-02-24`: 支持同步腾讯微博(使用腾讯微博的朋友看过来^^)
 * `2012-02-22`: 屏蔽搜索引擎收录(因为隐私还是很重要的)
 * `2012-02-18`: 加cache，使用redis充当memcache，提高访问速度，降低机器负载
