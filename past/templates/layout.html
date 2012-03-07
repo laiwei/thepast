@@ -84,6 +84,16 @@
                         {%else%}
                             <span>明天再来下载PDF吧，因为内存吃不消^^</span>
                         {%endif%}
+
+                        <span class="fade">
+                            {%for ua in user_.get_alias()%}
+                                {%set p = user_.get_thirdparty_profile(ua.type)%}
+                                {%if p%}
+                                    <div class="sep10"></div>
+                                    {{p.get("intro")|nl2br|safe}}
+                                {%endif%}
+                            {%endfor%}
+                        </span>
                     </div>
 
                 {% else %}
@@ -188,6 +198,12 @@
         {% endblock %}
     </div>
 </div>
+
+<script>
+$("img").error( function(){$(this).css({ visibility:"hidden" });
+});
+</script>
+
 </body>
 
 </html>

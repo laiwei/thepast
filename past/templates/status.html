@@ -83,7 +83,7 @@
     {% if images %}
         {%for image in images%}
             <div class="sep3"></div>
-            <img src="{{image}}"/>
+            <img src="{{image}}" alt=""/>
         {%endfor%}
     {% endif %}
 </div>
@@ -169,7 +169,7 @@
     {%if pdf%}
         {{s.text|wrap_long_line|safe}}
     {%else%}
-        {{s.text}}
+        {{s.text|safe}}
     {%endif%}
 
     {% set re = s.get_retweeted_data() %}

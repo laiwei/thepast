@@ -311,7 +311,18 @@ table .vborder1 {
 
 .fade { 
     color: #999;
-	font-size: 14px;
+}
+
+.snow {
+    color: rgba(0, 0, 0, 0.15);
+}
+
+.tip {
+    background-color: #F9F9F9;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    padding: 5px 10px 5px 10px;
+    font-size: 12px;
 }
 
 .sep20 {height:20px;}
@@ -422,9 +433,9 @@ a.node:hover {
 .month h2{font-size:26px;font-weight:bold;margin-bottom:10px;border-bottom:1px solid #E2E2E2;}
 .articles{margin:10px;}
 .articles li{line-height:14px;margin-bottom:15px;list-style-type: none;}
-.articles .day{width:38px;float:left;}
+.articles .day{width:48px;float:left;}
 .time{float:left;background:#EEE;border-radius:2px;padding:2px 4px;font-size:11px;color:#999;}
-.message{padding-left:38px;line-height:18px;font-size: 13px;}
+.message{padding-left:48px;line-height:18px;font-size: 13px;}
 .message span{font-size:11px;color:#999;margin-right:5px}
 .message .text{padding-left:88px;}
 .message .text img{margin:5px 0;}

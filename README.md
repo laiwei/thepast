@@ -35,6 +35,7 @@
 * python
 * [flask](http://flask.pocoo.org) -- `python web framework`
 * [redis](http://redis.io) -- `nosqldb, store text,img etc, and used for cache instead of memcached`
+* mongodb -- `data storag`
 * [xhtml2pdf](https://github.com/chrisglass/xhtml2pdf) -- `convert html to pdf`
 * git/github -- `code version control`
 * v2ex -- `thanks for v2ex and css of v2ex^^`

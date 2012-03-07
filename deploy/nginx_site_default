@@ -5,7 +5,6 @@ server {
 
 	server_name  thepast.me;
 
-    add_header  Cache-Control public;
 
 	access_log  /var/log/nginx/thepast.me.access.log;
     
@@ -20,13 +19,19 @@ server {
 
     location / { try_files $uri @pastme; }
     location /static/ {
-        expires     max;
+        #add_header  Cache-Control public;
+        #expires     max;
         root /home/work/proj/thepast/past;
     }
     location @pastme {
         include uwsgi_params;
         uwsgi_pass unix:/tmp/uwsgi.sock;
     }
+
+    error_page 500 502 503 504  /500.html;  
+    location = /500.html {  
+        root  /home/work/proj/thepast/past/static;
+    }  
 }
 
 
