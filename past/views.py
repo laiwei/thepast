@@ -56,12 +56,18 @@ def favicon():
 @app.route("/")
 def index():
     if not g.user:
-        return redirect(url_for("user_explore"))
+        return redirect(url_for("anonymous_index"))
 
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
     return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
+
+@app.route("/anonymous_index")
+def anonymous_index():
+    user_ids = Status.get_recent_updated_user_ids()
+    users = [User.get(x) for x in user_ids]
+    return render_template("index.html",  users=users, config=config)
 
 @app.route("/user")
 def user_explore():
@@ -71,7 +77,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
-@require_login
+#@require_login
 def user(uid):
     u = User.get(uid)
     if not u:

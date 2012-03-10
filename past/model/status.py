@@ -9,7 +9,7 @@ from past import config
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import mongo_conn, redis_cache_conn, db_conn
-from past.corelib.cache import cache, pcache
+from past.corelib.cache import cache, pcache, HALF_HOUR
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
@@ -169,6 +169,14 @@ class Status(object):
     @classmethod
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
+
+    @classmethod
+    @cache("recent_updated_users", expire=HALF_HOUR)
+    def get_recent_updated_user_ids(limit=16):
+        cursor = db_conn.execute('''select distinct user_id from status order by create_time desc limit %s''', limit)
+        rows = cursor.fetchall()
+        cursor and cursor.close()
+        return [row[0]for row in rows]
 
     @classmethod
     def get_max_origin_id(cls, cate, user_id):
@@ -396,4 +404,3 @@ class TaskQueue(object):
         db_conn.commit()
         cursor and cursor.close()
         
-

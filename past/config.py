@@ -44,6 +44,16 @@ OPENID_TYPE_DICT = {
     OPENID_TWITTER : "T",
 }
 
+OPENID_TYPE_NAME_DICT = {
+    "D" : "豆瓣",
+    "S" : "微博",
+    "W" : "wordpress",
+    "T" : "twitter",
+    "Q" : "腾讯",
+    "G" : "Google",
+    "F" : "Facebook",
+}
+
 #-- oauth key & secret config --
 APIKEY_DICT = {
     OPENID_DOUBAN : {

@@ -256,20 +256,20 @@ class UserAlias(object):
 
     def get_homepage_url(self):
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
-            return u"豆瓣", "%s/people/%s" %(config.DOUBAN_SITE, self.alias)
+            return u"豆瓣", "%s/people/%s" %(config.DOUBAN_SITE, self.alias), 'douban'
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
-            return u"微博", "%s/%s" %(config.SINA_SITE, self.alias)
+            return u"微博", "%s/%s" %(config.SINA_SITE, self.alias), 'sina'
 
         ##FIXME:twitter的显示的不对
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             u = User.get(self.user_id)
-            return u"twitter", "%s/%s" %(config.TWITTER_SITE, u.name)
+            return u"twitter", "%s/%s" %(config.TWITTER_SITE, u.name), 'twitter'
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
             ##XXX:腾讯微博比较奇怪
             return u"腾讯微博", "%s/%s" %(config.QQWEIBO_SITE, 
-                    User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", ""))
+                    User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", "")), 'qq'
 
 class OAuth2Token(object):
    
@@ -308,4 +308,53 @@ class OAuth2Token(object):
 
         return ot
 
+
+def life(user):
+    life_dict = {}
+    uas = user.get_alias()
+    for ua in uas:
+        life_dict[ua.type] = [config.OPENID_TYPE_NAME_DICT.get(ua.type)]
+        cate = None
+        if ua.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
+            cates = config.CATE_DOUBAN_STATUS
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
+            cates = config.CATE_SINA_STATUS
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
+            cates = config.CATE_QQWEIBO_STATUS
+        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
+            cates = config.CATE_TWITTER_STATUS
         
+    
+    ## just for tecent_weibo
+    @classmethod
+    def get_oldest_create_time(cls, cate, user_id):
+        cursor = db_conn.execute('''select min(create_time) from status 
+            where category=%s and user_id=%s''', (cate, user_id))
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        if row:
+            return row[0]
+        else:
+            return None
+    
+    @classmethod
+    def get_count_by_cate(cls, cate, user_id):
+        cursor = db_conn.execute('''select count(1) from status 
+            where category=%s and user_id=%s''', (cate, user_id))
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        if row:
+            return row[0]
+        else:
+            return 0
+
+    @classmethod
+    def get_count_by_user(cls, user_id):
+        cursor = db_conn.execute('''select count(1) from status 
+            where user_id=%s''', user_id)
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        if row:
+            return row[0]
+        else:
+            return 0
