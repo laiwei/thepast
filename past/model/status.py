@@ -172,8 +172,9 @@ class Status(object):
 
     @classmethod
     @cache("recent_updated_users", expire=HALF_HOUR)
-    def get_recent_updated_user_ids(limit=16):
-        cursor = db_conn.execute('''select distinct user_id from status order by create_time desc limit %s''', limit)
+    def get_recent_updated_user_ids(cls, limit=16):
+        cursor = db_conn.execute('''select distinct user_id from status 
+                order by create_time desc limit %s''', limit)
         rows = cursor.fetchall()
         cursor and cursor.close()
         return [row[0]for row in rows]
