@@ -393,7 +393,7 @@ class _Media(object):
     def get_type(self):
         return self.data.get("type")
     def get_src(self):
-        return self.data.get("original_src", "").replace("/spic/", "/lpic/")
+        return self.data.get("original_src", "").replace("/spic/", "/mpic/")
     
 class SinaWeiboData(AbsData):
     
