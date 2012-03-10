@@ -16,7 +16,7 @@ from past import config
 if __name__ == "__main__":
     
     #for uid in User.get_ids(0, 10000000):
-    for uid in [256,257,258,259,260]:
+    for uid in [261,262,263,264]:
         try:
             uas = UserAlias.gets_by_user_id(uid)
             if not uas:

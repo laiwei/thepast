@@ -82,7 +82,7 @@ def user_explore():
     
 
 @app.route("/user/<uid>")
-#@require_login
+@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
