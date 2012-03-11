@@ -1,41 +1,32 @@
 {% extends "layout.html" %}
 
-{% block head_block %}
-	<div id="site">
-        <div id="logo" class="fl"><h1><a href="http://thepast.me/">ThePast.Me</a><h1></div>
-		<!-- 授权平台图标导航 -->
-        <div id="navi">
-			<ul>
-				<li class="login qq"><a title="使用腾讯微博授权登录" href="/connect/qq">qq</a></li>
-				<li class="login sina"><a title="使用新浪微博授权登录" href="/connect/sina">sina</a></li>
-				<li class="login douban"><a title="使用豆瓣授权登录" href="/connect/douban">douban</a></li>
-				<li class="login twitter"><a title="使用 Twitter 授权登录" href="/connect/twitter">twitter</a></li>
-			</ul>
-		</div>
-	</div>
-{%endblock%}
-
-
 {% block content_block %}
     <!-- 个人杂志计划简介 -->
     <div id="news">
         <h2>个人杂志计划<sup><a target="_blank" href="https://github.com/laiwei/thepast">[开源]</a></sup></h2>
         <p>1.实时聚合你在“豆瓣”、“新浪微博”、“腾讯微博”、“Twitter”等平台的 Timeline，支持同步历史记录、消息去重。</p>
-        <p>2.聚合后的个人多平台 Timeline，可下载简单排版后的 PDF<sup><a target="_blank" href="http://thepast.me/demo.pdf">[预览]</a></sup> 供离线阅读或永久保存。</p>
+        <p>2.聚合后的个人多平台 Timeline，可下载简单排版后的 PDF<sup><a target="_blank" href="/demo-pdf">[预览]</a></sup> 供离线阅读或永久保存。</p>
         <p>3.愿景：希望每个人都能拿到一本记录自己、讲述自己的“纸质 Timeline ”，满足你做杂志的梦想！</p>
-        <p>即刻猛击头部<strong>任一图标</strong>授权登录吧～<sup>
+        <p>即刻猛击头部<strong>任一图标</strong>授权登录吧<sup>
         <a target="_blank" href="https://github.com/laiwei/thepast#readme">[？]</a></sup></p>
 
-        <p>重要提示：多平台绑定步骤，首页--点击任一图标授权登录--再点击<strong>个人信息框内的灰色图标</strong>进行授权。</p>
+        <p>重要提示：多平台绑定步骤，首页---点击任一图标授权登录---再点击<strong>个人信息框内的灰色图标</strong>进行授权。</p>
     </div>
     
     <div id="members">
         <!-- 用户循环开始 输出16个 -->
         {% for u in users %}
         <div class="member">
-            <div class="avatar"><img src="{{u.get_icon_url()}}" alt="{{u.name}}"></div>
+            <div class="avatar">
+                <a href="/user/{{u.id}}"><img src="{{u.get_icon_url()}}" alt="{{u.name}}"></a>
+            </div>
             <div class="entry">
-                <div class="name"><a href="/user/{{u.id}}">{{u.name}}</a><span><i>N.{{u.id}}</i></span></div>
+                <div class="name"><a href="/user/{{u.id}}">{{u.name}}</a>
+                    {%if u.is_pdf_ready()%}
+                        <sup><a target="_blank" href="/{{u.id}}/pdf">[PDF]</a></sup>
+                    {%endif%}
+                    <span><i>N.{{u.id}}</i></span>
+                </div>
                 <p>
                 {%for ua in u.get_alias()%}
                     {%set homepage_info = ua.get_homepage_url()%}

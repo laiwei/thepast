@@ -272,3 +272,12 @@ pdftoc {
     display: block;
 }
 
+.time{color:#999;}
+.text {
+    padding: 10px;
+    font-size: 12px;
+    line-height: 16px;
+}
+.text img{margin:5px 0;}
+.from{color:#CCC;}
+

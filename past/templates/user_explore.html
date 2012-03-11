@@ -1,57 +1,43 @@
 {% extends "layout.html" %}
 
 {% block content_block %}
-
-<div class="box">
-    <div class="cell">
-        <span class="bigger">发现有意思的用户 | 邀请你的朋友，一起来加入"个人杂志计划！"</span>
-        <div class="sep10"></div>
-    </div>
-
-    {%if not users%}
-        <br/>
-        <span class="fade">没有更多用户了，你可以邀请你感兴趣的朋友来一起加入"个人杂志计划"，这样会有更多精彩的内容，可以离线阅读了。
-        </span>
-        <br/> <br/>
-    {%endif%}
-
-    {% for user in users %}
-    <div class="cell" style="height:55px;">
-        <div class="fl">
-            <div style="height:48px;width:48px">
-                <a href="/user/{{user.id}}"><img class="userface" src="{{user.get_icon_url()}}"></a>
+    <div id="members">
+        <!-- 用户循环开始 输出16个 -->
+        {% for u in users %}
+        <div class="member">
+            <div class="avatar">
+                <a href="/user/{{u.id}}"><img src="{{u.get_icon_url()}}" alt="{{u.name}}"></a>
+            </div>
+            <div class="entry">
+                <div class="name"><a href="/user/{{u.id}}">{{u.name}}</a>
+                    {%if u.is_pdf_ready()%}
+                        <sup><a target="_blank" href="/{{u.id}}/pdf">[PDF]</a></sup>
+                    {%endif%}
+                    <span><i>N.{{u.id}}</i></span>
+                </div>
+                <p>
+                {%for ua in u.get_alias()%}
+                    {%set homepage_info = ua.get_homepage_url()%}
+                    {%if homepage_info%}
+                        <span class="from {{homepage_info[2]}}">
+                        <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
+                        </span>
+                    {%endif%}
+                {%endfor%}
+                </p>
             </div>
         </div>
-        <div class="fl" style="margin-left:10px;">
-            <span>{{user.name}}</span>
-            <div class="sep5"></div>
-            {%for ua in user.get_alias()%}
-                {%set homepage_info = ua.get_homepage_url()%}
-                {%if homepage_info%}
-                    <span><a href="{{homepage_info[1]}}">{{homepage_info[0]}}</a></span>&nbsp;
-                {%endif%}
-            {%endfor%}
-            <div class="sep5"></div>
-            <span><a href="/user/{{user.id}}">去ta的主页</a></span>&nbsp;&nbsp;
-            {%if user.is_pdf_ready()%}
-                <span><a href="/{{user.id}}/pdf">PDF版本下载</a></span>
-            {%endif%}
-        </div>
-        <div class="c"></div>
+        {% endfor %}
+        <!-- 用户循环结束 -->
+        <div class="clear"></div>
     </div>
-    {% endfor %}
-</div>
 
-<div class="sep20"></div>
+    <div class="sep10"></div>
+    <div class="box">
+        {% if g.start>0 %}
+        <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        {% endif %}
+        <a href="?start={{g.start+g.count}}">下一页</a>
+    </div>
 
-<div class="box">
-    {% if g.start>0 %}
-    <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    {% endif %}
-    <a href="?start={{g.start+g.count}}">下一页</a>
-</div>
-
-<script>
-</script>
 {% endblock %}
-

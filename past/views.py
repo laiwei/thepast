@@ -28,7 +28,7 @@ def require_login(f):
     @wraps(f)
     def _(*a, **kw):
         if not g.user:
-            return redirect(url_for("login"))
+            return redirect(url_for("home"))
 
         return f(*a, **kw)
     return _
@@ -36,11 +36,21 @@ def require_login(f):
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
         g.user_alias = None
+
+    if g.user:
+        unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
+                set([ua.type for ua in g.user.get_alias()]))
+        tmp = {}
+        for k,v in config.OPENID_TYPE_DICT.items():
+            tmp[v] = k
+        g.unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
+    else:
+        g.unbinded = None
+
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 30))
     g.cate = request.args.get("cate", None)
@@ -56,39 +66,31 @@ def favicon():
 
 @app.route("/")
 def index():
-    if not g.user:
-        return redirect(url_for("anonymous"))
+    return redirect(url_for("home"))
 
+@app.route("/i")
+def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
-            set([ua.type for ua in g.user.get_alias()]))
-    tmp = {}
-    for k,v in config.OPENID_TYPE_DICT.items():
-        tmp[v] = k
-    unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
-
     return render_template("timeline.html", user=g.user, 
-            unbinded=unbinded,
             status_list=status_list, config=config)
 
-@app.route("/anonymous")
-def anonymous():
+@app.route("/home")
+def home():
     user_ids = Status.get_recent_updated_user_ids()
     users = [User.get(x) for x in user_ids]
-    return render_template("index.html",  users=users, config=config)
-
-@app.route("/anonymous_index")
-def anonymous_index():
-    return redirect(url_for("anonymous"))
+    return render_template("home.html",
+            users=users, config=config)
 
 #TODO:xxx
 @app.route("/user")
 def user_explore():
+    g.count = 24
     user_ids = User.get_ids(start=g.start, limit=g.count)
     users = [User.get(x) for x in user_ids]
-    return render_template("user_explore.html", users=users, config=config)
+    return render_template("user_explore.html",
+            users=users, config=config)
     
 
 @app.route("/user/<uid>")
@@ -99,7 +101,7 @@ def user(uid):
         abort(404, "no such user")
 
     if g.user and g.user.id == u.id:
-        return redirect(url_for("index"))
+        return redirect(url_for("timeline"))
     
     #TODO:增加可否查看其他用户的权限检查
     cate = request.args.get("cate", None)
@@ -115,32 +117,16 @@ def user(uid):
     return render_template("timeline.html", user=u, unbinded=unbinded, 
             status_list=status_list, config=config)
 
-@app.route("/settings/profile")
-@require_login
-def profile():
-    u = g.user
-    sync_tasks = SyncTask.gets_by_user(u)
-    my_sync_cates = [x.category for x in sync_tasks]
-    return render_template("profile.html", user=u, 
-            my_sync_cates = my_sync_cates, config=config)
-
 @app.route("/logout")
 @require_login
 def logout():
     r = logout_user(g.user)
     flash(u"已退出",  "error")
-    return redirect(url_for("login"))
-
-#TODO
-@app.route("/login")
-def login():
-    if g.user:
-        return redirect(url_for("index"))
-    return render_template("login.html")
+    return redirect(url_for("home"))
 
 @app.route("/about")
 def about():
-    return render_template("about.html")
+    return redirect("https://github.com/laiwei/thepast#readme")
 
 @app.route("/connect/", defaults={"provider": config.OPENID_DOUBAN})
 @app.route("/connect/<provider>")
@@ -163,7 +149,6 @@ def connect(provider):
     ## when use oauth1, MUST save request_token and secret to SESSION
     if provider == config.OPENID_TWITTER or provider == config.OPENID_QQ:
         login_service.save_request_token_to_session(session)
-        print '------- connect, client:', login_service
 
     return redirect(login_uri)
 
@@ -213,7 +198,7 @@ def connect_callback(provider):
         return redirect(url_for('index'))
     else:
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 @require_login
@@ -267,6 +252,19 @@ def mypdf():
     else:
         return redirect(url_for("pdf", uid=g.user.id))
 
+@app.route("/demo-pdf")
+def demo_pdf():
+    pdf_filename = "demo.pdf"
+    full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, pdf_filename)
+    resp = make_response()
+    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers['Content-Type'] = 'application/pdf'
+    resp.headers['Content-Disposition'] = 'attachment; filename=%s' % pdf_filename
+    resp.headers['Content-Length'] = os.path.getsize(full_file_name)
+    redir = '/down/pdf/' + pdf_filename
+    resp.headers['X-Accel-Redirect'] = redir
+    return resp
+    
 @app.route("/<uid>/pdf")
 @require_login
 def pdf(uid):
@@ -276,8 +274,6 @@ def pdf(uid):
     
     pdf_filename = get_pdf_filename(user.id)
     if not is_pdf_file_exists(pdf_filename):
-        #generate_pdf(pdf_filename, user.id, 0, 10000000)
-        #abort(404, u"请明天来下载吧，因为我的内存吃不消了，只能晚上生成PDF^^")
         abort(404, "Please wait one day to  download the PDF version, because the vps memory is limited")
     if not is_pdf_file_exists(pdf_filename):
         abort(400, "generate pdf fail, please try again...")

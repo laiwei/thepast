@@ -2,48 +2,8 @@
 
 {% import "status.html" as status_tmpl_helper %}
 
-{% block head_block %}
-
-<div id="site">
-    <div id="logo" class="fl"><h1><a href="http://thepast.me/">ThePast.Me</a><h1></div>
-    <!-- 已登录：个人信息框 -->
-    {%if g.user%}
-    <div id="navi_login">
-        <div class="member">
-            <div class="avatar"><img src="{{g.user.get_icon_url()}}" alt="{{g.user.name}}"></div>
-            <div class="entry">
-                <div class="name">
-                    <a href="/user/{{g.user.id}}">{{g.user.name}}</a>
-                    <sup><a target="_blank" href="/pdf">[PDF]</a></sup>
-                    <span><i>N.{{g.user.id}}</i></span>
-                </div>
-
-                <p>
-                    {%set uas = g.user.get_alias()%}
-                    {%for ua in uas%}
-                        {%set h = ua.get_homepage_url()%}
-                        <span class="from {{h[2]}} oauth">
-                            <a title="访问我的{{h[0]}}" href="{{h[1]}}">{{h[0]}}</a>
-                        </span>
-                    {%endfor%}
-
-                    {%for ub in unbinded%}
-                        <span class="from {{ub[1]}}">
-                            <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
-                        </span>
-                    {%endfor%}
-                </p>
-            </div>
-        </div>
-    </div>
-    {%endif%}
-    <!-- End 个人信息框 -->
-</div>
-
-{% endblock %}
-
 {% block content_block %}
-<div class="timelines">
+<div id="timelines">
     {% if not status_list and g.start == 0 %}
         <div class="sep10"></div>
         <span class="fade">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</span>

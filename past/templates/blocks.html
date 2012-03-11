@@ -1,0 +1,53 @@
+{% macro people_info_block(user, unbinded) -%}
+
+<!-- 已登录：个人信息框 -->
+{%if user%}
+<div id="navi_login">
+    <div class="member">
+        <div class="avatar">
+            <a href="/user/{{user.id}}"><img src="{{user.get_icon_url()}}" alt="{{user.name}}"></a>
+        </div>
+        <div class="entry">
+            <div class="name">
+                <a href="/user/{{user.id}}">{{user.name}}</a>
+                {%if user.is_pdf_ready()%}
+                <sup><a target="_blank" href="/{{user.id}}/pdf">[PDF]</a></sup>
+                {%endif%}
+                <span><i>N.{{user.id}}</i></span>
+            </div>
+
+            <p>
+                {%set uas = user.get_alias()%}
+                {%for ua in uas%}
+                    {%set h = ua.get_homepage_url()%}
+                    <span class="from {{h[2]}} oauth">
+                        <a title="访问我的{{h[0]}}" href="{{h[1]}}">{{h[0]}}</a>
+                    </span>
+                {%endfor%}
+
+                {%if unbinded%}
+                    {%for ub in unbinded%}
+                        <span class="from {{ub[1]}}">
+                            <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
+                        </span>
+                    {%endfor%}
+                {%endif%}
+            </p>
+        </div>
+    </div>
+</div>
+{%endif%}
+<!-- End 个人信息框 -->
+
+{%- endmacro %}
+
+{% macro connect_block() -%}
+<div id="navi">
+    <ul>
+        <li class="login qq"><a title="使用腾讯微博授权登录" href="/connect/qq">qq</a></li>
+        <li class="login sina"><a title="使用新浪微博授权登录" href="/connect/sina">sina</a></li>
+        <li class="login douban"><a title="使用豆瓣授权登录" href="/connect/douban">douban</a></li>
+        <li class="login twitter"><a title="使用 Twitter 授权登录" href="/connect/twitter">twitter</a></li>
+    </ul>
+</div>
+{%- endmacro %}

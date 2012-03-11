@@ -3,15 +3,28 @@
 <head>
 <meta charset="utf-8">
 <title>{%block title_block%} The Past of Me | 个人杂志计划{%endblock%}</title>
-<link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.02">
+<link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.03">
 <script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
 </head>
 
 <body>
 
+{% import "blocks.html" as blocks %}
+
 <div id="head"> 
     {% block head_block %}
-    {% endblock %}
+        <div id="site">
+            <div id="logo" class="fl"><h1><a href="/home">ThePast.Me</a><h1></div>
+            {%if g.user%}
+                <!-- 已登录：个人信息框 -->
+                {{blocks.people_info_block(g.user, g.unbinded)}}
+                <!-- End 个人信息框 -->
+            {%else%}
+                <!-- 授权平台图标导航 -->
+                {{blocks.connect_block()}}
+            {%endif%}
+        </div>
+    {%endblock%}
 </div>
 
 <div id="main">
@@ -25,16 +38,13 @@
 
 <div id="footer">
     {%block footer_block%}
+       <div class="sep5"></div>
        <a class="dark" href="https://github.com/laiwei/thepast"> github主页 </a> &nbsp;&nbsp;
        <a class="dark" href="/user"> Explore </a> &nbsp;&nbsp;
        <a class="dark" href="/logout"> Logout</a> &nbsp;&nbsp;
-       <a class="dark" href="/SignIn"> SignIn</a> &nbsp;&nbsp;
-       <a class="dark" href="/about"> 关于 </a> &nbsp;&nbsp;
-       <a class="dark" href="/FAQ"> FAQ </a> &nbsp;&nbsp;
+       <a class="dark" href="/about"> About </a> &nbsp;&nbsp;
 
        <div class="sep10"></div>
-       <div class="sep5"></div>
-       
        <span class="fade">
            记录自己的过去... &nbsp;&nbsp
            copyright thepast.me && You
