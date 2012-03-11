@@ -256,20 +256,28 @@ class UserAlias(object):
 
     def get_homepage_url(self):
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
-            return u"豆瓣", "%s/people/%s" %(config.DOUBAN_SITE, self.alias), 'douban'
+            return config.OPENID_TYPE_NAME_DICT[self.type], \
+                    "%s/people/%s" %(config.DOUBAN_SITE, self.alias), \
+                    config.OPENID_DOUBAN
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
-            return u"微博", "%s/%s" %(config.SINA_SITE, self.alias), 'sina'
+            return config.OPENID_TYPE_NAME_DICT[self.type], \
+                    "%s/%s" %(config.SINA_SITE, self.alias), \
+                    config.OPENID_SINA
 
         ##FIXME:twitter的显示的不对
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             u = User.get(self.user_id)
-            return u"twitter", "%s/%s" %(config.TWITTER_SITE, u.name), 'twitter'
+            return config.OPENID_TYPE_NAME_DICT[self.type],\
+                    "%s/%s" %(config.TWITTER_SITE, u.name),\
+                    config.OPENID_TWITTER
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
             ##XXX:腾讯微博比较奇怪
-            return u"腾讯微博", "%s/%s" %(config.QQWEIBO_SITE, 
-                    User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", "")), 'qq'
+            return config.OPENID_TYPE_NAME_DICT[self.type],\
+                    "%s/%s" %(config.QQWEIBO_SITE, \
+                    User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", "")), \
+                    config.OPENID_QQ
 
 class OAuth2Token(object):
    

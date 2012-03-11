@@ -36,6 +36,7 @@ def require_login(f):
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
+    g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -61,7 +62,16 @@ def index():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    return render_template("timeline.html", user=g.user, status_list=status_list, config=config)
+    unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
+            set([ua.type for ua in g.user.get_alias()]))
+    tmp = {}
+    for k,v in config.OPENID_TYPE_DICT.items():
+        tmp[v] = k
+    unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
+
+    return render_template("timeline.html", user=g.user, 
+            unbinded=unbinded,
+            status_list=status_list, config=config)
 
 @app.route("/anonymous")
 def anonymous():
@@ -96,7 +106,14 @@ def user(uid):
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    return render_template("timeline.html", user=u, status_list=status_list, config=config)
+    unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
+            set([ua.type for ua in g.user.get_alias()]))
+    tmp = {}
+    for k,v in config.OPENID_TYPE_DICT.items():
+        tmp[v] = k
+    unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
+    return render_template("timeline.html", user=u, unbinded=unbinded, 
+            status_list=status_list, config=config)
 
 @app.route("/settings/profile")
 @require_login

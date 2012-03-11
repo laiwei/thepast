@@ -28,30 +28,21 @@ K_TASKQUEUE = 1001
 #-- openid type config --
 OPENID_DOUBAN = 'douban'
 OPENID_SINA = 'sina'
-OPENID_WORDPRESS = 'wordpress'
 OPENID_QQ = 'qq' ##qq weibo
-OPENID_GOOGLE = 'google'
-OPENID_FACEBOOK = 'facebook'
 OPENID_TWITTER = 'twitter'
 
 OPENID_TYPE_DICT = {
     OPENID_DOUBAN : "D",
     OPENID_SINA : "S",
-    OPENID_WORDPRESS : "W",
     OPENID_QQ : "Q",
-    OPENID_GOOGLE : "G",
-    OPENID_FACEBOOK : "F",
     OPENID_TWITTER : "T",
 }
 
 OPENID_TYPE_NAME_DICT = {
-    "D" : "豆瓣",
-    "S" : "微博",
-    "W" : "wordpress",
-    "T" : "twitter",
-    "Q" : "腾讯",
-    "G" : "Google",
-    "F" : "Facebook",
+    "D" : u"豆瓣",
+    "S" : u"新浪微博",
+    "T" : u"twitter",
+    "Q" : u"腾讯微博",
 }
 
 #-- oauth key & secret config --

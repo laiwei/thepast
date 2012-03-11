@@ -8,195 +8,44 @@
 </head>
 
 <body>
-<div id="Top">
-{% block top_block %} 
-    <div id="TopMain">
-        <a href="/"> 
-            <img src="{{url_for('static', filename='img/logo.png')}}" 
-                border="0" style="display: block; float: left; margin-left: 10px;">
-        </a>
-        <div id="Navigation">
-            <ul>
-                <li><a href="/" class="top">Home</a></li>
-                <li><a href="/user" class="top"><b>Explore</b></a></li>
-                <li><a href="/about" class="top">About</a></li>
-                {% if g.user %}
-                <li><a href="/settings/profile" class="top">{{g.user.name}}</a></li>
-                <li><a href="/logout" class="top">Logout</a></li>
-                {% else %}
-                <li><a href="/anoymous" class="top">SignUp</a></li>
-                <li><a href="/anoymous" class="top">Login</a></li>
-                {% endif %}
-            </ul>
-        </div>
 
-        <div id="Search" style="display:none;">
-            <form>
-                <div class="search_bar">
-                <input type="text" maxlength="40" name="q" id="q" value="">
-                </div>
-            </form>
-        </div>
-        
-    </div>
-{% endblock %}
+<div id="head"> 
+    {% block head_block %}
+    {% endblock %}
 </div>
 
-<div id="Wrapper">
-
-    <div id="Main">
-    {% block main_block%}
-        <div id="Sidebar">
-            {% block sidebar_block%}
+<div id="main">
+    {% block main_block %}
+        <div id="content"> 
+            {%block content_block %}
             {% endblock%}
         </div>
-
-        <div id="Rightbar">
-            {% block rightbar_block%}
-            <div class="box">
-                {% set user_ = user or g.user%}
-                {% if user_ %}
-                    <div class="cell">
-                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                            <tbody><tr>
-                                <td width="48" valign="top">
-                                <a href="/user/{{user_.id}}"><img src="{{user_.get_icon_url()}}" border="0"></a></td>
-                                <td width="10" valign="top"></td>
-                                <td width="auto" align="left"><span class="bigger"><a href="/user/{{user_.id}}">{{user_.name}}</a></span>
-                                    <div class="sep5"></div>
-                                    <span class="fade">个人杂志计划第{{user_.id}}号成员</span>
-                                </td>
-                            </tr>
-                        </tbody></table>
-                    </div>
-
-                    <div class="inner">
-        
-                        他/她的：{%for ua in user_.get_alias()%}
-                            {%set homepage_info = ua.get_homepage_url()%}
-                            {%if homepage_info%}
-                                <span><a href="{{homepage_info[1]}}">{{homepage_info[0]}}</a></span>&nbsp;
-                            {%endif%}
-                        {%endfor%}
-                        <div class="sep10"></div>
-                        {%if user_.is_pdf_ready()%}
-                            <span><a href="/{{user_.id}}/pdf">PDF版本下载</a></span>
-                        {%else%}
-                            <span>明天再来下载PDF吧，因为内存吃不消^^</span>
-                        {%endif%}
-
-                        <span class="fade">
-                            {%for ua in user_.get_alias()%}
-                                {%set p = user_.get_thirdparty_profile(ua.type)%}
-                                {%if p%}
-                                    <div class="sep10"></div>
-                                    {{p.get("intro")|nl2br|safe}}
-                                {%endif%}
-                            {%endfor%}
-                        </span>
-                    </div>
-
-                {% else %}
-                    <div class="cell">
-                        <span class="bigger">个人杂志计划</span>
-                        <div class="inner">
-                            <ul>
-                                <li>聚合你的豆瓣，twitter，新浪微博... 仍在增加中</li>
-                                <li><a href="/pdf">下载排版后的PDF版本</a>，离线阅读</li>
-                            </ul>
-                            <div class="sep10"> </div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="sep20"> </div>
-
-            {% if g.user %}
-                <div class="box">
-                    <div class="cell">
-                        <span class="bigger">绑定其他第三方</span>
-                    </div>
-                    <div class="inner">
-                        <ul>
-                            <li><a href="/connect/douban" class="dark" style="display: block;">
-                                豆瓣</a> </li>
-                            <li><a href="/connect/sina" class="dark" style="display: block;">
-                                新浪微博</a> </li>
-                            <li><a href="/connect/twitter" class="dark" style="display: block;">
-                                twitter</a> </li>
-                            <li><a href="/connect/qq" class="dark" style="display: block;">
-                                腾讯微博</a> </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="sep20"> </div>
-            {% endif %}
-
-            <div class="box">
-                <div class="cell">
-                    <span class="bigger">意见和反馈</span>
-                </div>
-                <div class="inner">
-
-                你可以关注我的微博或者豆瓣，给我留言，期待你的反馈
-                <div class="sep10"></div>
-                <ul>
-                <li><a target="_blank" href="http://weibo.com/hellolaiwei"> 我的微博 </a></li>
-                <li><a target="_blank" href="http://www.douban.com/people/laiwei"> 我的豆瓣 </a></li>
-                </ul>
-                </div>
-            </div>
-            <div class="sep20"> </div>
-            {% endblock%}
-
-        </div>
-
-        <div id="Content">
-            {% block content_notification %}
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <ul class=flashes>
-                            {% for category, message in messages %}
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                {% endwith %}
-                
-            {% endblock%}
-
-            {% block content_block%}
-            {% endblock%}
-        </div>
-
-        <div class="c"></div>
-
-    {% endblock%}
-    </div>
-
+    {% endblock %}
 </div>
 
-<div id="Bottom">
-    <div id="BottomMain">
-        {% block bottom_block %} 
-            <strong><a class="dark" href="/about"> 关于 </a></strong> &nbsp;&nbsp;
-            <strong><a class="dark" href="/FAQ"> FAQ </a></strong> &nbsp;&nbsp;
+<div id="footer">
+    {%block footer_block%}
+       <a class="dark" href="https://github.com/laiwei/thepast"> github主页 </a> &nbsp;&nbsp;
+       <a class="dark" href="/user"> Explore </a> &nbsp;&nbsp;
+       <a class="dark" href="/logout"> Logout</a> &nbsp;&nbsp;
+       <a class="dark" href="/SignIn"> SignIn</a> &nbsp;&nbsp;
+       <a class="dark" href="/about"> 关于 </a> &nbsp;&nbsp;
+       <a class="dark" href="/FAQ"> FAQ </a> &nbsp;&nbsp;
 
-            <div class="sep10"></div>
-            <div class="sep5"></div>
-            
-            <span class="fade">
-                记录自己的过去...
-                copyright thepast.me && You
-            </span>
-            <div class="sep10"></div>
-            <div class="sep5"></div>
-            <small>
-                <script src="http://s17.cnzz.com/stat.php?id=3877715&web_id=3877715" language="JavaScript"></script>
-                VERSION:0.0.1
-            </small>
-        {% endblock %}
-    </div>
+       <div class="sep10"></div>
+       <div class="sep5"></div>
+       
+       <span class="fade">
+           记录自己的过去... &nbsp;&nbsp
+           copyright thepast.me && You
+       </span>
+       <div class="sep10"></div>
+       <div class="sep5"></div>
+       <small>
+           <script src="http://s17.cnzz.com/stat.php?id=3877715&web_id=3877715" language="JavaScript"></script>
+           VERSION:0.0.1
+       </small>
+   {% endblock %}
 </div>
 
 <script>

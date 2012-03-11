@@ -2,13 +2,48 @@
 
 {% import "status.html" as status_tmpl_helper %}
 
-{% block content_block %}
-<div class="box">
-    <div class="cell">
-        <span class="bigger">Hi, Welcome to thepast.me</span>
-        <div class="sep10"></div>
-    </div>
+{% block head_block %}
 
+<div id="site">
+    <div id="logo" class="fl"><h1><a href="http://thepast.me/">ThePast.Me</a><h1></div>
+    <!-- 已登录：个人信息框 -->
+    {%if g.user%}
+    <div id="navi_login">
+        <div class="member">
+            <div class="avatar"><img src="{{g.user.get_icon_url()}}" alt="{{g.user.name}}"></div>
+            <div class="entry">
+                <div class="name">
+                    <a href="/user/{{g.user.id}}">{{g.user.name}}</a>
+                    <sup><a target="_blank" href="/pdf">[PDF]</a></sup>
+                    <span><i>N.{{g.user.id}}</i></span>
+                </div>
+
+                <p>
+                    {%set uas = g.user.get_alias()%}
+                    {%for ua in uas%}
+                        {%set h = ua.get_homepage_url()%}
+                        <span class="from {{h[2]}} oauth">
+                            <a title="访问我的{{h[0]}}" href="{{h[1]}}">{{h[0]}}</a>
+                        </span>
+                    {%endfor%}
+
+                    {%for ub in unbinded%}
+                        <span class="from {{ub[1]}}">
+                            <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
+                        </span>
+                    {%endfor%}
+                </p>
+            </div>
+        </div>
+    </div>
+    {%endif%}
+    <!-- End 个人信息框 -->
+</div>
+
+{% endblock %}
+
+{% block content_block %}
+<div class="timelines">
     {% if not status_list and g.start == 0 %}
         <div class="sep10"></div>
         <span class="fade">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</span>
@@ -32,30 +67,30 @@
 			<!-- 调用日期： XX日 -->
 			<div class="day"> › {{d}}日</div>
 			
-{%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
-    {%set s = repeated_status.status_list[0]%}
+        {%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
+            {%set s = repeated_status.status_list[0]%}
 
-    <li>
-        <div class="message">
-            {%if s.category == config.CATE_DOUBAN_STATUS%}
-                {{status_tmpl_helper.douban_status(s)}}
-            {%endif%}
+            <li>
+                <div class="message">
+                    {%if s.category == config.CATE_DOUBAN_STATUS%}
+                        {{status_tmpl_helper.douban_status(s)}}
+                    {%endif%}
 
-            {%if s.category == config.CATE_SINA_STATUS%}
-                {{status_tmpl_helper.sina_status(s)}}
-            {%endif%}
+                    {%if s.category == config.CATE_SINA_STATUS%}
+                        {{status_tmpl_helper.sina_status(s)}}
+                    {%endif%}
 
-            {%if s.category == config.CATE_QQWEIBO_STATUS%}
-                {{status_tmpl_helper.qq_weibo_status(s)}}
-            {%endif%}
+                    {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                        {{status_tmpl_helper.qq_weibo_status(s)}}
+                    {%endif%}
 
-            {%if s.category == config.CATE_TWITTER_STATUS%}
-                {{status_tmpl_helper.twitter_status(s)}}
-            {%endif%}
+                    {%if s.category == config.CATE_TWITTER_STATUS%}
+                        {{status_tmpl_helper.twitter_status(s)}}
+                    {%endif%}
 
-        </div>
-    </li>
-{%endfor%}
+                </div>
+            </li>
+        {%endfor%}
 
 		</ul>
 		<!-- 日循环结束 -->
@@ -74,5 +109,6 @@
     {% endif %}
     <a href="?start={{g.start+g.count}}">下一页</a>
 </div>
+
 {% endblock %}
 
