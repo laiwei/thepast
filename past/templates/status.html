@@ -1,10 +1,4 @@
 {% macro douban_status(s, pdf=False) -%}
-<!-- 调用时间：时分秒 -->
-{%if not pdf%}
-    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-{%endif%}
-
-<div class="text">
     <!-- 正文 -->
     {%if pdf%}
         {{s.text|wrap_long_line}}
@@ -12,11 +6,6 @@
         {{s.text}}
     {%endif%}
 
-    <!-- 来源 -->
-    {%set from_ = s.get_origin_uri()%}
-    {%if from_ and not pdf%}
-        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-    {%endif%}
 
     <!-- 附件 -->
     {%set atts = s.get_data() and s.get_data().get_attachments()%}
@@ -84,31 +73,18 @@
     {% endif %}
 
     {%if pdf%}
-    <div class="time">
-    From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
-    <hr/>
+        <div class="time">
+        From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
-
-</div>
     
 {%- endmacro %}
 
 
 {% macro sina_status(s, pdf=False) -%}
-{%if not pdf%}
-    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-{%endif%}
-
-<div class="text">
     {%if pdf%}
         {{s.text|wrap_long_line}}
     {%else%}
         {{s.text}}
-    {%endif%}
-
-    {%set from_ = s.get_origin_uri()%}
-    {%if from_ and not pdf%}
-        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
     {%endif%}
 
     {% set images = s.get_data().get_images() or [] %}
@@ -136,46 +112,26 @@
     {% endif %}
 
     {%if pdf%}
-    <div class="time">
-    From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
-    <hr/>
+        <div class="time">
+        From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
 
-</div>
 {%- endmacro %}
 
 {% macro twitter_status(s, pdf=False) -%}
-{%if not pdf%}
-    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-{%endif%}
-
-<div class="text">
-
     {%if pdf%}
         {{s.text|wrap_long_line}}
     {%else%}
         {{s.text}}
     {%endif%}
 
-    {%set from_ = s.get_origin_uri()%}
-    {%if from_ and not pdf%}
-        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-    {%endif%}
-
     {%if pdf%}
-    <div class="time">
-    From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
-    <hr/>
+        <div class="time">
+        From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
-</div>    
 {%- endmacro %}
 
 {% macro qq_weibo_status(s, pdf=False) -%}
-{%if not pdf%}
-    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-{%endif%}
-
-<div class="text">
     {%if pdf%}
         {{s.text|wrap_long_line|safe}}
     {%else%}
@@ -187,11 +143,6 @@
         {{ "//" + re }} 
     {% endif %}
 
-    {%set from_ = s.get_origin_uri()%}
-    {%if from_ and not pdf%}
-        <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-    {%endif%}
-
     {% set images = s.get_data().get_images() or [] %}
     {% if images %}
         {%for image in images%}
@@ -201,10 +152,8 @@
     {% endif %}
 
     {%if pdf%}
-    <div class="time">
-    From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
-    <hr/>
+        <div class="time">
+        From: {{s.get_origin_uri() and s.get_origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
-</div>
 {%- endmacro %}
 
