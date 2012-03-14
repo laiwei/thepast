@@ -16,7 +16,7 @@ from past import config
 if __name__ == "__main__":
     
     #for uid in User.get_ids(0, 10000000):
-    for uid in [4,]:
+    for uid in [277,278,279,280,281,]:
         try:
             uas = UserAlias.gets_by_user_id(uid)
             if not uas:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
             count = 3000
             if config.OPENID_TYPE_DICT[config.OPENID_SINA] in types \
                     or config.OPENID_TYPE_DICT[config.OPENID_QQ] in types:
-                count = 20
+                count = 250
             pdf_filename = get_pdf_filename(uid)
             print pdf_filename
             generate_pdf(pdf_filename, uid, 0, count, capacity=-1)

@@ -28,7 +28,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .login.douban a{background-position:0 -76px;}
 .login.twitter a{background-position:0 -114px;}
 
-.from{display:inline-block;margin:0 0 -2px 4px;}
+.from{display:inline-block;margin:0 0 -2px 0px;}
 .from a{background:url(/static/img/sns.png) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
 .from.twitter a{background-position:0 -16px;}
 .from.sina a{background-position:0 -32px;}

@@ -36,6 +36,14 @@
                     <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
 
                     <div class="text">
+                        <!-- 来源 -->
+                        {%for s in repeated_status.status_list%}
+                            {%set from_ = s.get_origin_uri()%}
+                            {%if from_%}
+                                <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                            {%endif%}
+                        {%endfor%}
+
                         {%if s.category == config.CATE_DOUBAN_STATUS%}
                             {{status_tmpl_helper.douban_status(s)}}
                         {%endif%}
@@ -52,13 +60,6 @@
                             {{status_tmpl_helper.twitter_status(s)}}
                         {%endif%}
 
-                        <!-- 来源 -->
-                        {%for s in repeated_status.status_list%}
-                            {%set from_ = s.get_origin_uri()%}
-                            {%if from_ and not pdf%}
-                                <span class="from {{from_[0]}}"><a href="{{from_[1]}}"></a></span>
-                            {%endif%}
-                        {%endfor%}
                     </div>
                 </div>
             </li>
@@ -84,3 +85,10 @@
 
 {% endblock %}
 
+<!--
+<script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+<script>
+$("img").error( function(){$(this).css({ visibility:"hidden" });
+});
+</script>
+-->

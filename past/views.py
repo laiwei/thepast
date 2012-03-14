@@ -275,8 +275,6 @@ def pdf(uid):
     pdf_filename = get_pdf_filename(user.id)
     if not is_pdf_file_exists(pdf_filename):
         abort(404, "Please wait one day to  download the PDF version, because the vps memory is limited")
-    if not is_pdf_file_exists(pdf_filename):
-        abort(400, "generate pdf fail, please try again...")
 
     full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, pdf_filename)
     resp = make_response()

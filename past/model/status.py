@@ -57,6 +57,11 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
+        if self.get_retweeted_data():
+            return int(self.id)
+        if self.category == config.CATE_DOUBAN_STATUS and \
+            self.get_data() and self.get_data().get_attachments():
+            return int(self.id)
         s = u"%s%s%s" % (self.user_id, self.bare_text[:15], self.create_time.day)
         d = hashlib.md5()
         d.update(s.encode("utf8"))

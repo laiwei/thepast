@@ -347,7 +347,7 @@ class DoubanStatusData(DoubanData):
             medias = att and att.get_medias()
             for x in medias:
                 if x and x.get_type() == 'image':
-                    o.append(x.get_src())   
+                    o.append(x.get_src().replace("http://img3", "http://img2").replace("http://img1", "http://img2"))   
         return o
 
     def get_user(self):
