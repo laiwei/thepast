@@ -110,6 +110,11 @@ CACHE_DIR = "/home/work/proj/thepast/var/cache"
 FILE_DOWNLOAD_DIR = "/home/work/proj/thepast/var/down"
 PDF_FILE_DOWNLOAD_DIR = FILE_DOWNLOAD_DIR + "/pdf"
 
+#scws config
+SCWS = "/usr/local/scws/bin/scws"
+SCWS_XDB_DICT = "/usr/local/scws/etc/dict.utf8.xdb"
+CHINESE_DICT_WITH_FREQUENCY = "static/chinese_dict_with_frequency.txt"
+
 try:
     from local_config import *
 except:
