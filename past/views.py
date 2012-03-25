@@ -98,7 +98,8 @@ def tag(uid):
     if not u:
         abort(404, "no such user")
     from past.cws.cut import get_keywords
-    kws = get_keywords(count=30)
+    count = min(g.count, 50)
+    kws = get_keywords(u.id, count)
     return ",".join([x[0] for x in kws])
     
 @app.route("/user/<uid>")
