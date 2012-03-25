@@ -49,6 +49,7 @@ def get_keywords(user_id=config.MY_USER_ID, count=30):
     r = commands.getoutput(cmd)
 
     if not r:
+        print '-----no keywords'
         return None
     
     term_frq = defaultdict(int)
@@ -63,6 +64,6 @@ def get_keywords(user_id=config.MY_USER_ID, count=30):
                 frq = re.sub(r'\(.*\)', '', lines[3])
                 term_frq[term] += float(frq)
         except Exception, e:
-            pass
+            print e
     tf_list = sorted(term_frq.items(), key=lambda x:x[1], reverse=True) 
     return tf_list[:count]

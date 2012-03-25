@@ -425,7 +425,7 @@ def get_all_text_by_user(user_id):
                 else:
                     _t += retweeted_data.get_content()
             text += _t.replace('"', '').replace("`", "")
-        except:
-            pass
+        except Exception, e:
+            print e
     return text
 
