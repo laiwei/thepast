@@ -92,7 +92,15 @@ def user_explore():
     return render_template("user_explore.html",
             users=users, config=config)
     
-
+@app.route("/user/<uid>/tag")
+def tag(uid):
+    u = User.get(uid)
+    if not u:
+        abort(404, "no such user")
+    from past.cws.cut import get_keywords
+    kws = get_keywords(count=30)
+    return ",".join([x[0] for x in kws])
+    
 @app.route("/user/<uid>")
 @require_login
 def user(uid):
