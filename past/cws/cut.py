@@ -7,6 +7,7 @@ from collections import defaultdict
 
 from past import config
 from past.corelib.cache import cache
+from past.utils import randbytes
 from past.model.status import get_all_text_by_user
 
 """ 
@@ -43,10 +44,17 @@ def cut_str(text):
 @cache("user_keywords:{user_id}:{count}", 3600*6)
 def get_keywords(user_id=config.MY_USER_ID, count=30):
     text = get_all_text_by_user(user_id)
-    cmd = '%s -I -d %s -c utf8 -t500 -i "%s"|grep -E "^[0-9]+"' \
-            % (config.SCWS, config.HOT_TERMS_DICT, text)
-    cmd = cmd.encode("utf8")
-    r = commands.getoutput(cmd)
+    file_ = "/tmp/tag_%s" % randbytes(8)
+    with open(file_, 'w') as f:
+        f.write(text.encode("utf8"))
+    try:
+        cmd = '%s -I -d %s -c utf8 -t500 -i "%s"|grep -E "^[0-9]+"' \
+                % (config.SCWS, config.HOT_TERMS_DICT, file_)
+        r = commands.getoutput(cmd)
+    except Exception, e:
+        print e
+    finally:
+        os.path.exists(file_) and os.remove(file_)
 
     if not r:
         print '-----no keywords'
