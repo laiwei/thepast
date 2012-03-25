@@ -113,7 +113,8 @@ PDF_FILE_DOWNLOAD_DIR = FILE_DOWNLOAD_DIR + "/pdf"
 #scws config
 SCWS = "/usr/local/scws/bin/scws"
 SCWS_XDB_DICT = "/usr/local/scws/etc/dict.utf8.xdb"
-CHINESE_DICT_WITH_FREQUENCY = "static/chinese_dict_with_frequency.txt"
+MY_CUT_DICT = "/home/work/proj/thepast/past/cws/mydict.txt"
+HOT_TERMS_DICT = "/home/work/proj/thepast/past/cws/hot_terms.txt"
 
 try:
     from local_config import *

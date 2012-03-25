@@ -410,3 +410,22 @@ class TaskQueue(object):
         db_conn.commit()
         cursor and cursor.close()
         
+def get_all_text_by_user(user_id):
+    text = ""
+    status_ids = Status.get_ids(user_id, limit=1000)
+    for s in Status.gets(status_ids):
+        try:
+            #_t = ''.join( [x for x in s.text if is_cn_or_en(x)] )
+            _t = ''.join( [x for x in s.text] )
+
+            retweeted_data = s.get_retweeted_data()
+            if retweeted_data:
+                if isinstance(retweeted_data, basestring):
+                    _t += retweeted_data
+                else:
+                    _t += retweeted_data.get_content()
+            text += _t.replace('"', '').replace("`", "")
+        except:
+            pass
+    return text
+
