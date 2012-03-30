@@ -1,11 +1,11 @@
 {% macro people_info_block(user, unbinded) -%}
 
-<!-- 已登录：个人信息框 -->
+<!-- 个人信息框 -->
 {%if user%}
 <div id="navi_login">
     <div class="member">
         <div class="avatar">
-            <a href="/user/{{user.id}}"><img src="{{user.get_icon_url()}}" alt="{{user.name}}"></a>
+            <a href="/user/{{user.id}}"><img src="{{user.get_icon_url()}}" target="_blank" alt="{{user.name}}"></a>
         </div>
         <div class="entry">
             <div class="name">
@@ -21,7 +21,7 @@
                 {%for ua in uas%}
                     {%set h = ua.get_homepage_url()%}
                     <span class="from {{h[2]}} oauth">
-                        <a title="访问我的{{h[0]}}" href="{{h[1]}}">{{h[0]}}</a>
+                        <a title="访问{{h[0]}}" href="{{h[1]}}" target="_blank">{{h[0]}}</a>
                     </span>
                 {%endfor%}
 

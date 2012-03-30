@@ -69,6 +69,7 @@ def index():
     return redirect(url_for("home"))
 
 @app.route("/i")
+@require_login
 def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
@@ -117,13 +118,7 @@ def user(uid):
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
-            set([ua.type for ua in g.user.get_alias()]))
-    tmp = {}
-    for k,v in config.OPENID_TYPE_DICT.items():
-        tmp[v] = k
-    unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
-    return render_template("timeline.html", user=u, unbinded=unbinded, 
+    return render_template("timeline.html", user=u, unbinded=[], 
             status_list=status_list, config=config)
 
 @app.route("/logout")
