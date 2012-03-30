@@ -104,7 +104,7 @@ def tag(uid):
     return ",".join([x[0] for x in kws])
     
 @app.route("/user/<uid>")
-@require_login
+#@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
