@@ -57,10 +57,13 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        if self.get_retweeted_data():
+        if self.category == config.CATE_QQWEIBO_STATUS and self.get_retweeted_data() != self.text:
+            return int(self.id)
+        if (self.category == config.CATE_SINA_STATUS or self.category == config.CATE_DOUBAN_STATUS) \
+                and self.get_retweeted_data():
             return int(self.id)
         if self.category == config.CATE_DOUBAN_STATUS and \
-            self.get_data() and self.get_data().get_attachments():
+                self.get_data() and self.get_data().get_attachments():
             return int(self.id)
         s = u"%s%s%s" % (self.user_id, self.bare_text[:15], self.create_time.day)
         d = hashlib.md5()
