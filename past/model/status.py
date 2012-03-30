@@ -416,7 +416,7 @@ def get_all_text_by_user(user_id, limit=1000):
     for s in Status.gets(status_ids):
         try:
             #_t = ''.join( [x for x in s.text if is_cn_or_en(x)] )
-            _t = ''.join( [x for x in s.text] )
+            _t = s.text
 
             retweeted_data = s.get_retweeted_data()
             if retweeted_data:
