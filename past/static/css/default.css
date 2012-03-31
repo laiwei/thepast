@@ -13,7 +13,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .fl{float:left;}
 .clear{clear:both;}
 
-#site,#content{width:960px;margin:0 auto;}
+#site{width:960px;margin:0px auto 0px auto;}
 
 #head{background-image:url(/static/img/head.png);box-shadow:0 0 4px rgba(0, 0, 0, 0.35);border-bottom: 1px solid #F0F0F0;height:80px;position:relative;z-index:1;}
 #logo a{display:block;width: 412px;height: 80px;background-image:url(/static/img/logo.png);text-indent:-9999em;}
@@ -34,12 +34,55 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .from.sina a{background-position:0 -32px;}
 .from.douban a{background-position:0 -48px;}
 
-#content{margin-top:32px;}
-#news,#members,#timelines{background:url(/static/img/new.gif);padding:18px;margin-bottom:32px;border:1px solid #FFF;box-shadow:inset 1px 1px 4px #CCC;line-height:30px;}
+#content {
+    width: 960px;
+    margin: 32px auto 0px auto;
+    padding: 12px 0px 30px 0px;
+}
+
+#news,#members{
+    background:url(/static/img/new.gif);
+    padding:18px;
+    margin-bottom:32px;
+    border:1px solid #FFF;
+    box-shadow:inset 1px 1px 4px #CCC;
+    line-height:30px;
+}
+#timelines{
+    background-color: #fff;
+    padding: 10px;
+    margin: 0px 282px 32px 0px;
+    border:1px solid #FFF;
+    line-height:30px;
+
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+
+    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+}
+#timelines img{max-width:500px;}
+#sidebar {
+    float: left;
+    width: 0px;
+}
+#rightbar {
+    float: right;
+    width: 272px;
+    padding: 0px 0px 10px 10px;
+}
+#main{
+    background-image: url("/static/img/members.gif");
+}
+
 #news h2{font-weight:bold;font-size:19.5px;line-height:35px;}
 #news p strong{border-bottom:1px dotted;}
 
-#members,#timelines{background:url(/static/img/members.png);padding:18px 0 0;}
+#members{background:url(/static/img/members.png);padding:18px 0 0;}
 .member{font-size:13.5px;width:188px;height:48px;float:left;margin: 0 25px 18px 24px;border:1px solid #FFF;box-shadow:0px 0px 2px #CCC;line-height:24px;overflow:hidden;background-color:rgba(170, 170, 170, 0.07);}
 .avatar{width:48px;height:48px;float:left;}
 .entry{margin-left:55px;}
@@ -54,8 +97,6 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #navi_login .from a:hover{opacity:0.47;}
 #navi_login .from.oauth a{opacity:1;}
 
-#timelines{padding:18px;}
-#timelines img{max-width:760px;}
 .month{font-size: 13px;margin:10px 0 25px;}
 .month h2{font-size: 18px;font-weight:bold;}
 .articles{margin: 10px 0;}
@@ -69,12 +110,90 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .message .from{color:#CCC;}
 
 
-.fade { 
-    color: #999;
-}
-
 .sep20 {height:20px;}
 .sep10 {height:10px;}
 .sep5 {height:5px;}
 .sep3 {height:3px;}
 
+.box {
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+
+    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+
+    /*background-color: #fff;*/
+    background-color: #fff;
+    border: 1px solid #fff;
+}
+.glass {
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+.box .inner, .glass .inner {
+    padding: 10px;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.box .highlighted {
+    border-left: 3px solid #3c3;
+    background-color: #f5f5f5;
+}
+
+.box .yellow {
+    padding: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    background-color: #ffffe2;
+    border-top: 1px solid #ffffcc;
+    -moz-border-radius: 0px 0px 6px 6px;
+}
+
+.box .cell {
+    padding: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    border-bottom: 1px solid #e2e2e2;
+}
+
+.box .bar {
+    font-size: 14px;
+    line-height: 14px;
+    color: #667;
+    background-color: #f0f0f0;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    padding: 5px;
+    display: inline-block;
+}
+.bigger {
+    font-size: 16px;
+}
+
+.fade { 
+    color: #999;
+}
+
+.item_node {
+    color: #778087;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 4px 10px 4px 10px;
+    margin: 3px;
+    background-color: #f5f5f5;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    display: inline-block;
+}
+
+.item_node:hover {
+    text-decoration: none;
+    background-color: #99a;
+    color: #fff;
+}

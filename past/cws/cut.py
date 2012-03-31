@@ -41,7 +41,7 @@ def cut_str(text):
     r = commands.getoutput(cmd)
     return r
 
-@cache("user_keywords:{user_id}:{count}", 3600*6)
+#@cache("user_keywords:{user_id}:{count}", 3600*24)
 def get_keywords(user_id=config.MY_USER_ID, count=30):
     text = get_all_text_by_user(user_id)
     file_ = "/tmp/tag_%s" % randbytes(8)
@@ -70,6 +70,7 @@ def get_keywords(user_id=config.MY_USER_ID, count=30):
                 term = term.lower()
             if term in hot_keywords and term not in term_frq:
                 frq = re.sub(r'\(.*\)', '', lines[3])
+                term = term.decode("utf8")
                 term_frq[term] += float(frq)
         except Exception, e:
             print e

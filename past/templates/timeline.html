@@ -18,6 +18,36 @@
 {%endblock%}
 
 {% block content_block %}
+<div id="sidebar"></div>
+<div id="rightbar">
+
+    <div class="box">
+        <div class="cell">
+            <span class="fade">关键字</span>
+        </div>
+
+        <div class="inner">
+            {%for t in tags_list%}
+                <span class="item_node">{{t}}</span>
+            {%endfor%}
+        </div>
+    </div>
+
+    <div class="sep10"> </div>
+
+    <div class="box">
+        <div class="inner">
+            <span class="fade">个人介绍</span>
+        </div>
+
+        {% for intro in intros%}
+        <div class="inner">
+            {{intro}}
+        </div>
+        {% endfor%}
+    </div>
+</div>
+
 <div id="timelines">
     {% if not status_list and g.start == 0 %}
         <div class="sep10"></div>
@@ -88,15 +118,17 @@
 	<!-- 月循环结束 -->
     {%endfor%}
 
+    <div class="sep10"></div>
+    <div class="box">
+        {% if g.start>0 %}
+        <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        {% endif %}
+        <a href="?start={{g.start+g.count}}">下一页</a>
+    </div>
+
 </div>
 
-<div class="sep10"></div>
-<div class="box">
-    {% if g.start>0 %}
-    <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    {% endif %}
-    <a href="?start={{g.start+g.count}}">下一页</a>
-</div>
+<div class="clear"></div>
 
 {% endblock %}
 

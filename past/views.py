@@ -20,6 +20,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
+from past.cws.cut import get_keywords
 import api_client
 
 from past import app
@@ -74,8 +75,11 @@ def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    return render_template("timeline.html", user=g.user, 
-            status_list=status_list, config=config)
+    tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT]
+    intros = filter(None, intros)
+    return render_template("timeline.html", user=g.user, tags_list=tags_list,
+            intros=intros, status_list=status_list, config=config)
 
 @app.route("/home")
 def home():
@@ -98,13 +102,12 @@ def tag(uid):
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
-    from past.cws.cut import get_keywords
     count = min(g.count, 50)
     kws = get_keywords(u.id, count)
     return ",".join([x[0] for x in kws])
     
 @app.route("/user/<uid>")
-#@require_login
+@require_login
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -114,12 +117,15 @@ def user(uid):
         return redirect(url_for("timeline"))
     
     #TODO:增加可否查看其他用户的权限检查
+    tags_list = [x[0] for x in get_keywords(u.id, 30)]
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
+    intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT]
+    intros = filter(None, intros)
     return render_template("timeline.html", user=u, unbinded=[], 
-            status_list=status_list, config=config)
+            tags_list=tags_list, intros=intros, status_list=status_list, config=config)
 
 @app.route("/logout")
 @require_login
