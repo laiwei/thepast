@@ -42,7 +42,7 @@
 
         {% for intro in intros%}
         <div class="inner">
-            {{intro}}
+            {{intro|nl2br|safe}}
         </div>
         {% endfor%}
     </div>

@@ -76,7 +76,7 @@ def timeline():
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
     tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
-    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT]
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     return render_template("timeline.html", user=g.user, tags_list=tags_list,
             intros=intros, status_list=status_list, config=config)
@@ -122,7 +122,7 @@ def user(uid):
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT]
+    intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     return render_template("timeline.html", user=u, unbinded=[], 
             tags_list=tags_list, intros=intros, status_list=status_list, config=config)
