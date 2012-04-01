@@ -48,11 +48,11 @@ def get_keywords(user_id=config.MY_USER_ID, count=30):
     with open(file_, 'w') as f:
         f.write(text.encode("utf8"))
     try:
-        cmd = '%s -I -d %s -c utf8 -t500 -i "%s"|grep -E "^[0-9]+"' \
+        cmd = '%s -I -d %s -c utf8 -t200 -i "%s"|grep -E "^[0-9]+"' \
                 % (config.SCWS, config.HOT_TERMS_DICT, file_)
         r = commands.getoutput(cmd)
     except Exception, e:
-        print e
+        import traceback; print traceback.format_exc()
     finally:
         os.path.exists(file_) and os.remove(file_)
 
@@ -65,14 +65,15 @@ def get_keywords(user_id=config.MY_USER_ID, count=30):
     for line in r.split("\n"):
         try:
             lines = re.split("\s+", line)
-            term = lines[1]
-            if term.isalpha():
-                term = term.lower()
-            if term in hot_keywords and term not in term_frq:
-                frq = re.sub(r'\(.*\)', '', lines[3])
-                term = term.decode("utf8")
-                term_frq[term] += float(frq)
+            if len(lines) >= 2:
+                term = lines[1]
+                if term.isalpha():
+                    term = term.lower()
+                if term in hot_keywords and term not in term_frq:
+                    frq = re.sub(r'\(.*\)', '', lines[3])
+                    term = term.decode("utf8")
+                    term_frq[term] += float(frq)
         except Exception, e:
-            print e
+            import traceback; print traceback.format_exc()
     tf_list = sorted(term_frq.items(), key=lambda x:x[1], reverse=True) 
     return tf_list[:count]

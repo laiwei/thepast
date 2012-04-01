@@ -13,6 +13,9 @@ REDIS_PORT = 6379
 REDIS_CACHE_HOST = "localhost"
 REDIS_CACHE_PORT = 7379
 
+MEMCACHED_HOST = "127.0.0.1"
+MEMCACHED_PORT = 11211
+
 #-- app config --
 DEBUG = True
 SECRET_KEY = "dev_key_of_thepast"

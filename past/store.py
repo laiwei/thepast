@@ -6,6 +6,7 @@ import datetime
 
 import MySQLdb
 import redis
+import memcache
 import pymongo
 
 from past.utils.escape import json_decode, json_encode
@@ -102,8 +103,13 @@ class DB(object):
 
     def rollback(self):
         return self._conn and self._conn.rollback()
-        
+
+def connect_memcached():
+    mc = memcache.Client(['%s:%s' % (config.MEMCACHED_HOST, config.MEMCACHED_PORT)], debug=0)
+    return mc
+
 db_conn = DB()
+#redis_cache_conn = connect_memcached()
 redis_cache_conn = connect_redis_cache()
-redis_conn = connect_redis()
+#redis_conn = connect_redis()
 mongo_conn = MongoDB()

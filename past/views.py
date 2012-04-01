@@ -75,7 +75,10 @@ def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
-    tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
+    if status_list:
+        tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
+    else:
+        tags_list = []
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     return render_template("timeline.html", user=g.user, tags_list=tags_list,
@@ -117,11 +120,14 @@ def user(uid):
         return redirect(url_for("timeline"))
     
     #TODO:增加可否查看其他用户的权限检查
-    tags_list = [x[0] for x in get_keywords(u.id, 30)]
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
+    if status_list:
+        tags_list = [x[0] for x in get_keywords(u.id, 30)]
+    else:
+        tags_list = []
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     return render_template("timeline.html", user=u, unbinded=[], 

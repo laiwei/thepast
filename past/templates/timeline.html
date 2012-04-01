@@ -23,13 +23,17 @@
 
     <div class="box">
         <div class="cell">
-            <span class="fade">关键字</span>
+            <span class="fade">个人关键字</span>
         </div>
 
-        <div class="inner">
+        <div class="cell">
             {%for t in tags_list%}
                 <span class="item_node">{{t}}</span>
             {%endfor%}
+        </div>
+
+        <div class="inner">
+            <span class="fade">个人关键字是thepast根据你的timeline自动提取的，如果你觉得不错，请推荐给你的朋友^^</span>
         </div>
     </div>
 

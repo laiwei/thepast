@@ -12,7 +12,8 @@ sudo apt-get install python-mysqldb
 sudo apt-get install redis-server
 
 git clone git://github.com/laiwei/thepast.git
-virtualenv --no-site-packages env
+#virtualenv --no-site-packages env
+virtualenv env
 
 pip install flask redis tweepy httplib2
 

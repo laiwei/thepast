@@ -76,7 +76,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
     padding: 0px 0px 10px 10px;
 }
 #main{
-    background-image: url("/static/img/members.gif");
+    background-image: url("/static/img/members.png");
 }
 
 #news h2{font-weight:bold;font-size:19.5px;line-height:35px;}
