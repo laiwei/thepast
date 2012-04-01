@@ -109,7 +109,6 @@ def connect_memcached():
     return mc
 
 db_conn = DB()
-#redis_cache_conn = connect_memcached()
-redis_cache_conn = connect_redis_cache()
+mc = redis_cache_conn = connect_memcached()
 #redis_conn = connect_redis()
 mongo_conn = MongoDB()

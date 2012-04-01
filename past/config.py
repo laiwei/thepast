@@ -7,12 +7,16 @@ DB_PASSWD = "123456"
 DB_NAME = "thepast"
 
 #-- redis config --
+#XXX
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
+#XXX
 REDIS_CACHE_HOST = "localhost"
 REDIS_CACHE_PORT = 7379
 
+#-- mc config --
+# mc replace redis
 MEMCACHED_HOST = "127.0.0.1"
 MEMCACHED_PORT = 11211
 

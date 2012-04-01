@@ -14,7 +14,7 @@ except:
 from .empty import Empty
 from .format import format
 
-from past.store import redis_cache_conn
+from past.store import mc
 
 # some time consts for mc expire
 HALF_HOUR =  1800
@@ -44,7 +44,7 @@ def gen_key_factory(key_pattern, arg_names, defaults):
         return key and key.replace(' ','_'), aa
     return gen_key
 
-def cache_(key_pattern, redis, expire=0, max_retry=0):
+def cache_(key_pattern, mc, expire=0, max_retry=0):
     def deco(f):
         arg_names, varargs, varkw, defaults = inspect.getargspec(f)
         if varargs or varkw:
@@ -55,22 +55,22 @@ def cache_(key_pattern, redis, expire=0, max_retry=0):
             key, args = gen_key(*a, **kw)
             if not key:
                 return f(*a, **kw)
-            r = redis.get(key)
+            if isinstance(key, unicode):
+                key = key.encode("utf8")
+            r = mc.get(key)
 
             # anti miss-storm
             retry = max_retry
             while r is None and retry > 0:
                 time.sleep(0.1)
-                r = redis.get(key)
+                r = mc.get(key)
                 retry -= 1
             r = pickle.loads(r) if r else None
             
             if r is None:
                 r = f(*a, **kw)
                 if r is not None:
-                    redis.set(key, pickle.dumps(r))
-                if expire > 0:
-                    redis.expire(key, expire)
+                    mc.set(key, pickle.dumps(r), expire)
             
             if isinstance(r, Empty):
                 r = None
@@ -79,7 +79,7 @@ def cache_(key_pattern, redis, expire=0, max_retry=0):
         return _
     return deco
 
-def pcache_(key_pattern, redis, count=300, expire=0, max_retry=0):
+def pcache_(key_pattern, mc, count=300, expire=0, max_retry=0):
     def deco(f):
         arg_names, varargs, varkw, defaults = inspect.getargspec(f)
         if varargs or varkw:
@@ -96,27 +96,28 @@ def pcache_(key_pattern, redis, count=300, expire=0, max_retry=0):
             limit = int(limit)
             if not key or limit is None or start+limit > count:
                 return f(*a, **kw)
-            r = redis.get(key)
+            if isinstance(key, unicode):
+                key = key.encode("utf8")
+            r = mc.get(key)
             
             # anti miss-storm
             retry = max_retry
             while r is None and retry > 0:
                 time.sleep(0.1)
-                r = redis.get(key)
+                r = mc.get(key)
                 retry -= 1
             r = pickle.loads(r) if r else None
 
             if r is None:
                 r = f(limit=count, **args)
-                redis.set(key, pickle.dumps(r))
-                if expire > 0:
-                    redis.expire(key, expire)
+                mc.set(key, pickle.dumps(r), expire)
             return r[start:start+limit]
+
         _.original_function = f
         return _
     return deco
 
-def delete_cache_(key_pattern, redis):
+def delete_cache_(key_pattern, mc):
     def deco(f):
         arg_names, varargs, varkw, defaults = inspect.getargspec(f)
         if varargs or varkw:
@@ -126,25 +127,25 @@ def delete_cache_(key_pattern, redis):
         def _(*a, **kw):
             key, args = gen_key(*a, **kw)
             r = f(*a, **kw)
-            redis.delete(key)
+            mc.delete(key)
             return r
         return _
         _.original_function = f
     return deco
 
-def create_decorators(redis):
+def create_decorators(mc):
 
-    def _cache(key_pattern, expire=0, redis=redis, max_retry=0):
-        return cache_(key_pattern, redis, expire=expire, max_retry=max_retry)
+    def _cache(key_pattern, expire=0, mc=mc, max_retry=0):
+        return cache_(key_pattern, mc, expire=expire, max_retry=max_retry)
     
     def _pcache(key_pattern, count=300, expire=0, max_retry=0):
-        return pcache_(key_pattern, redis, count=count, expire=expire, max_retry=max_retry)
+        return pcache_(key_pattern, mc, count=count, expire=expire, max_retry=max_retry)
     
     def _delete_cache(key_pattern):
-        return delete_cache_(key_pattern, redis=redis)
+        return delete_cache_(key_pattern, mc=mc)
     
     return dict(cache=_cache, pcache=_pcache, delete_cache=_delete_cache)
                 
     
-globals().update(create_decorators(redis_cache_conn))
+globals().update(create_decorators(mc))
 

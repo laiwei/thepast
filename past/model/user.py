@@ -2,7 +2,7 @@
 
 from MySQLdb import IntegrityError
 from past.corelib.cache import cache, pcache
-from past.store import mongo_conn, redis_cache_conn, db_conn
+from past.store import mongo_conn, mc, db_conn
 from past.utils import randbytes
 from past.utils.escape import json_decode, json_encode
 from past import config
@@ -30,8 +30,8 @@ class User(object):
     @classmethod
     def _clear_cache(cls, user_id):
         if user_id:
-            redis_cache_conn.delete("user:%s" % user_id)
-        redis_cache_conn.delete("user:ids")
+            mc.delete("user:%s" % user_id)
+        mc.delete("user:ids")
         
     @classmethod
     @cache("user:{id}")

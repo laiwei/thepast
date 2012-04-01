@@ -8,7 +8,7 @@ from MySQLdb import IntegrityError
 from past import config
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
-from past.store import mongo_conn, redis_cache_conn, db_conn
+from past.store import mongo_conn, mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
@@ -84,11 +84,11 @@ class Status(object):
     @classmethod
     def _clear_cache(self, user_id, status_id, cate=None):
         if status_id:
-            redis_cache_conn.delete("status:%s" % status_id)
+            mc.delete("status:%s" % status_id)
         if user_id:
-            redis_cache_conn.delete("status_ids:user:%scate:None" % user_id)
+            mc.delete("status_ids:user:%scate:None" % user_id)
             if cate:
-                redis_cache_conn.delete("status_ids:user:%scate:%s" % (user_id, cate))
+                mc.delete("status_ids:user:%scate:%s" % (user_id, cate))
 
     #@property
     #def text(self):
