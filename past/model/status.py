@@ -116,12 +116,12 @@ class Status(object):
                 mongo_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
             if raw is not None:
                 mongo_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
-            cls._clear_cache(user_id, None, cate=category)
             status = cls.get(status_id)
         except IntegrityError:
             #log.warning("add status duplicated, ignore...")
             db_conn.rollback()
         finally:
+            cls._clear_cache(user_id, None, cate=category)
             cursor and cursor.close()
 
         return status

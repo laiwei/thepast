@@ -1,0 +1,37 @@
+server {
+
+	listen   80; ## listen for ipv4
+	##listen   [::]:80 default ipv6only=on; ## listen for ipv6
+
+	server_name  thepast.me;
+
+
+	access_log  /var/log/nginx/thepast.me.access.log;
+    
+    location = /favicon.ico {
+        return 204;
+    }
+
+    location /down/ {
+        internal;
+        root /home/work/proj/thepast/var;
+    }
+
+    location / { try_files $uri @pastme; }
+    location /static/ {
+        #add_header  Cache-Control public;
+        #expires     max;
+        root /home/work/proj/thepast/past;
+    }
+    location @pastme {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/uwsgi.sock;
+    }
+
+    error_page 500 502 503 504  /500.html;  
+    location = /500.html {  
+        root  /home/work/proj/thepast/past/static;
+    }  
+}
+
+

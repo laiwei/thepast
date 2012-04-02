@@ -16,13 +16,13 @@ from past import config
 if __name__ == "__main__":
     
     #for uid in User.get_ids(0, 10000000):
-    for uid in range(418, 442):
+    for uid in range(442, 473):
         try:
             uas = UserAlias.gets_by_user_id(uid)
             if not uas:
                 continue
             types = [x.type for x in uas]
-            count = 500
+            count = 300
             if config.OPENID_TYPE_DICT[config.OPENID_SINA] in types \
                     or config.OPENID_TYPE_DICT[config.OPENID_QQ] in types:
                 count = 250

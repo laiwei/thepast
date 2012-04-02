@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
                 if sync_task:
                     while True:
-                        if max_sync_times >= 4:
+                        if max_sync_times >= 5:
                             break
                         r = jobs.sync(sync_task, old=True)
                         new_min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
