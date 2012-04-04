@@ -43,7 +43,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #news,#members{
     background:url(/static/img/new.gif);
     padding:18px;
-    margin: 10px auto 32px 10px;
+    margin: 10px auto 32px 0px;
     border:1px solid #FFF;
     box-shadow:inset 1px 1px 4px #CCC;
     line-height:30px;
@@ -122,13 +122,15 @@ a:hover{color:#4d5256;text-decoration:underline;}
     padding: 5px 10px 5px 10px; 
     font-size: 14px; 
     line-height: 18px;
-    margin-left: 10px;
+    margin-left: 230px;
     text-align: center;
 
     color: #0C7823;
     text-decoration: none;
     text-shadow: 0px 1px 0px #fff;
     font-weight: 500;
+
+    width:500px;
 }
 
 .mini_navi a{

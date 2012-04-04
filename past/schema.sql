@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.49, for debian-linux-gnu (i486)
+-- MySQL dump 10.13  Distrib 5.1.61, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: thepast
 -- ------------------------------------------------------
--- Server version	5.1.49-3
+-- Server version	5.1.61-0+squeeze1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `oauth2_token` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_id` (`alias_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
+) ENGINE=InnoDB AUTO_INCREMENT=1383 DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `oauth2_token` (
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `passwd` (
   `user_id` int(11) unsigned NOT NULL,
-  `email` varchar(63) NOT NULL DEFAULT '',
+  `email` varchar(63) NOT NULL,
   `salt` varchar(8) NOT NULL DEFAULT '',
   `passwd` varchar(15) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -67,7 +67,7 @@ CREATE TABLE `status` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_origin` (`origin_id`,`site`,`category`),
   KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=1422284 DEFAULT CHARSET=utf8 COMMENT='status';
+) ENGINE=InnoDB AUTO_INCREMENT=30083131 DEFAULT CHARSET=utf8 COMMENT='status';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,7 +83,7 @@ CREATE TABLE `sync_task` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_cate` (`user_id`,`category`)
-) ENGINE=InnoDB AUTO_INCREMENT=273 DEFAULT CHARSET=utf8 COMMENT='sync_task';
+) ENGINE=InnoDB AUTO_INCREMENT=1849 DEFAULT CHARSET=utf8 COMMENT='sync_task';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `task_queue` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_time` (`time`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8 COMMENT='TaskQueue';
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8 COMMENT='TaskQueue';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -116,7 +116,7 @@ CREATE TABLE `user` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_uid` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8 COMMENT='user';
+) ENGINE=InnoDB AUTO_INCREMENT=513 DEFAULT CHARSET=utf8 COMMENT='user';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,7 +134,7 @@ CREATE TABLE `user_alias` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_type` (`alias`,`type`),
   KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8 COMMENT='alias';
+) ENGINE=InnoDB AUTO_INCREMENT=775 DEFAULT CHARSET=utf8 COMMENT='alias';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -146,4 +146,4 @@ CREATE TABLE `user_alias` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-02-22 15:47:20
+-- Dump completed on 2012-04-04 23:22:34

@@ -8,9 +8,11 @@ from past import config
 from past.model.user import User
 from past.utils import is_valid_email
 
+from .utils import require_login
+
 @app.route("/settings", methods=["GET", "POST"])
+@require_login()
 def settings():
-    g.user = User.get(2)
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
 
