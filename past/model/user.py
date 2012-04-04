@@ -59,6 +59,24 @@ class User(object):
         return None
 
     @classmethod
+    @cache("email2user:{email}")
+    def get_user_by_email(cls, email):
+        cursor = db_conn.execute('''select user_id from passwd 
+                where email=%s''', email)
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        return row and cls.get(row[0])
+
+    @classmethod
+    @cache("alias2user:{type_}{alias}")
+    def get_user_by_alias(cls, type_, alias):
+        cursor = db_conn.execute('''select user_id from user_alis
+            where type=%s and alias=%s''', (type_, alias))
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        return row and cls.get(row[0])
+
+    @classmethod
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
 
@@ -75,6 +93,29 @@ class User(object):
     def get_alias(self):
         return UserAlias.gets_by_user_id(self.id)
     
+    @cache("user_email:{self.id}")
+    def get_email(self):
+        cursor = db_conn.execute('''select email from passwd 
+                where user_id=%s''', self.id)
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        return row and row[0]
+
+    def set_email(self, email):
+        cursor = None
+        try:
+            cursor = db_conn.execute('''insert into passwd (user_id, email) values (%s,%s)
+                    ON DUPLICATE KEY UPDATE email=%s''',
+                    (self.id, email, email))
+            db_conn.commit()
+            return True
+        except IntegrityError:
+            db_conn.rollback()
+            return False
+        finally:
+            mc.delete("user_email:%s" % self.id)
+            cursor and cursor.close()
+            
     @classmethod
     def add(cls, name=None, uid=None, session_id=None):
         cursor = None

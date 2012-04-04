@@ -52,3 +52,23 @@
 </div>
 {%- endmacro %}
 
+
+{% macro notification_block(with_flash=True) -%}
+<div id="notification">
+    {% if with_flash %}
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+        <div class="box">
+            <div class="inner"> 
+            {% for cate, msg in msgs %}
+                <li class="{{cate}}">{{msg}}</li>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="sep20"></div>
+        {% endif %}
+    {% endwith %}
+    {% endif %}
+</div>
+{%- endmacro %}
+

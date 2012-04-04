@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% import "blocks.html" as blocks %}
+
+{% block content_block %}
+    <div id="sidebar"></div>
+    <div id="rightbar">
+        <div class="box">
+            <div class="inner">
+                <span class="fade">个人介绍</span>
+            </div>
+
+            {% for intro in intros%}
+            <div class="inner">
+                {{intro|nl2br|safe}}
+            </div>
+            {% endfor%}
+        </div>
+    </div>
+
+    <div id="middlebar">
+        {{ blocks.notification_block() }}
+        <div class="box">
+            <div class="cell"><a href="/i">首页</a> &gt; 设置</div>
+            <form method="post">
+            <div class="inner"><table>
+                <tr height="30px"><td width="100px" align="right"><span class="fade">user_id：</span></td>
+                    <td width="180px" align="left">{{g.user.id}}</td>
+                </tr>
+                <tr height="30px"><td align="right"><span class="fade">注册时间：</span></td>
+                    <td align="left">{{g.user.create_time}}</td>
+                </tr>
+                <tr height="30px"><td align="right"><span class="fade">电子邮件：</span></td>
+                    <td> <input type="text" class="sl" name="email" value="{{g.user.get_email() or ''}}">定期发送更新好的PDF版本</input> </td>
+                </tr>
+                <tr height="30px"><td align="right"><span class="fade"></span></td>
+                    <td> <input type="submit" value="保存设置"></input> </td>
+                </tr>
+            
+            </table></div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

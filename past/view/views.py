@@ -11,7 +11,7 @@ except ImportError:
 from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, make_response, flash
 
-import config
+from past import config
 from past.corelib import auth_user_from_session, set_user_cookie, \
         logout_user, category2provider
 from past.utils.escape import json_encode, json_decode, clear_html_element
@@ -21,22 +21,16 @@ from past.model.status import SyncTask, Status, TaskQueue
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
 from past.cws.cut import get_keywords
-import api_client
+from past import api_client
 
 from past import app
 
-def require_login(f):
-    @wraps(f)
-    def _(*a, **kw):
-        if not g.user:
-            return redirect(url_for("home"))
-
-        return f(*a, **kw)
-    return _
+from .utils import require_login
 
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
+    g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -70,7 +64,7 @@ def index():
     return redirect(url_for("home"))
 
 @app.route("/i")
-@require_login
+@require_login()
 def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
@@ -87,9 +81,13 @@ def timeline():
 @app.route("/home")
 def home():
     user_ids = Status.get_recent_updated_user_ids()
-    users = [User.get(x) for x in user_ids]
+    users = filter(None, [User.get(x) for x in user_ids])
     return render_template("home.html",
             users=users, config=config)
+
+@app.route("/past")
+def past():
+    return "再等等才能有这个功能撒"
 
 #TODO:xxx
 @app.route("/user")
@@ -110,7 +108,7 @@ def tag(uid):
     return ",".join([x[0] for x in kws])
     
 @app.route("/user/<uid>")
-@require_login
+@require_login()
 def user(uid):
     u = User.get(uid)
     if not u:
@@ -134,7 +132,7 @@ def user(uid):
             tags_list=tags_list, intros=intros, status_list=status_list, config=config)
 
 @app.route("/logout")
-@require_login
+@require_login()
 def logout():
     r = logout_user(g.user)
     flash(u"已退出",  "error")
@@ -175,12 +173,32 @@ def connect_callback(provider):
 
     d = config.APIKEY_DICT.get(provider)
     login_service = None
-    if provider == config.OPENID_DOUBAN:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
-        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_SINA:
-        openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
-        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+    user = None
+
+    if provider in [config.OPENID_DOUBAN, config.OPENID_SINA,]:
+        if provider == config.OPENID_DOUBAN:
+            openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
+            login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+        elif provider == config.OPENID_SINA:
+            openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
+            login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+
+        ## oauth2方式授权处理
+        try:
+            token_dict = login_service.get_access_token(code)
+        except OAuthLoginError, e:
+            abort(401, e.msg)
+
+        if not ( token_dict and token_dict.get("access_token") ):
+            abort(401, "no_access_token")
+        try:
+            user_info = login_service.get_user_info(
+                token_dict.get("access_token"), token_dict.get("uid"))
+        except OAuthLoginError, e:
+            abort(401, e.msg)
+
+        user = _save_user_and_token(token_dict, user_info, openid_type)
+
     else:
         ## 处理以oauth1的方式授权的
         if provider == config.OPENID_QQ:
@@ -189,35 +207,19 @@ def connect_callback(provider):
         elif provider == config.OPENID_TWITTER:
             user = _twitter_callback(request)
 
-        if user:
-            _add_sync_task_and_push_queue(provider, user)
-            return redirect(url_for('index'))
-        else:
-            return "connect to %s fail" % provider
-
-    try:
-        token_dict = login_service.get_access_token(code)
-    except OAuthLoginError, e:
-        abort(401, e.msg)
-
-    if not ( token_dict and token_dict.get("access_token") ):
-        abort(401, "no_access_token")
-    try:
-        user_info = login_service.get_user_info(
-            token_dict.get("access_token"), token_dict.get("uid"))
-    except OAuthLoginError, e:
-        abort(401, e.msg)
-
-    user = _save_user_and_token(token_dict, user_info, openid_type)
     if user:
         _add_sync_task_and_push_queue(provider, user)
+        # 没有email的用户跳转到email补充页面
+        if not user.get_email():
+            flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
+            return redirect("/settings")
         return redirect(url_for('index'))
     else:
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
         return redirect(url_for("home"))
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
-@require_login
+@require_login()
 def sync(cates):
     cates = cates.split("|")
     if not (cates and isinstance(cates, list)):
@@ -261,7 +263,7 @@ def sync(cates):
     return json_encode({'ok':'true'})
 
 @app.route("/pdf")
-@require_login
+@require_login()
 def mypdf():
     if not g.user:
         return redirect(url_for("pdf", uid=config.MY_USER_ID))
@@ -282,7 +284,7 @@ def demo_pdf():
     return resp
     
 @app.route("/<uid>/pdf")
-@require_login
+@require_login()
 def pdf(uid):
     user = User.get(uid)
     if not user:

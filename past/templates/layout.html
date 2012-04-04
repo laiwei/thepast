@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>{%block title_block%} The Past of Me | 个人杂志计划{%endblock%}</title>
-<link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.06">
+<link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.07">
 </head>
 
 <body>
@@ -29,6 +29,16 @@
 <div id="main">
     {% block main_block %}
         <div id="content"> 
+            {%block mini_navi_block%}
+                <div class="mini_navi">
+                    <ul>
+                        <a href="/i">首页</a>
+                        <a href="/past">我的过去</a>
+                        <a href="/explore">浏览发现</a>
+                        <a href="/settings">设置</a>
+                    </ul>
+                </div>
+            {%endblock%}
             {%block content_block %}
             {% endblock%}
         </div>

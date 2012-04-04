@@ -39,13 +39,13 @@ CREATE TABLE `oauth2_token` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `passwd` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
+  `email` varchar(63) NOT NULL DEFAULT '',
   `salt` varchar(8) NOT NULL DEFAULT '',
   `passwd` varchar(15) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_uid` (`user_id`)
+  UNIQUE KEY `uniq_idx_uid` (`user_id`),
+  UNIQUE KEY `uniq_idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='passwd';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

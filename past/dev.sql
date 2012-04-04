@@ -1,10 +1,11 @@
 
-DROP TABLE IF EXISTS `task_queue`;
-CREATE TABLE `task_queue` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `task_id` int(11) unsigned NOT NULL,
-  `task_kind` smallint(4) unsigned NOT NULL,
+DROP TABLE IF EXISTS `passwd`;
+CREATE TABLE `passwd` (
+  `user_id` int(11) unsigned NOT NULL,
+  `email` varchar(63) NOT NULL,
+  `salt` varchar(8) NOT NULL DEFAULT '',
+  `passwd` varchar(15) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_time` (`time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='TaskQueue';
+  UNIQUE KEY `uniq_idx_uid` (`user_id`),
+  UNIQUE KEY `uniq_idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='passwd';

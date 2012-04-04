@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 import os
+import re
 import time
 import datetime
 import httplib2
@@ -63,3 +64,10 @@ def datetime2timestamp(datetime_):
         return 0
 
     return datetime_ and  int(time.mktime(datetime_.timetuple()))
+
+EMAILRE = re.compile(r'^[_\.0-9a-zA-Z+-]+@([0-9a-zA-Z]+[0-9a-zA-Z-]*\.)+[a-zA-Z]{2,4}$')
+def is_valid_email(email):
+    if len(email) >= 6:
+        return EMAILRE.match(email) != None 
+    return False
+

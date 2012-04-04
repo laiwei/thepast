@@ -52,86 +52,86 @@
     </div>
 </div>
 
-<div id="timelines">
-    {% if not status_list and g.start == 0 %}
-        <div class="sep10"></div>
-        <span class="fade">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</span>
-        <div class="sep10"></div>
-        <span class="fade">或者可以先去看看<a href="/user">别人的页面</a></span>
-        <div class="sep10"></div>
-    {% endif %}
-
-    {%set sorted_months = status_list.keys()|sort(reverse=True)%}
-    {%for m in sorted_months%}
-	<!-- 一月循环开始 -->
-	<div class="month">
-		<!-- 调用时间：XX年XX月 -->
-		<h2 class="title">{{m.replace("-","年")}}月</h2>
-		
-        {%set days_statuses = status_list[m]%}
-        {%set sorted_days = days_statuses.keys()|sort(reverse=True)%}
-        {%for d in sorted_days%}
-		<!-- 日循环开始 -->
-		<ul class="articles">
-			<!-- 调用日期： XX日 -->
-			<div class="day"> › {{d}}日</div>
-			
-        {%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
-            {%set s = repeated_status.status_list[0]%}
-
-            <li>
-                <div class="message">
-                    <!-- 调用时间：时分秒 -->
-                    <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-
-                    <div class="text">
-                        <!-- 来源 -->
-                        {%for s in repeated_status.status_list%}
-                            {%set from_ = s.get_origin_uri()%}
-                            {%if from_%}
-                                <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
-                            {%endif%}
-                        {%endfor%}
-
-                        {%if s.category == config.CATE_DOUBAN_STATUS%}
-                            {{status_tmpl_helper.douban_status(s)}}
-                        {%endif%}
-
-                        {%if s.category == config.CATE_SINA_STATUS%}
-                            {{status_tmpl_helper.sina_status(s)}}
-                        {%endif%}
-
-                        {%if s.category == config.CATE_QQWEIBO_STATUS%}
-                            {{status_tmpl_helper.qq_weibo_status(s)}}
-                        {%endif%}
-
-                        {%if s.category == config.CATE_TWITTER_STATUS%}
-                            {{status_tmpl_helper.twitter_status(s)}}
-                        {%endif%}
-
-                    </div>
-                </div>
-            </li>
-        {%endfor%}
-
-		</ul>
-		<!-- 日循环结束 -->
-        {%endfor%}
-
-	</div>
-	<!-- 月循环结束 -->
-    {%endfor%}
-
-    <div class="sep10"></div>
-    <div class="box">
-        {% if g.start>0 %}
-        <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<div id="middlebar">
+    <div class="timelines">
+        {% if not status_list and g.start == 0 %}
+            <div class="sep10"></div>
+            <span class="fade">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</span>
+            <div class="sep10"></div>
+            <span class="fade">或者可以先去看看<a href="/user">别人的页面</a></span>
+            <div class="sep10"></div>
         {% endif %}
-        <a href="?start={{g.start+g.count}}">下一页</a>
+
+        {%set sorted_months = status_list.keys()|sort(reverse=True)%}
+        {%for m in sorted_months%}
+        <!-- 一月循环开始 -->
+        <div class="month">
+            <!-- 调用时间：XX年XX月 -->
+            <h2 class="title">{{m.replace("-","年")}}月</h2>
+            
+            {%set days_statuses = status_list[m]%}
+            {%set sorted_days = days_statuses.keys()|sort(reverse=True)%}
+            {%for d in sorted_days%}
+            <!-- 日循环开始 -->
+            <ul class="articles">
+                <!-- 调用日期： XX日 -->
+                <div class="day"> › {{d}}日</div>
+                
+            {%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
+                {%set s = repeated_status.status_list[0]%}
+
+                <li>
+                    <div class="message">
+                        <!-- 调用时间：时分秒 -->
+                        <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+
+                        <div class="text">
+                            <!-- 来源 -->
+                            {%for s in repeated_status.status_list%}
+                                {%set from_ = s.get_origin_uri()%}
+                                {%if from_%}
+                                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                                {%endif%}
+                            {%endfor%}
+
+                            {%if s.category == config.CATE_DOUBAN_STATUS%}
+                                {{status_tmpl_helper.douban_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_SINA_STATUS%}
+                                {{status_tmpl_helper.sina_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                                {{status_tmpl_helper.qq_weibo_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_TWITTER_STATUS%}
+                                {{status_tmpl_helper.twitter_status(s)}}
+                            {%endif%}
+
+                        </div>
+                    </div>
+                </li>
+            {%endfor%}
+
+            </ul>
+            <!-- 日循环结束 -->
+            {%endfor%}
+
+        </div>
+        <!-- 月循环结束 -->
+        {%endfor%}
+
+        <div class="sep10"></div>
+        <div class="box">
+            {% if g.start>0 %}
+            <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            {% endif %}
+            <a href="?start={{g.start+g.count}}">下一页</a>
+        </div>
     </div>
-
 </div>
-
 <div class="clear"></div>
 
 {% endblock %}

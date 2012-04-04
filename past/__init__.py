@@ -6,7 +6,8 @@ from flask import Flask
 app = Flask(__name__)
 app.config.from_object("past.config")
 
-import views
+import view
+
 from utils import filters
 from utils import wrap_long_line
 
