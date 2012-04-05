@@ -31,7 +31,13 @@
                     <td align="left">{{g.user.create_time}}</td>
                 </tr>
                 <tr height="30px"><td align="right"><span class="fade">电子邮件：</span></td>
-                    <td> <input type="text" class="sl" name="email" value="{{g.user.get_email() or ''}}">定期发送更新好的PDF版本</input> </td>
+                    <td>
+                    {%if g.user.get_email()%}
+                        {{g.user.get_email()}}
+                    {%else%}
+                        <input type="text" class="sl" name="email" value="">定期发送更新好的PDF版本</input> 
+                    {%endif%}
+                    </td>
                 </tr>
                 <tr height="30px"><td align="right"><span class="fade"></span></td>
                     <td> <input type="submit" value="保存设置"></input> </td>
