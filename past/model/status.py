@@ -10,6 +10,7 @@ from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import mongo_conn, mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
+from past.consts import YESTERDAY, TODAY, TOMORROW
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
@@ -173,7 +174,17 @@ class Status(object):
         rows = cursor.fetchall()
         cursor and cursor.close()
         return [x[0] for x in rows]
-    
+
+    @classmethod
+    def get_ids_by_date(cls, user_id, start_date, end_date):
+        cursor = db_conn.execute('''select id from status 
+                where user_id=%s and create_time>=%s and create_time<=%s
+                order by time desc''',
+                (user_id, start_date, end_date))
+        rows = cursor.fetchall()
+        cursor and cursor.close()
+        return [x[0] for x in rows]
+
     @classmethod
     def gets(cls, ids):
         return [cls.get(x) for x in ids]
@@ -413,6 +424,7 @@ class TaskQueue(object):
         db_conn.commit()
         cursor and cursor.close()
         
+## functions
 def get_all_text_by_user(user_id, limit=1000):
     text = ""
     status_ids = Status.get_ids(user_id, limit=limit)
@@ -431,4 +443,21 @@ def get_all_text_by_user(user_id, limit=1000):
         except Exception, e:
             print e
     return text
+
+@cache("sids:{user_id}:{day}", expire=3600*24)
+def get_status_ids_yesterday(user_id, day=YESTERDAY):
+    ids = Status.get_ids_by_date(user_id, YESTERDAY, TODAY)
+    return ids
+
+@cache("sids_today_in_history:{user_id}:{day}", expire=3600*24)
+def get_status_ids_today_in_history(user_id, day=TODAY):
+    now = datetime.datetime.now()
+    years = range(now.year-1, 2005, -1)
+    dates = [("%s-%s" %(y,now.strftime("%m-%d")), 
+        "%s-%s" %(y,(now+datetime.timedelta(days=1)).strftime("%m-%d"))) for y in years]
+    ids = [Status.get_ids_by_date(user_id, d[0], d[1]) for d in dates]
+    r =[]
+    for x in ids:
+        r.extend(x)
+    return r
 

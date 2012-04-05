@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% import "status.html" as status_tmpl_helper %}
+{% import "blocks.html" as blocks %}
+
+{% block content_block %}
+    <div id="sidebar"></div>
+    <div id="rightbar">
+        <div class="box">
+            <div class="inner">
+                <span class="fade">个人介绍</span>
+            </div>
+
+            {% for intro in intros%}
+            <div class="inner">
+                {{intro|nl2br|safe}}
+            </div>
+            {% endfor%}
+        </div>
+    </div>
+
+    <div id="middlebar">
+        {{ blocks.notification_block() }}
+        <div class="timelines">
+            <div class="month">
+                <h2 class="title">我的昨天 &gt; {{YESTERDAY}}，找到{{status_of_yesterday|length}}条记录</h2>
+                <ul class="articles">
+                    {% for s in status_of_yesterday %}
+                    <li>
+                        <div class="message">
+                            <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+                            <div class="text">
+                            <!-- 来源 -->
+                            {%set from_ = s.get_origin_uri()%}
+                            {%if from_%}
+                                <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                            {%endif%}
+
+                            {%if s.category == config.CATE_DOUBAN_STATUS%}
+                                {{status_tmpl_helper.douban_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_SINA_STATUS%}
+                                {{status_tmpl_helper.sina_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                                {{status_tmpl_helper.qq_weibo_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_TWITTER_STATUS%}
+                                {{status_tmpl_helper.twitter_status(s)}}
+                            {%endif%}
+                            </div>
+                        </div>
+                    </li>
+                {%endfor%}
+                </ul>
+            </div>
+        </div>
+        <!--end of timelines-->
+
+        <div class="timelines">
+            <div class="month">
+                <h2 class="title">历史上的今天</h2>
+                <ul class="articles">
+                {% set days = status_of_today_in_history.keys()|sort(reverse=True)%}
+                {% for d in days %}
+                    {% set statuses = status_of_today_in_history[d] %}
+                    <div class="day"> ›<span class="bigger"> {{d}}, 找到{{statuses|length}}条记录</span></div>
+                    {%for s in statuses %}
+                    <li>
+                        <div class="message">
+                            <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
+                            <div class="text">
+                            <!-- 来源 -->
+                            {%set from_ = s.get_origin_uri()%}
+                            {%if from_%}
+                                <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                            {%endif%}
+
+                            {%if s.category == config.CATE_DOUBAN_STATUS%}
+                                {{status_tmpl_helper.douban_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_SINA_STATUS%}
+                                {{status_tmpl_helper.sina_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                                {{status_tmpl_helper.qq_weibo_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_TWITTER_STATUS%}
+                                {{status_tmpl_helper.twitter_status(s)}}
+                            {%endif%}
+                            </div>
+                        </div>
+                    </li>
+                    {%endfor%}
+                {%endfor%}
+                </ul>
+            </div>
+        </div>
+        <!--end of timelines-->
+
+    </div>
+    <!--end of middlbar-->
+{% endblock %}

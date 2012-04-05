@@ -17,7 +17,8 @@ from past.corelib import auth_user_from_session, set_user_cookie, \
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.pdf import link_callback, is_pdf_file_exists, generate_pdf, get_pdf_filename, is_user_pdf_file_exists
 from past.model.user import User, UserAlias, OAuth2Token
-from past.model.status import SyncTask, Status, TaskQueue
+from past.model.status import SyncTask, Status, TaskQueue, \
+        get_status_ids_today_in_history, get_status_ids_yesterday
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
 from past.cws.cut import get_keywords
@@ -63,7 +64,7 @@ def index():
     return redirect(url_for("home"))
 
 @app.route("/i")
-@require_login()
+@require_login("/i")
 def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
@@ -85,8 +86,26 @@ def home():
             users=users, config=config)
 
 @app.route("/past")
+@require_login("/past")
 def past():
-    return "再等等才能有这个功能撒"
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
+    
+    yesterday_ids = get_status_ids_yesterday(g.user.id)
+    status_of_yesterday = Status.gets(yesterday_ids)
+
+    history_ids = get_status_ids_today_in_history(g.user.id)
+    d = {}
+    for s in Status.gets(history_ids):
+        t = s.create_time.strftime("%Y-%m-%d")
+        if d.has_key(t):
+            d[t].append(s)
+        else:
+            d[t] = [s]
+    status_of_today_in_history = d
+    from past.consts import YESTERDAY
+
+    return render_template("past.html", **locals())
 
 #TODO:xxx
 @app.route("/user")
@@ -262,7 +281,7 @@ def sync(cates):
     return json_encode({'ok':'true'})
 
 @app.route("/pdf")
-@require_login()
+@require_login("/pdf")
 def mypdf():
     if not g.user:
         return redirect(url_for("pdf", uid=config.MY_USER_ID))
