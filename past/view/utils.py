@@ -8,7 +8,10 @@ def require_login(redir=None):
         @wraps(f)
         def __(*a, **kw):
             if not g.user:
-                return redir or redirect("/home")
+                if redir:
+                    return redirect(redir)
+                else:
+                    return redirect("/home")
             return f(*a, **kw)
         return __
     return _

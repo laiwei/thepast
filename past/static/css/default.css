@@ -43,7 +43,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #news,#members{
     background:url(/static/img/new.gif);
     padding:18px;
-    margin: 10px auto 32px 10px;
+    margin: 10px auto 32px 0px;
     border:1px solid #FFF;
     box-shadow:inset 1px 1px 4px #CCC;
     line-height:30px;
@@ -108,9 +108,14 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .articles li{line-height:14px;padding: 0px 0 0px 100px;list-style-type: none;border-top: 1px solid #e2e2e2;border-bottom: 1px solid #e2e2e2;margin-bottom: -1px;}
 .articles .day{}
 .time{float:left;padding: 8px 20px;color:#999;margin-left: -100px;}
-.message{line-height:18px;font-size: 13px;border-left: 1px solid #e2e2e2;}
+.message{line-height:18px;
+    font-size: 13px;
+    /*border-left: 1px solid #e2e2e2;*/
+}
 .message span{font-size:11px;color:#999;margin-right:5px}
-.message .text{margin-left: 5px;border-left: 1px solid #e2e2e2; padding: 8px 0 8px 30px;}
+.message .text{margin-left: 5px;
+    border-left: 1px solid #e2e2e2;
+    padding: 8px 0 8px 30px;}
 .message .text img{margin:5px 0;}
 .message .from{color:#CCC;}
 
@@ -122,13 +127,15 @@ a:hover{color:#4d5256;text-decoration:underline;}
     padding: 5px 10px 5px 10px; 
     font-size: 14px; 
     line-height: 18px;
-    margin-left: 10px;
+    margin-left: 230px;
     text-align: center;
 
     color: #0C7823;
     text-decoration: none;
     text-shadow: 0px 1px 0px #fff;
     font-weight: 500;
+
+    width:500px;
 }
 
 .mini_navi a{

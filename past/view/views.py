@@ -64,7 +64,7 @@ def index():
     return redirect(url_for("home"))
 
 @app.route("/i")
-@require_login()
+@require_login("/i")
 def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
@@ -86,8 +86,12 @@ def home():
             users=users, config=config)
 
 @app.route("/past")
+@require_login("/past")
 def past():
-    return "再等等才能有这个功能撒"
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
+
+    return render_template("past.html", **locals())
 
 #TODO:xxx
 @app.route("/user")
@@ -263,7 +267,7 @@ def sync(cates):
     return json_encode({'ok':'true'})
 
 @app.route("/pdf")
-@require_login()
+@require_login("/pdf")
 def mypdf():
     if not g.user:
         return redirect(url_for("pdf", uid=config.MY_USER_ID))
