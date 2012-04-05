@@ -35,8 +35,10 @@
 * python
 * [flask](http://flask.pocoo.org) -- `python web framework`
 * [redis](http://redis.io) -- `nosqldb, store text,img etc, and used for cache instead of memcached`
+* memcached -- `之前使用redis代替memcached，不过redis在小内存情况下表现较差，所以选择使用memcached`
 * mongodb -- `data storage`
 * [xhtml2pdf](https://github.com/chrisglass/xhtml2pdf) -- `convert html to pdf`
+* [scws](http://www.ftphp.com/scws) -- `simple chinese word segment`
 * git/github -- `code version control`
 * v2ex -- `thanks for v2ex and css of v2ex^^`
 
@@ -61,6 +63,14 @@ http://thepast.me
 
 ChangeList:
 -------
+* `2012-04-05`: 增加了"我的过去"栏目，提供有意思的回忆功能
+* `2012-04-04`: 提供补充email功能，以便在PDF文件生成之后，通知用户或者直接发送附件
+* `2012-04-01`: redis在内存比较小的情况下，效率比较低，而且在分配的内存耗尽，没有及时淘汰掉key时，会造成写入失败，于是改用了memcached
+* `2012-04-01`: mongodb坏掉了，原因是在32位系统下，mongodb存在数据文件不能超过2G的限制，见[官方说明](http://blog.mongodb.org/post/137788967/32-bit-limitations); 于是将系统升级为64位debian，重新安装了64位版本mongodb，恢复了数据
+* `2012-03-31`: 加上了sidebar，用来展示用户的自我介绍，个人关键字等
+* `2012-03-30`: 恢复了早期新浪微博用户的status时间差了12小时的数据
+* `2012-03-25`: 增加了个人关键字提取功能，根据timeline的信息提取个人关键字，使用了[scws](http://www.ftphp.com/scws/),thanks
+* `2012-03-10`: 新的匿名用户首页和timeline页面,from木木[lmm214]
 * `2012-03-04`: 使用mongodb代替redis做数据持久化存储,并将redis中的37万条数据转存到mongodb中
 * `2012-03-04`: 使用豆瓣新广播的api，代替旧的miniblog API
 * `2012-03-01`: mysql connect增加了mysql gone away之后的重试机制
