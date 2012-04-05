@@ -23,8 +23,9 @@
         {{ blocks.notification_block() }}
         <div class="timelines">
             <div class="month">
-                <h2 class="title">我的昨天 &gt; {{YESTERDAY}}，找到{{status_of_yesterday|length}}条记录</h2>
+                <h2 class="title">我的昨天</h2>
                 <ul class="articles">
+                    <div class="day"> ›<span class="bigger"> {{YESTERDAY}}，找到{{status_of_yesterday|length}}条记录</span></div>
                     {% for s in status_of_yesterday %}
                     <li>
                         <div class="message">
