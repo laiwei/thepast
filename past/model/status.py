@@ -10,7 +10,6 @@ from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import mongo_conn, mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
-from past.consts import YESTERDAY, TODAY, TOMORROW
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
@@ -445,12 +444,13 @@ def get_all_text_by_user(user_id, limit=1000):
     return text
 
 @cache("sids:{user_id}:{day}", expire=3600*24)
-def get_status_ids_yesterday(user_id, day=YESTERDAY):
-    ids = Status.get_ids_by_date(user_id, YESTERDAY, TODAY)
+def get_status_ids_yesterday(user_id, day=(datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")):
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    ids = Status.get_ids_by_date(user_id, day, today)
     return ids
 
 @cache("sids_today_in_history:{user_id}:{day}", expire=3600*24)
-def get_status_ids_today_in_history(user_id, day=TODAY):
+def get_status_ids_today_in_history(user_id, day=datetime.datetime.now().strftime("%Y-%m-%d")):
     now = datetime.datetime.now()
     years = range(now.year-1, 2005, -1)
     dates = [("%s-%s" %(y,now.strftime("%m-%d")), 
