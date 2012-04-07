@@ -5,17 +5,9 @@
 {% block content_block %}
     <div id="sidebar"></div>
     <div id="rightbar">
-        <div class="box">
-            <div class="inner">
-                <span class="fade">个人介绍</span>
-            </div>
-
-            {% for intro in intros%}
-            <div class="inner">
-                {{intro|nl2br|safe}}
-            </div>
-            {% endfor%}
-        </div>
+        {{blocks.rightbar_intros_block(intros)}}
+        <div class="sep10"></div>
+        {{blocks.rightbar_feedback_block()}}
     </div>
 
     <div id="middlebar">

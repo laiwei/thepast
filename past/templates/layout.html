@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>{%block title_block%} The Past of Me | 个人杂志计划{%endblock%}</title>
 <link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.10">
+<script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/jquery.magnifier.js') }}" type="text/javascript"></script>
 </head>
 
 <body>
@@ -49,7 +51,6 @@
     {%block footer_block%}
        <div class="sep5"></div>
        <a class="dark" href="https://github.com/laiwei/thepast"> github主页 </a> &nbsp;&nbsp;
-       <a class="dark" href="/user"> Explore </a> &nbsp;&nbsp;
        <a class="dark" href="/logout"> Logout</a> &nbsp;&nbsp;
        <a class="dark" href="/about"> About </a> &nbsp;&nbsp;
 

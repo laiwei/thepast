@@ -110,13 +110,18 @@ class Status(object):
                     (user_id, origin_id, create_time, site, category, title)
                     values (%s,%s,%s,%s,%s,%s)""",
                     (user_id, origin_id, create_time, site, category, title))
-            db_conn.commit()
             status_id = cursor.lastrowid
-            if text is not None:
-                mongo_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
-            if raw is not None:
-                mongo_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
-            status = cls.get(status_id)
+            try:
+                if text is not None:
+                    mongo_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
+                if raw is not None:
+                    mongo_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
+            except Exception, e:
+                log.warning('ERROR_MONGODB:%s' % e)
+                db_conn.rollback()
+            else:
+                db_conn.commit()
+                status = cls.get(status_id)
         except IntegrityError:
             #log.warning("add status duplicated, ignore...")
             db_conn.rollback()
@@ -444,13 +449,13 @@ def get_all_text_by_user(user_id, limit=1000):
     return text
 
 @cache("sids:{user_id}:{day}", expire=3600*24)
-def get_status_ids_yesterday(user_id, day=(datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")):
+def get_status_ids_yesterday(user_id, day):
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     ids = Status.get_ids_by_date(user_id, day, today)
     return ids
 
 @cache("sids_today_in_history:{user_id}:{day}", expire=3600*24)
-def get_status_ids_today_in_history(user_id, day=datetime.datetime.now().strftime("%Y-%m-%d")):
+def get_status_ids_today_in_history(user_id, day):
     now = datetime.datetime.now()
     years = range(now.year-1, 2005, -1)
     dates = [("%s-%s" %(y,now.strftime("%m-%d")), 

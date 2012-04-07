@@ -91,10 +91,12 @@ def past():
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     
-    yesterday_ids = get_status_ids_yesterday(g.user.id)
+    yesterday_ids = get_status_ids_yesterday(g.user.id, 
+            day=(datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d"))
     status_of_yesterday = Status.gets(yesterday_ids)
 
-    history_ids = get_status_ids_today_in_history(g.user.id)
+    history_ids = get_status_ids_today_in_history(g.user.id, 
+            day=datetime.datetime.now().strftime("%Y-%m-%d"))
     d = {}
     for s in Status.gets(history_ids):
         t = s.create_time.strftime("%Y-%m-%d")
