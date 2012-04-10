@@ -18,8 +18,8 @@ class User(object):
         self.session_id = None
     
     def __repr__(self):
-        return "<User id=%s, name=%s, uid=%s, session_id=%s>" \
-                % (self.id, self.name, self.uid, self.session_id)
+        return "<User id=%s, uid=%s, session_id=%s>" \
+                % (self.id, self.uid, self.session_id)
     __str__ = __repr__
 
     @property
