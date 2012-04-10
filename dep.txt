@@ -111,3 +111,10 @@ sudo apt-get install memcached
 ## telnet 127.0.0.1 11211 "stats"
 pip install python-memcached
 
+
+## rss feed parse
+pip install feedparser
+#http://stackoverflow.com/questions/2244836/rss-feed-parser-library-in-python
+#http://packages.python.org/feedparser/
+
+

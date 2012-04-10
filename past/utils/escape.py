@@ -26,6 +26,7 @@ import re
 import sys
 import urllib
 import datetime
+import time
 import types
 from HTMLParser import HTMLParser
 
@@ -211,7 +212,13 @@ def recursive_unicode(obj):
 
     Supports lists, tuples, and dictionaries.
     """
-    if isinstance(obj, dict):
+    if obj is True:
+        return to_unicode("true")
+    elif obj is False:
+        return to_unicode("false")
+    elif obj is None:
+        return to_unicode("null")
+    elif isinstance(obj, dict):
         return dict((recursive_unicode(k), recursive_unicode(v)) for (k,v) in obj.iteritems())
     elif isinstance(obj, list):
         return list(recursive_unicode(i) for i in obj)
@@ -223,18 +230,15 @@ def recursive_unicode(obj):
         return to_unicode(obj.strftime("%s %s" % (_DATE_FORMAT, _TIME_FORMAT)))
     elif isinstance(obj, datetime.date):
         return to_unicode(obj.strftime("%s" % _DATE_FORMAT))
+    elif isinstance(obj, time.struct_time):
+        t = datetime.datetime(obj.tm_year, obj.tm_mon, obj.tm_mday, obj.tm_hour, obj.tm_min, obj.tm_sec)
+        return to_unicode(t.strftime("%s %s" % (_DATE_FORMAT, _TIME_FORMAT)))
     elif isinstance(obj, datetime.time):
         return to_unicode(obj.strftime("%s" % _TIME_FORMAT))
     elif isinstance(obj, types.IntType) or isinstance(obj, types.LongType):
         return to_unicode(str(obj))
     elif isinstance(obj, types.FloatType):
         return to_unicode("%f" % obj)
-    elif obj is True:
-        return to_unicode("true")
-    elif obj is False:
-        return to_unicode("false")
-    elif obj is None:
-        return to_unicode("null")
     else:
         return obj
 

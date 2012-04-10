@@ -104,9 +104,8 @@ class User(object):
     def set_email(self, email):
         cursor = None
         try:
-            cursor = db_conn.execute('''insert into passwd (user_id, email) values (%s,%s)
-                    ON DUPLICATE KEY UPDATE email=%s''',
-                    (self.id, email, email))
+            cursor = db_conn.execute('''insert into passwd (user_id, email) values (%s,%s)''',
+                    (self.id, email))
             db_conn.commit()
             return True
         except IntegrityError:
@@ -320,6 +319,12 @@ class UserAlias(object):
                     User.get(self.user_id).get_thirdparty_profile(self.type).get("uid", "")), \
                     config.OPENID_QQ
 
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS]:
+            ##FIXME: wordpress显示rss地址代替blog地址
+            return config.OPENID_TYPE_NAME_DICT[self.type],\
+                    self.alias, config.OPENID_WORDPRESS
+
+
 class OAuth2Token(object):
    
     def __init__(self, alias_id, access_token, refresh_token):
@@ -358,52 +363,39 @@ class OAuth2Token(object):
         return ot
 
 
-def life(user):
-    life_dict = {}
-    uas = user.get_alias()
-    for ua in uas:
-        life_dict[ua.type] = [config.OPENID_TYPE_NAME_DICT.get(ua.type)]
-        cate = None
-        if ua.type == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
-            cates = config.CATE_DOUBAN_STATUS
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
-            cates = config.CATE_SINA_STATUS
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
-            cates = config.CATE_QQWEIBO_STATUS
-        elif ua.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
-            cates = config.CATE_TWITTER_STATUS
-        
+class Confirmation(object):
+    def __init__(self, random_id, text, time):
+        self.random_id = random_id
+        self.text = text
+        self.time = time
     
-    ## just for tecent_weibo
     @classmethod
-    def get_oldest_create_time(cls, cate, user_id):
-        cursor = db_conn.execute('''select min(create_time) from status 
-            where category=%s and user_id=%s''', (cate, user_id))
+    def get_by_random_id(cls, random_id):
+        cursor = db_conn.execute('''select text, time from confirmation 
+                where random_id=%s''', random_id)
         row = cursor.fetchone()
         cursor and cursor.close()
         if row:
-            return row[0]
-        else:
-            return None
+            return cls(random_id, row[0], row[1])
     
-    @classmethod
-    def get_count_by_cate(cls, cate, user_id):
-        cursor = db_conn.execute('''select count(1) from status 
-            where category=%s and user_id=%s''', (cate, user_id))
-        row = cursor.fetchone()
-        cursor and cursor.close()
-        if row:
-            return row[0]
-        else:
-            return 0
+    def delete(self):
+        Confirmation.delete_by_random_id(self.random_id)
 
     @classmethod
-    def get_count_by_user(cls, user_id):
-        cursor = db_conn.execute('''select count(1) from status 
-            where user_id=%s''', user_id)
-        row = cursor.fetchone()
-        cursor and cursor.close()
-        if row:
-            return row[0]
-        else:
-            return 0
+    def delete_by_random_id(cls, random_id):
+        db_conn.execute('''delete from confirmation 
+                where random_id=%s''', random_id)
+        db_conn.commit()
+
+    @classmethod
+    def add(cls, random_id, text):
+        cursor = None
+        try:
+            cursor = db_conn.execute('''insert into confirmation (random_id, text) values(%s, %s)''',
+                    (random_id, text))
+            db_conn.commit()
+            return True
+        except IntegrityError:
+            db_conn.rollback()
+        finally:
+            cursor and cursor.close()

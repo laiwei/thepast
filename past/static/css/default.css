@@ -33,6 +33,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .from.twitter a{background-position:0 -16px;}
 .from.sina a{background-position:0 -32px;}
 .from.douban a{background-position:0 -48px;}
+.from.wordpress a{background-position:0 -64px;}
 
 #content {
     width: 960px;
@@ -212,6 +213,9 @@ vertical-align: middle;
 }
 .bigger {
     font-size: 16px;
+}
+.smaller{
+    font-size: 11px;
 }
 
 .fade { 

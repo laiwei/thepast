@@ -8,7 +8,7 @@ from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import datetime2timestamp
-from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
+from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo, Wordpress
 from past.corelib import category2provider
 from past.model.data import (DoubanNoteData, DoubanMiniBlogData)
 from past.model.status import Status, SyncTask
@@ -137,6 +137,32 @@ def sync(t, old=False):
         import traceback; print traceback.format_exc()
     return 0
 
+def sync_wordpress(t, refresh=False):
+    if not t:
+        log.warning('no_wordpress_sync_task')
+        return
+
+    #一个人可以有多个wordpress的rss源地址
+    rs = UserAlias.gets_by_user_id(t.user_id)
+    uas = []
+    for x in rs:
+        if x.type == config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS]:
+            uas.append(x)
+    if not uas:
+        log.warning('no_wordpress_alias')
+        return
+    for ua in uas:
+        try:
+            client = Wordpress(ua.alias)
+            rs = client.get_feeds(refresh)
+            if rs:
+                log.info("get wordpress succ, result length is:%s" % len(rs))
+                for x in rs:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return 
+        except:
+            import traceback; print traceback.format_exc()
+
 def sync_helper(cate,old=False):
     log.info("%s syncing old %s... cate=%s" % (datetime.datetime.now(), old, cate))
     ids = SyncTask.get_ids()
@@ -150,7 +176,10 @@ def sync_helper(cate,old=False):
     log.info("task_list length is %s" % len(task_list))
     for t in task_list:
         try:
-            sync(t, old)
+            if t.category == config.CATE_WORDPRESS_POST:
+                sync_wordpress(t)
+            else:
+                sync(t, old)
         except Exception, e:
             import traceback
             print "%s %s" % (datetime.datetime.now(), traceback.format_exc())
@@ -162,14 +191,16 @@ if __name__ == '__main__':
     parser.add_option("-n", "--num", type="int", dest="num", help="run how many times")
     (options, args) = parser.parse_args()
     
-    if not options.time or options.time not in ['new', 'old']:
-        print 'sync old or new?'
-    else:
-        old = True if options.time=='old' else False
-        cate = options.cate if options.cate else None
-        num = options.num if options.num else 1
-        for i in xrange(num):
-            sync_helper(cate, old)
+    if not options.time:
+        options.time = 'new'
+    if options.time not in ['new', 'old']:
+        options.time = 'new'
+    
+    old = True if options.time=='old' else False
+    cate = options.cate if options.cate else None
+    num = options.num if options.num else 1
+    for i in xrange(num):
+        sync_helper(cate, old)
 
 
 ##python jobs.py -t old -c 200 -n 2

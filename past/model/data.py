@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 
 import datetime
+import hashlib
 
 from past import config
 from past.utils.escape import json_decode
@@ -256,6 +257,10 @@ class AbsData(object):
     def get_origin_uri(self):
         return ""
 
+    ##摘要信息，对于blog等长文来说很有用,视情况在子类中覆盖该方法
+    def get_summary(self):
+        return self.get_content()
+
 class DoubanData(AbsData):
     
     def __init__(self, category, data):
@@ -437,7 +442,7 @@ class SinaWeiboStatusData(SinaWeiboData):
     def get_middle_pic(self):
         return self.data.get("bmiddle_pic", "")
 
-    def get_images(self, size="middle"):
+    def get_images(self, size="origin"):
         method = "get_%s_pic" % size
         if hasattr(self, method):
             i = getattr(self, method)()
@@ -445,7 +450,6 @@ class SinaWeiboStatusData(SinaWeiboData):
                 return [i]
         return []
         
-
 # twitter status
 class TwitterStatusData(AbsData):
     def __init__(self, data):
@@ -530,3 +534,38 @@ class QQWeiboStatusData(AbsData):
 
     def get_origin_uri(self):
         return self.data.get("fromurl")
+
+
+class WordpressData(AbsData):
+    def __init__(self, data):
+        super(WordpressData, self).__init__(
+                config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS],
+                config.CATE_WORDPRESS_POST, data)
+
+    def get_origin_id(self):
+        id_ = self.data.get("id", "") or self.data.get("link", "")
+        m = hashlib.md5()
+        m.update(id_)
+        return m.hexdigest()[:16]
+
+    def get_create_time(self):
+        t = self.data.get("published", "")
+        return t and datetime.datetime.strptime(t, "%a, %d %b %Y %H:%M:%S +0000")
+    
+    def get_title(self):
+        return self.data.get("title", "")
+
+    def get_content(self):
+        content = self.data.get("content")
+        if content:
+            c = content[0]
+            return c and c.get("value")
+
+    def get_user(self):
+        return self.data.get("author", "")
+
+    def get_origin_uri(self):
+        return self.data.get("id", "") or self.data.get("link", "")
+
+    def get_summary(self):
+        return self.data.get("summary", "")
