@@ -16,9 +16,29 @@
 
         <!--绑定wordpress-->
         <div class="box">
-            <div class="cell"><a href="/i">首页</a> &gt; 绑定wordpress</div>
-        {% if step == '1'%}
-            <div id="feed1" class="cell"><table>
+            <div class="inner"><a href="/i">首页</a> &gt; 绑定wordpress</div>
+        </div>
+
+        <div class="sep10"></div>
+
+    {%if wordpress_alias_list%}
+        <div class="box">
+            <div class="cell"><strong>已绑定的rss列表:</strong></div>
+            <div class="inner">
+            <ol>
+                {%for x in wordpress_alias_list%}
+                <li>{{x.alias}}</li>
+                {%endfor%}
+            </ol>
+            </div>
+        </div>
+        <div class="sep10"></div>
+    {%endif%}
+
+    {% if step == '1'%}
+        <div class="box">
+            <div class="cell"><strong>再绑定一个rss地址</strong></div>
+            <div id="feed1" class="inner"><table>
                 <tr height="40px">
                     <td width="200px" align="right"><span class="fade">你的wordpress feed地址：</span></td>
                     <td width="280px" align="left">
@@ -28,19 +48,13 @@
                     </td>
                 </tr>
                 <tr height="30px"><td align="right"><span class="fade"></span></td>
-                    <td> <input type="submit" name="bind_wordpress" value="确定"></input> </td>
+                    <td> <input type="submit" name="bind_wordpress" value="确定绑定"></input> </td>
                 </tr>
             </table></div>
-
-            <div id="feed2" class="inner" style="display:none;">
-                <span id="feed2_0" style="display:none;"></span>
-                你的wordpress feed地址为：<span id="feed2_1"></span>
-                <div class="sep10"></div>
-                <span id="feed2_2"></span>
-                <div class="sep10"></div>
-                <input type="submit" name="confirm_bind_wordpress" value="下一步"></input>
-            </div>
-        {%else%}
+        </div>
+    {%else%}
+        <div class="box">
+            <div class="cell"><strong>再绑定一个rss地址</strong> &gt; 等待验证...</div>
             <div id="feed2" class="inner">
                 你的blog feed地址为：<span id="feed2_1" class="fade">{{feed_uri}}</span>
                 <div class="sep10"></div>
@@ -51,31 +65,26 @@
 
                 <input type="submit" name="confirm_bind_wordpress" value="下一步"></input>
             </div>
-        {%endif%}
-
-            <div class="inner">
-            1. 每个人只能认领一个blog^^
-            <div class="sep3"></div>
-            2. 理论来说，支持导入所有的rss feed，而不仅仅是wordpress
-            <div class="sep3"></div>
-            3. 对于wordpress rss feed来讲，只能导入最近的15篇文章，如果需要导入更多，需要去wordpress的控制面板中设置rss输出的文章数目。
-            <div class="sep3"></div>
-            </div>
-
         </div>
-    </div>
+    {%endif%}
+        
+        <div class="sep10"></div>
+        <div class="box">
+            <div class="inner">
+                1. 理论来说，支持导入所有的rss feed，而不仅仅是wordpress
+                <div class="sep3"></div>
+                2. 对于wordpress rss feed来讲，只能导入最近的15篇文章，如果需要导入更多，需要去wordpress的控制面板中设置rss输出的文章数目。
+                <div class="sep3"></div>
+            </div>
+        </div>
 
     <script language="javascript">
         jQuery(function($) {
             $("input[name='bind_wordpress']").bind("click", function(){
                 var feed_uri = $("input[name='wordpress_feed']").val();
-                $.post("/bind/wordpress", {'step':1, 'feed_uri':feed_uri}, function(data){
-                    if(data.ok == 'true'){
-                        $("#feed1").hide();
-                        $("#feed2").show();
-                        $("#feed2_0").text(data.code);
-                        $("#feed2_1").text(data.feed_uri);
-                        $("#feed2_2").text(data.msg);
+                $.post("/bind/wordpress", {'_r':Math.random(), 'feed_uri':feed_uri}, function(data){
+                    if(data.ok === 'true'){
+                        window.location="/bind/wordpress";
                     }else{
                         alert(data.msg);
                     }
@@ -86,13 +95,13 @@
             var c = $("input[name='confirm_bind_wordpress']");
             c.bind("click", function(){
                 c.val("正在验证中... 可能需要1分钟，请不要刷新页面");
-                $.post("/bind/wordpress", {'step':2, 'random_id': $("#feed2_0").text()}, function(data){
+                $.post("/bind/wordpress", {'_r':Math.random()}, function(data){
                     c.val("下一步");
                     if(data.ok === 'true'){
                         alert(data.msg);
-                        window.location = "/settings";
+                        window.location = "/bind/wordpress";
                     }else{
-                        alert(data.msg + "," + "你是否还没有发含有验证码的文章呀？^^");
+                        alert(data.msg);
                     }
                 }, 'json');
             });
