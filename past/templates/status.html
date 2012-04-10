@@ -1,9 +1,9 @@
 {% macro douban_status(s, pdf=False) -%}
     <!-- 正文 -->
     {%if pdf%}
-        {{s.text|wrap_long_line}}
+        {{s.summary|wrap_long_line}}
     {%else%}
-        {{s.text}}
+        {{s.summary}}
     {%endif%}
 
 
@@ -82,9 +82,9 @@
 
 {% macro sina_status(s, pdf=False) -%}
     {%if pdf%}
-        {{s.text|wrap_long_line}}
+        {{s.summary|wrap_long_line}}
     {%else%}
-        {{s.text}}
+        {{s.summary}}
     {%endif%}
 
     {% set images = s.get_data().get_images() or [] %}
@@ -120,9 +120,9 @@
 
 {% macro twitter_status(s, pdf=False) -%}
     {%if pdf%}
-        {{s.text|wrap_long_line}}
+        {{s.summary|wrap_long_line}}
     {%else%}
-        {{s.text}}
+        {{s.summary}}
     {%endif%}
 
     {%if pdf%}
@@ -133,13 +133,13 @@
 
 {% macro qq_weibo_status(s, pdf=False) -%}
     {%if pdf%}
-        {{s.text|wrap_long_line|safe}}
+        {{s.summary|wrap_long_line|safe}}
     {%else%}
-        {{s.text|safe}}
+        {{s.summary|safe}}
     {%endif%}
 
     {% set re = s.get_retweeted_data() %}
-    {% if not s.text and re %}
+    {% if not s.summary and re %}
         {{ "//" + re }} 
     {% endif %}
 
@@ -157,3 +157,17 @@
     {%endif%}
 {%- endmacro %}
 
+{% macro wordpress_status(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    <a href="{{origin_uri[1]}}" class="bigger">{{s.title}}</a><br/>
+    {%if pdf%}
+        {{s.text|wrap_long_line}}
+    {%else%}
+        {{s.summary|nl2br|safe}}
+    {%endif%}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}

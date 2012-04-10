@@ -12,7 +12,8 @@ from past.store import mongo_conn, mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
 from .user import UserAlias
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
-        SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData
+        SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
+        WordpressData
 
 log = logging.getLogger(__file__)
 
@@ -30,9 +31,10 @@ class Status(object):
         self.site = site
         self.category = category
         self.title = title
-        self.text = mongo_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
-        self.text = json_decode(self.text) if self.text else ""
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
+        _raw_data_obj = self.get_data()
+        ##对于140字以内的消息，summary和text相同；对于wordpress等长文，summary只是摘要，text为全文
+        self.summary = _raw_data_obj and _raw_data_obj.get_summary()
         if self.site == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             self.create_time += datetime.timedelta(seconds=8*3600)
 
@@ -57,7 +59,7 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        if self.category == config.CATE_QQWEIBO_STATUS and self.get_retweeted_data() != self.text:
+        if self.category == config.CATE_QQWEIBO_STATUS and self.get_retweeted_data() != self.summary:
             return int(self.id)
         if (self.category == config.CATE_SINA_STATUS or self.category == config.CATE_DOUBAN_STATUS) \
                 and self.get_retweeted_data():
@@ -71,7 +73,7 @@ class Status(object):
         return int(d.hexdigest(),16)
         
     def _generate_bare_text(self, offset=150):
-        bare_text = self.text[:offset]
+        bare_text = self.summary[:offset]
         bare_text = clear_html_element(bare_text).replace(u"《", "").replace(u"》", "").replace("amp;","")
         bare_text = re.sub("\s", "", bare_text)
         bare_text = re.sub("http://t.cn/[a-zA-Z0-9]+", "", bare_text)
@@ -90,10 +92,10 @@ class Status(object):
             if cate:
                 mc.delete("status_ids:user:%scate:%s" % (user_id, cate))
 
-    #@property
-    #def text(self):
-    #    _text = mongo_conn.get(self.__class__.STATUS_REDIS_KEY % self.id)
-    #    return json_decode(_text) if _text else ""
+    @property
+    def text(self):
+        _text = mongo_conn.get(Status.STATUS_REDIS_KEY % self.id)
+        return json_decode(_text) if _text else ""
 
     @property
     def raw(self):
@@ -273,10 +275,13 @@ class Status(object):
             return QQWeiboStatusData(self.raw)
         elif self.category == config.CATE_DOUBAN_STATUS:
             return DoubanStatusData(self.raw)
+        elif self.category == config.CATE_WORDPRESS_POST:
+            return WordpressData(self.raw)
         else:
             return None
 
     def get_origin_uri(self):
+        ##d是AbsData的子类实例
         d = self.get_data()
         if self.category == config.CATE_DOUBAN_MINIBLOG or self.category == config.CATE_DOUBAN_STATUS:
             ua = UserAlias.get_by_user_and_type(self.user_id, 
@@ -292,6 +297,8 @@ class Status(object):
             return (config.OPENID_TWITTER, d.get_origin_uri())
         elif self.category == config.CATE_QQWEIBO_STATUS:
             return (config.OPENID_QQ, config.QQWEIBO_STATUS % self.origin_id)
+        elif self.category == config.CATE_WORDPRESS_POST:
+            return (config.OPENID_WORDPRESS, d.get_origin_uri())
         else:
             return None
 
@@ -434,8 +441,8 @@ def get_all_text_by_user(user_id, limit=1000):
     status_ids = Status.get_ids(user_id, limit=limit)
     for s in Status.gets(status_ids):
         try:
-            #_t = ''.join( [x for x in s.text if is_cn_or_en(x)] )
-            _t = s.text
+            ##TODO:这里用的summary，是为了效率上的考虑
+            _t = s.summary
 
             retweeted_data = s.get_retweeted_data()
             if retweeted_data:

@@ -28,8 +28,16 @@ if __name__ == "__main__":
                 sync_task = SyncTask.get(queue.task_id)
                 if not sync_task:
                     continue
+
+                ## 现在不同步豆瓣日记
                 if str(sync_task.category) == str(config.CATE_DOUBAN_NOTE):
                     continue
+
+                ## 同步wordpress rss
+                if str(sync_task.category) == str(config.CATE_WORDPRESS_POST):
+                    jobs.sync_wordpress(sync_task)
+                    continue
+
                 max_sync_times = 0
                 min_id = Status.get_min_origin_id(sync_task.category, sync_task.user_id)
                 if sync_task:

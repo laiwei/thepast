@@ -238,6 +238,7 @@ def connect_callback(provider):
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
         return redirect(url_for("home"))
 
+
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 @require_login()
 def sync(cates):

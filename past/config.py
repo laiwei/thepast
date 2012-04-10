@@ -37,12 +37,15 @@ OPENID_DOUBAN = 'douban'
 OPENID_SINA = 'sina'
 OPENID_QQ = 'qq' ##qq weibo
 OPENID_TWITTER = 'twitter'
+##命名需要商榷
+OPENID_WORDPRESS = 'wordpress'
 
 OPENID_TYPE_DICT = {
     OPENID_DOUBAN : "D",
     OPENID_SINA : "S",
     OPENID_QQ : "Q",
     OPENID_TWITTER : "T",
+    OPENID_WORDPRESS : "W",
 }
 
 OPENID_TYPE_NAME_DICT = {
@@ -50,6 +53,7 @@ OPENID_TYPE_NAME_DICT = {
     "S" : u"新浪微博",
     "T" : u"twitter",
     "Q" : u"腾讯微博",
+    "W" : u"Wordpress",
 }
 
 #-- oauth key & secret config --

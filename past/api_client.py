@@ -4,12 +4,13 @@ import urlparse
 import urllib
 import tweepy
 import config
+from past.store import mc
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import httplib2_request
 from past.model.data import (DoubanNoteData, DoubanStatusData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
-    QQWeiboStatusData)
+    QQWeiboStatusData, WordpressData)
 from past.model.user import User,UserAlias, OAuth2Token
 from past.oauth_login import QQOAuth1Login
 
@@ -302,3 +303,44 @@ class QQWeibo(object):
 
         return [QQWeiboStatusData(c) for c in info]
         
+class Wordpress(object):
+    
+    WORDPRESS_ETAG_KEY = "wordpress:etag:%s"
+
+    ## 同步wordpress rss
+    def __init__(self, alias):
+        ## alias means wordpress feed uri
+        self.alias = alias
+
+    def __repr__(self):
+        return "<Wordpress alias=%s>" %(self.alias)
+    __str__ = __repr__
+
+    def get_etag(self):
+        r = str(Wordpress.WORDPRESS_ETAG_KEY % self.alias)
+        return mc.get(r)
+
+    def set_etag(self, etag):
+        r = str(Wordpress.WORDPRESS_ETAG_KEY % self.alias)
+        mc.set(r, etag)
+
+    def get_feeds(self, refresh=False):
+        import feedparser
+        etag = self.get_etag()
+        if refresh:
+            d = feedparser.parse(self.alias)
+        else:
+            d = feedparser.parse(self.alias, etag=etag)
+        if not d:
+            return []
+        if not (d.status == 200 or d.status == 301):
+            log.warning("---get wordpress feeds, status is %s, not valid" % d.status)
+            return []
+
+        entries = d.entries
+        if not entries:
+            return []
+
+        self.set_etag(d.etag)
+        return [WordpressData(x) for x in entries]
+

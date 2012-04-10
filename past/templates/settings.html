@@ -11,7 +11,10 @@
     </div>
 
     <div id="middlebar">
+        <!--提醒-->
         {{ blocks.notification_block() }}
+
+        <!--设置email-->
         <div class="box">
             <div class="cell"><a href="/i">首页</a> &gt; 设置</div>
             <form method="post">
@@ -22,18 +25,28 @@
                 <tr height="30px"><td align="right"><span class="fade">注册时间：</span></td>
                     <td align="left">{{g.user.create_time}}</td>
                 </tr>
-                <tr height="30px"><td align="right"><span class="fade">电子邮件：</span></td>
+                {% if wordpress_alias %}
+                <tr height="30px">
+                    <td width="200px" align="right"><span class="fade">你的wordpress feed地址：</span></td>
+                    <td width="280px" align="left"> {{wordpress_alias.alias}} </td>
+                </tr>
+                {% endif%}
+                <tr height="40px"><td align="right"><span class="fade">电子邮件：</span></td>
                     <td>
                     {%if g.user.get_email()%}
                         {{g.user.get_email()}}
                     {%else%}
-                        <input type="text" class="sl" name="email" value="">定期发送更新好的PDF版本</input> 
+                        <input type="text" class="sl" name="email" value=""></input> 
+                        <div class="sep3"></div>
+                        <span class="fade smaller">定期发送更新好的PDF版本</span>
                     {%endif%}
                     </td>
                 </tr>
+                {%if not g.user.get_email()%}
                 <tr height="30px"><td align="right"><span class="fade"></span></td>
                     <td> <input type="submit" value="保存设置"></input> </td>
                 </tr>
+                {%endif%}
             
             </table></div>
             </form>

@@ -26,6 +26,7 @@ import re
 import sys
 import urllib
 import datetime
+import time
 import types
 from HTMLParser import HTMLParser
 
@@ -223,6 +224,9 @@ def recursive_unicode(obj):
         return to_unicode(obj.strftime("%s %s" % (_DATE_FORMAT, _TIME_FORMAT)))
     elif isinstance(obj, datetime.date):
         return to_unicode(obj.strftime("%s" % _DATE_FORMAT))
+    elif isinstance(obj, time.struct_time):
+        t = datetime.datetime(obj.tm_year, obj.tm_mon, obj.tm_mday, obj.tm_hour, obj.tm_min, obj.tm_sec)
+        return to_unicode(t.strftime("%s %s" % (_DATE_FORMAT, _TIME_FORMAT)))
     elif isinstance(obj, datetime.time):
         return to_unicode(obj.strftime("%s" % _TIME_FORMAT))
     elif isinstance(obj, types.IntType) or isinstance(obj, types.LongType):

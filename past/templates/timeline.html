@@ -90,6 +90,10 @@
                                 {{status_tmpl_helper.twitter_status(s)}}
                             {%endif%}
 
+                            {%if s.category == config.CATE_WORDPRESS_POST%}
+                                {{status_tmpl_helper.wordpress_status(s)}}
+                            {%endif%}
+
                         </div>
                     </div>
                 </li>
@@ -115,8 +119,9 @@
 <div class="clear"></div>
 
 <script>
-$("img").error( function(){$(this).css({ visibility:"hidden" });
-});
+    jQuery(function($) {
+        $("img").error( function(){$(this).css({ visibility:"hidden" }); });
+    });
 </script>
 
 {% endblock %}
