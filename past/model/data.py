@@ -568,6 +568,4 @@ class WordpressData(AbsData):
         return self.data.get("id", "") or self.data.get("link", "")
 
     def get_summary(self):
-        #summary的排版有问题，暂时先换回content
-        #return self.data.get("summary", "")
-        return self.get_content()
+        return self.data.get("summary", "")[:140]

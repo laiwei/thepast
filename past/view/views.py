@@ -64,7 +64,7 @@ def index():
     return redirect(url_for("home"))
 
 @app.route("/i")
-@require_login("/i")
+@require_login()
 def timeline():
     ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
@@ -86,7 +86,7 @@ def home():
             users=users, config=config)
 
 @app.route("/past")
-@require_login("/past")
+@require_login()
 def past():
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
@@ -108,6 +108,19 @@ def past():
     from past.consts import YESTERDAY
 
     return render_template("past.html", **locals())
+
+@app.route("/post/<id>")
+@require_login()
+def post(id):
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
+
+    status = Status.get(id)
+    if not status:
+        flash(u"访问的文章不存在^^","error")
+
+    return render_template("post.html", **locals())
+    
 
 #TODO:xxx
 @app.route("/user")
@@ -284,7 +297,7 @@ def sync(cates):
     return json_encode({'ok':'true'})
 
 @app.route("/pdf")
-@require_login("/pdf")
+@require_login()
 def mypdf():
     if not g.user:
         return redirect(url_for("pdf", uid=config.MY_USER_ID))

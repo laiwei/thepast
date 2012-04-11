@@ -65,7 +65,7 @@
             {% endfor %}
             </div>
         </div>
-        <div class="sep20"></div>
+        <div class="sep3"></div>
         {% endif %}
     {% endwith %}
     {% endif %}
@@ -74,6 +74,7 @@
 
 
 {% macro rightbar_tags_block(tags_list) -%}
+{%if tags_list%}
 <div class="box">
     <div class="cell">
         <span class="bigger">个人关键字</span>
@@ -89,20 +90,25 @@
         <span>个人关键字是thepast根据你的timeline自动提取的，如果你觉得不错，请推荐给你的朋友^^</span>
     </div>
 </div>
+<div class="sep10"></div>
+{%endif%}
 {%- endmacro %}
 
 {% macro rightbar_intros_block(intros) -%}
-<div class="box">
-    <div class="cell">
-        <span class="bigger">个人介绍</span>
-    </div>
+    {%if intros%}
+    <div class="box">
+        <div class="cell">
+            <span class="bigger">个人介绍</span>
+        </div>
 
-    {% for intro in intros%}
-    <div class="inner">
-        {{intro|nl2br|safe}}
+        {% for intro in intros%}
+        <div class="inner">
+            {{intro|nl2br|safe}}
+        </div>
+        {% endfor%}
     </div>
-    {% endfor%}
-</div>
+    <div class="sep10"></div>
+    {%endif%}
 {%- endmacro %}
 
 
@@ -121,4 +127,5 @@
     </div>
 
 </div>
+<div class="sep10"></div>
 {%- endmacro %}

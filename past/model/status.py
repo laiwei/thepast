@@ -34,6 +34,7 @@ class Status(object):
         self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
         _raw_data_obj = self.get_data()
         ##对于140字以内的消息，summary和text相同；对于wordpress等长文，summary只是摘要，text为全文
+        ##summary当作属性来，可以缓存在mc中，text太大了，作为一个method
         self.summary = _raw_data_obj and _raw_data_obj.get_summary()
         if self.site == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             self.create_time += datetime.timedelta(seconds=8*3600)
@@ -72,7 +73,7 @@ class Status(object):
         d.update(s.encode("utf8"))
         return int(d.hexdigest(),16)
         
-    def _generate_bare_text(self, offset=150):
+    def _generate_bare_text(self, offset=140):
         bare_text = self.summary[:offset]
         bare_text = clear_html_element(bare_text).replace(u"《", "").replace(u"》", "").replace("amp;","")
         bare_text = re.sub("\s", "", bare_text)
@@ -80,6 +81,7 @@ class Status(object):
         bare_text = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://url.cn/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text)
+        bare_text = re.sub("http://dou.bz/[a-zA-Z0-9]+", "", bare_text)
         return bare_text  
 
     ##TODO:这个clear_cache需要拆分

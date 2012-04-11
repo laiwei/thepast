@@ -16,7 +16,7 @@ from past.store import mc
 from .utils import require_login
 
 @app.route("/settings", methods=["GET", "POST"])
-@require_login("/settings")
+@require_login()
 def settings():
     ##XXX:
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]

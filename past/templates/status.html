@@ -159,11 +159,12 @@
 
 {% macro wordpress_status(s, pdf=False) -%}
     {% set origin_uri = s.get_origin_uri() %}
-    <a href="{{origin_uri[1]}}" class="bigger">{{s.title}}</a><br/>
+    <a href="{{origin_uri[1]}}">{{s.title}}</a><br/>
     {%if pdf%}
         {{s.text|wrap_long_line}}
     {%else%}
-        {{s.summary|safe}}
+        {{s.summary}}
+        <a href="/post/{{s.id}}">&nbsp;read more</a>
     {%endif%}
 
     {%if pdf%}
