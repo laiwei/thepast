@@ -4,7 +4,7 @@ import datetime
 import hashlib
 
 from past import config
-from past.utils.escape import json_decode
+from past.utils.escape import json_decode , clear_html_element
 
 ## User数据接口 
 class AbsUserData(object):
@@ -398,7 +398,8 @@ class _Media(object):
     def get_type(self):
         return self.data.get("type")
     def get_src(self):
-        return self.data.get("original_src", "").replace("/spic/", "/mpic/")
+        src = self.data.get("original_src", "") or self.data.get("src", "")
+        return src.replace("/spic/", "/mpic/").replace("/small/", "/raw/")
     
 class SinaWeiboData(AbsData):
     
@@ -568,4 +569,4 @@ class WordpressData(AbsData):
         return self.data.get("id", "") or self.data.get("link", "")
 
     def get_summary(self):
-        return self.data.get("summary", "")[:140]
+        return clear_html_element(self.data.get("summary", ""))[:140]
