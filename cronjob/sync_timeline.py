@@ -11,6 +11,6 @@ activate_this = '../env/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 
 if __name__ == "__main__":
-    for c in [100, 200, 400, 500]:
+    for c in [100, 200, 300, 400, 500]:
         for t in ['old', 'new']:
             print commands.getoutput("../env/bin/python ../jobs.py -t %s -c %s -n 1" %(t, c))

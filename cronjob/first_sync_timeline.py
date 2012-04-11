@@ -36,6 +36,7 @@ if __name__ == "__main__":
                 ## 同步wordpress rss
                 if str(sync_task.category) == str(config.CATE_WORDPRESS_POST):
                     jobs.sync_wordpress(sync_task)
+                    queue.remove()
                     continue
 
                 max_sync_times = 0

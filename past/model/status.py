@@ -41,8 +41,8 @@ class Status(object):
         self.bare_text = self._generate_bare_text()
 
     def __repr__(self):
-        return "<Status id=%s, user_id=%s, origin_id=%s, cate=%s, title=%s>" \
-            %(self.id, self.user_id, self.origin_id, self.category, self.title)
+        return "<Status id=%s, user_id=%s, origin_id=%s, cate=%s>" \
+            %(self.id, self.user_id, self.origin_id, self.category)
     __str__ = __repr__
 
     def __eq__(self, other):

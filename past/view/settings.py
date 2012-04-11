@@ -18,7 +18,6 @@ from .utils import require_login
 @app.route("/settings", methods=["GET", "POST"])
 @require_login("/settings")
 def settings():
-    g.user = User.get(5)
     ##XXX:
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
@@ -45,6 +44,9 @@ def bind_wordpress():
     if not g.user:
         flash(u"请先使用豆瓣、微博、QQ、Twitter任意一个帐号登录后，再来做绑定blog的操作^^", "tip")
         return redirect("/home")
+
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
 
     uas = g.user.get_alias()
     wordpress_alias_list = [x for x in uas if x.type == config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS]]

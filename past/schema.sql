@@ -16,6 +16,22 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `confirmation`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `confirmation` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `random_id` varchar(16) NOT NULL,
+  `text` varchar(128) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_idx_random` (`random_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='confirmation';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `oauth2_token`
 --
 
@@ -29,7 +45,7 @@ CREATE TABLE `oauth2_token` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_id` (`alias_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1601 DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
+) ENGINE=InnoDB AUTO_INCREMENT=1748 DEFAULT CHARSET=utf8 COMMENT='oauth2_token';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +84,7 @@ CREATE TABLE `status` (
   UNIQUE KEY `idx_origin` (`origin_id`,`site`,`category`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31098766 DEFAULT CHARSET=utf8 COMMENT='status';
+) ENGINE=InnoDB AUTO_INCREMENT=32302780 DEFAULT CHARSET=utf8 COMMENT='status';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -84,7 +100,7 @@ CREATE TABLE `sync_task` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_cate` (`user_id`,`category`)
-) ENGINE=InnoDB AUTO_INCREMENT=2067 DEFAULT CHARSET=utf8 COMMENT='sync_task';
+) ENGINE=InnoDB AUTO_INCREMENT=2214 DEFAULT CHARSET=utf8 COMMENT='sync_task';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +116,7 @@ CREATE TABLE `task_queue` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_time` (`time`)
-) ENGINE=InnoDB AUTO_INCREMENT=215 DEFAULT CHARSET=utf8 COMMENT='TaskQueue';
+) ENGINE=InnoDB AUTO_INCREMENT=302 DEFAULT CHARSET=utf8 COMMENT='TaskQueue';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,7 +133,7 @@ CREATE TABLE `user` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_uid` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=605 DEFAULT CHARSET=utf8 COMMENT='user';
+) ENGINE=InnoDB AUTO_INCREMENT=654 DEFAULT CHARSET=utf8 COMMENT='user';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,12 +146,12 @@ CREATE TABLE `user_alias` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `type` varchar(2) NOT NULL DEFAULT '',
   `user_id` int(11) unsigned NOT NULL DEFAULT '0',
-  `alias` varchar(63) NOT NULL DEFAULT '',
+  `alias` varchar(128) NOT NULL DEFAULT '',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_alias_type` (`alias`,`type`),
   KEY `idx_uid` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=933 DEFAULT CHARSET=utf8 COMMENT='alias';
+) ENGINE=InnoDB AUTO_INCREMENT=1018 DEFAULT CHARSET=utf8 COMMENT='alias';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -147,4 +163,4 @@ CREATE TABLE `user_alias` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-04-07 21:50:39
+-- Dump completed on 2012-04-10 23:29:34

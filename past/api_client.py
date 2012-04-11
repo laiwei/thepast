@@ -341,6 +341,7 @@ class Wordpress(object):
         if not entries:
             return []
 
-        self.set_etag(d.etag)
+        if not refresh:
+            self.set_etag(d.etag)
         return [WordpressData(x) for x in entries]
 

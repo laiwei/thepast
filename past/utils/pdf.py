@@ -68,6 +68,7 @@ def render(user, status_list, with_head=True):
     from jinja2 import Environment, PackageLoader
     env = Environment(loader=PackageLoader('past', 'templates'))
     env.filters['wrap_long_line'] = wrap_long_line
+    env.filters['nl2br'] = filters.nl2br
     t = env.get_template('status.html')
     m = t.module
     for s in status_list:

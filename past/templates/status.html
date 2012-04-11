@@ -163,7 +163,7 @@
     {%if pdf%}
         {{s.text|wrap_long_line}}
     {%else%}
-        {{s.summary|nl2br|safe}}
+        {{s.summary|safe}}
     {%endif%}
 
     {%if pdf%}

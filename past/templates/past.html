@@ -44,6 +44,10 @@
                             {%if s.category == config.CATE_TWITTER_STATUS%}
                                 {{status_tmpl_helper.twitter_status(s)}}
                             {%endif%}
+
+                            {%if s.category == config.CATE_WORDPRESS_POST%}
+                                {{status_tmpl_helper.wordpress_status(s)}}
+                            {%endif%}
                             </div>
                         </div>
                     </li>
@@ -86,6 +90,10 @@
 
                             {%if s.category == config.CATE_TWITTER_STATUS%}
                                 {{status_tmpl_helper.twitter_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_WORDPRESS_POST%}
+                                {{status_tmpl_helper.wordpress_status(s)}}
                             {%endif%}
                             </div>
                         </div>
