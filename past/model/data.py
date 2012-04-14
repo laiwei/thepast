@@ -569,4 +569,4 @@ class WordpressData(AbsData):
         return self.data.get("id", "") or self.data.get("link", "")
 
     def get_summary(self):
-        return clear_html_element(self.data.get("summary", ""))[:140]
+        return clear_html_element(self.data.get("summary", ""))[:150]

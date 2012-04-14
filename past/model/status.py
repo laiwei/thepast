@@ -165,7 +165,18 @@ class Status(object):
 
     @classmethod
     @pcache("status_ids:user:{user_id}cate:{cate}")
-    def get_ids(cls, user_id, start=0, limit=20, order="create_time", cate=None):
+    def get_ids(cls, user_id, start=0, limit=20, cate=None):
+        return cls._get_ids(user_id, start, limit, 
+                order="create_time desc", cate=cate)
+
+    @classmethod
+    @pcache("status_ids_asc:user:{user_id}cate:{cate}")
+    def get_ids_asc(cls, user_id, start=0, limit=20, cate=None):
+        return cls._get_ids(user_id, start, limit, 
+                order="create_time", cate=cate)
+
+    @classmethod
+    def _get_ids(cls, user_id, start=0, limit=20, order="create_time desc", cate=None):
         cursor = None
         if not user_id:
             return []
@@ -173,11 +184,11 @@ class Status(object):
             if str(cate) == str(config.CATE_DOUBAN_NOTE):
                 return []
             sql = """select id from status where user_id=%s and category=%s
-                    order by """ + order + """ desc limit %s,%s""" 
+                    order by """ + order + """ limit %s,%s""" 
             cursor = db_conn.execute(sql, (user_id, cate, start, limit))
         else:
             sql = """select id from status where user_id=%s and category!=%s
-                    order by """ + order + """ desc limit %s,%s""" 
+                    order by """ + order + """ limit %s,%s""" 
             cursor = db_conn.execute(sql, (user_id, config.CATE_DOUBAN_NOTE, start, limit))
         rows = cursor.fetchall()
         cursor and cursor.close()

@@ -1,5 +1,8 @@
 *.swp
 *.pyc
+*.txt
+*.tar.gz
+*.xdb
 
 local_config.py
 env/

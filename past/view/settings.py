@@ -38,7 +38,6 @@ def settings():
             flash(u'电子邮箱格式不正确', 'error')
     return render_template("settings.html", **locals())
 
-
 @app.route("/bind/wordpress", methods=["GET", "POST"])
 def bind_wordpress():
     if not g.user:
@@ -123,3 +122,4 @@ def bind_wordpress():
             return json_encode(ret)
     else:
         return "method not allowed"
+
