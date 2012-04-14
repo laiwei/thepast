@@ -26,15 +26,17 @@ def visual(uid):
             config=config)
 
 @app.route("/user/<uid>/timeline_json")
+@require_login(()
 def timeline_json(uid):
-    limit = 100
+    limit = 150
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
 
     cate = request.args.get("cate", None)
-    ids = Status.get_ids_asc(user_id=u.id,
+    ids = Status.get_ids(user_id=u.id,
             start=g.start, limit=limit, cate=g.cate)
+    ids = ids[::-1]
 
     status_list = Status.gets(ids)
     date = []
@@ -42,6 +44,9 @@ def timeline_json(uid):
         headline = s.summary or ''
         text = ''
         images = s.get_data().get_images() or []
+        
+        if not (headline or text):
+            continue
 
         t = s.create_time
 
@@ -74,7 +79,7 @@ def timeline_json(uid):
     t = datetime.now()
     tmp = {
         'startDate': '%s,%s,%s,%s,%s,%s' % (t.year, t.month, t.day, t.hour, t.minute, t.second),
-        'headline': '<a href="/user/%s/visual?start=%s">查看更多...</a>' % (u.id, g.start+limit),
+        'headline': '<a href="/user/%s/visual?start=%s">查看更早的内容...</a>' % (u.id, g.start+limit),
         'text': '',
         'asset': {
             'media': '', 'credit': '', 'caption': ''
