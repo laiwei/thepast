@@ -3,20 +3,6 @@
 {% import "status.html" as status_tmpl_helper %}
 {% import "blocks.html" as blocks %}
 
-{% block head_block %}
-    <div id="site">
-        <div id="logo" class="fl"><h1><a href="/home">ThePast.Me</a><h1></div>
-        {%if g.user.id == user.id%}
-            <!-- 自己的个人信息框 -->
-            {{blocks.people_info_block(g.user, g.unbinded)}}
-            <!-- End 个人信息框 -->
-        {%else%}
-            <!-- 其他用户的个人信息框 -->
-            {{blocks.people_info_block(user, [])}}
-        {%endif%}
-    </div>
-{%endblock%}
-
 {% block content_block %}
 <div id="sidebar"></div>
 <div id="rightbar">

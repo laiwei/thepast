@@ -15,6 +15,11 @@ from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
 from .utils import require_login
 
+@app.route("/visual")
+@require_login()
+def myvisual():
+    return redirect("/user/%s/visual" % g.user.id)
+
 @app.route("/user/<uid>/visual")
 @require_login()
 def visual(uid):
@@ -26,9 +31,9 @@ def visual(uid):
             config=config)
 
 @app.route("/user/<uid>/timeline_json")
-@require_login(()
+@require_login()
 def timeline_json(uid):
-    limit = 150
+    limit = 100
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
@@ -39,6 +44,9 @@ def timeline_json(uid):
     ids = ids[::-1]
 
     status_list = Status.gets(ids)
+    if not status_list:
+        return json_encode({})
+
     date = []
     for s in status_list:
         headline = s.summary or ''
@@ -63,9 +71,9 @@ def timeline_json(uid):
             uri = s.get_origin_uri()
             headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
             text = s.text or ''
-
+        
         tmp = {
-            'startDate': '%s,%s,%s,%s,%s,%s' % (t.year, t.month, t.day, t.hour, t.minute, t.second),
+            'startDate': t.strftime("%Y,%m,%d,%H,%M,%S"),
             'headline': headline,
             'text': text,
             'asset': {
@@ -76,23 +84,23 @@ def timeline_json(uid):
         }
         date.append(tmp)
 
-    t = datetime.now()
-    tmp = {
-        'startDate': '%s,%s,%s,%s,%s,%s' % (t.year, t.month, t.day, t.hour, t.minute, t.second),
-        'headline': '<a href="/user/%s/visual?start=%s">查看更早的内容...</a>' % (u.id, g.start+limit),
-        'text': '',
-        'asset': {
-            'media': '', 'credit': '', 'caption': ''
-        },
-    }
-    date.append(tmp)
+    if date:
+        tmp = {
+            'startDate': datetime.now().strftime("%Y,%m,%d,%H,%M,%S"),
+            'headline': '<a href="/user/%s/visual?start=%s">查看更早的内容...</a>' % (u.id, g.start+limit),
+            'text': '',
+            'asset': {
+                'media': '', 'credit': '', 'caption': ''
+            },
+        }
+        date.insert(0, tmp)
 
     json_data = {
         'timeline':
         {
             'headline': 'The past of you',
             'type': 'default',
-            'startDate': date[0]['startDate'],
+            'startDate': date[1]['startDate'],
             'text': 'Storytelling about yourself...',
             'asset':{
                 'media': '',

@@ -18,14 +18,30 @@
     {% block head_block %}
         <div id="site">
             <div id="logo" class="fl"><h1><a href="/home">ThePast.Me</a><h1></div>
-            {%if g.user%}
-                <!-- 已登录：个人信息框 -->
-                {{blocks.people_info_block(g.user, g.unbinded)}}
-                <!-- End 个人信息框 -->
-            {%else%}
+
+            {%if not g.user%}
                 <!-- 授权平台图标导航 -->
                 {{blocks.connect_block()}}
+            {%elif user and g.user.id == user.id %}
+                <!-- 自己的个人信息框 -->
+                {{blocks.people_info_block(g.user, g.unbinded)}}
+            {%else%}
+                <!-- 其他用户的个人信息框 -->
+                {{blocks.people_info_block(user, [])}}
             {%endif%}
+
+            {%block mini_navi_block%}
+                <div class="mini_navi">
+                    <ul>
+                        <a href="/i">首页</a>
+                        <a href="/past">我的过去</a>
+                        <a href="/user">浏览发现</a>
+                        <a href="/visual">时间线</a>
+                        <a href="/bind/wordpress">绑定blog</a>
+                        <a href="/settings">设置</a>
+                    </ul>
+                </div>
+            {%endblock%}
         </div>
     {%endblock%}
 </div>
@@ -33,20 +49,6 @@
 <div id="main">
     {% block main_block %}
         <div id="content"> 
-            {%block mini_navi_block%}
-                <div class="mini_navi">
-                    <ul>
-                        <a href="/i">首页</a>
-                        <a href="/past">我的过去</a>
-                        <a href="/user">浏览发现</a>
-                        {%if g.user%}
-                        <a href="/user/{{g.user.id}}/visual">时间线</a>
-                        {%endif%}
-                        <a href="/settings">设置</a>
-                        <a href="/bind/wordpress">绑定blog</a>
-                    </ul>
-                </div>
-            {%endblock%}
             {%block content_block %}
             {% endblock%}
         </div>
