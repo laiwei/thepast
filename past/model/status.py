@@ -86,7 +86,7 @@ class Status(object):
 
     ##TODO:这个clear_cache需要拆分
     @classmethod
-    def _clear_cache(self, user_id, status_id, cate=None):
+    def _clear_cache(cls, user_id, status_id, cate=None):
         if status_id:
             mc.delete("status:%s" % status_id)
         if user_id:
@@ -197,9 +197,9 @@ class Status(object):
     @classmethod
     def get_ids_by_date(cls, user_id, start_date, end_date):
         cursor = db_conn.execute('''select id from status 
-                where user_id=%s and create_time>=%s and create_time<=%s
-                order by time desc''',
-                (user_id, start_date, end_date))
+                where user_id=%s and category!=%s and create_time>=%s and create_time<=%s
+                order by create_time desc''',
+                (user_id, config.CATE_DOUBAN_NOTE, start_date, end_date))
         rows = cursor.fetchall()
         cursor and cursor.close()
         return [x[0] for x in rows]
@@ -244,8 +244,12 @@ class Status(object):
     ## just for tecent_weibo
     @classmethod
     def get_oldest_create_time(cls, cate, user_id):
-        cursor = db_conn.execute('''select min(create_time) from status 
-            where category=%s and user_id=%s''', (cate, user_id))
+        if cate:
+            cursor = db_conn.execute('''select min(create_time) from status 
+                where category=%s and user_id=%s''', (cate, user_id))
+        else:
+            cursor = db_conn.execute('''select min(create_time) from status 
+                where user_id=%s''', user_id)
         row = cursor.fetchone()
         cursor and cursor.close()
         if row:

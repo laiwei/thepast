@@ -161,7 +161,7 @@
     {% set origin_uri = s.get_origin_uri() %}
     <a href="{{origin_uri[1]}}">{{s.title}}</a><br/>
     {%if pdf%}
-        {{s.text|wrap_long_line}}
+        {{s.text}}
     {%else%}
         {{s.summary}}
         <a href="/post/{{s.id}}">&nbsp;read more</a>
@@ -169,6 +169,6 @@
 
     {%if pdf%}
         <div class="time">
-        From: {{origin_uri()[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
 {%- endmacro %}

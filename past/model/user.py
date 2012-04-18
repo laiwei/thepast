@@ -82,9 +82,19 @@ class User(object):
 
     @classmethod
     @pcache("user:ids")
-    def get_ids(cls, start=0, limit=20, order="id desc"):
+    def get_ids(cls, start=0, limit=20):
         sql = """select id from user 
-                order by """ + order + """ limit %s, %s"""
+                order by id desc limit %s, %s"""
+        cursor = db_conn.execute(sql, (start, limit))
+        rows = cursor.fetchall()
+        cursor and cursor.close()
+        return [x[0] for x in rows]
+
+    @classmethod
+    @pcache("user:ids:asc")
+    def get_ids_asc(cls, start=0, limit=20):
+        sql = """select id from user 
+                order by id asc limit %s, %s"""
         cursor = db_conn.execute(sql, (start, limit))
         rows = cursor.fetchall()
         cursor and cursor.close()

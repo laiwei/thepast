@@ -3,6 +3,7 @@ import os
 import re
 import time
 import datetime
+import imghdr
 import httplib2
 import random
 import string
@@ -71,3 +72,8 @@ def is_valid_email(email):
         return EMAILRE.match(email) != None 
     return False
 
+
+def is_valid_image(content):
+     return content and imghdr.what(content) in \
+            [ 'rgb' ,'gif' ,'pbm' ,'pgm' ,
+            'ppm' ,'tiff' ,'rast' ,'xbm' ,'jpeg' ,'bmp' ,'png']
