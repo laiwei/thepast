@@ -13,10 +13,11 @@ except ImportError:
 from past import app
 from past.model.user import User
 from past.model.status import Status
-from past.utils import wrap_long_line, filters, randbytes
+from past.utils import wrap_long_line, filters, randbytes, is_valid_image
+from past.utils.escape import clear_html_element
 from past import config
 
-def generate_pdf(filename, uid, start, count, cate=None, with_head=True, capacity=50*1024):
+def generate_pdf(filename, uid, status_ids, with_head=True, capacity=50*1024):
 
     #########Set FONT################
     from xhtml2pdf.default import DEFAULT_FONT
@@ -39,8 +40,7 @@ def generate_pdf(filename, uid, start, count, cate=None, with_head=True, capacit
         return None
 
     # get status
-    ids = Status.get_ids(user_id=uid, start=start, limit=count, cate=cate)
-    status_list = Status.gets(ids)
+    status_list = Status.gets(status_ids)
     _html = render(user, status_list, with_head)
     _pdf = pisaDocument(_html, result, default_css=css, link_callback=link_callback, capacity=capacity)
     result.close()
@@ -51,6 +51,10 @@ def generate_pdf(filename, uid, start, count, cate=None, with_head=True, capacit
         return None
 
 def render(user, status_list, with_head=True):
+    if not status_list:
+        return
+    date = status_list[0].create_time.strftime("%Y年%m月")
+    date = date.decode("utf8")
     if with_head:
         _html = u"""<html> <body>
             <div id="Top">
@@ -61,7 +65,7 @@ def render(user, status_list, with_head=True):
 
             <div class="box">
         """ % (os.path.join(app.root_path, "static/img/logo.png"), 
-            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user.name)
+            date, user.name)
     else:
         _html = u"""<html> <body><div class="box">"""
 
@@ -69,6 +73,7 @@ def render(user, status_list, with_head=True):
     env = Environment(loader=PackageLoader('past', 'templates'))
     env.filters['wrap_long_line'] = wrap_long_line
     env.filters['nl2br'] = filters.nl2br
+    env.filters['clear_html_element'] = clear_html_element
     t = env.get_template('status.html')
     m = t.module
     for s in status_list:
@@ -82,21 +87,29 @@ def render(user, status_list, with_head=True):
             r = m.twitter_status(s, pdf=True)
         elif s.category == config.CATE_QQWEIBO_STATUS:
             r = m.qq_weibo_status(s, pdf=True)
+        elif s.category == config.CATE_WORDPRESS_POST:
+            r = m.wordpress_status(s, pdf=True)
         else:
             r = ''
         if not r:
             continue
         _html += '''<div class="cell">''' + r + '''</div>'''
-        s._clear_cache(user_id = s.user_id, status_id = s.id)
+        Status._clear_cache(user_id = s.user_id, status_id = s.id)
     _html += """</div></body></html>"""
     return _html
 
 def link_callback(uri, rel):
     lower_uri = uri.lower()
-    print '%s getting %s' % (datetime.datetime.now(), lower_uri)
+    print '%s getting %s' % (datetime.datetime.now(), uri)
     if not (lower_uri.startswith('http://') or 
-            lower_uri.startswith('https://') or lower_uri.startswith('ftp://')):
-        return uri
+            lower_uri.startswith('https://') or 
+            lower_uri.startswith('ftp://')):
+        return ''
+    if lower_uri.find(" ") != -1:
+        return ''
+
+    if lower_uri.find("\n") != -1:
+        return ''
 
     d = hashlib.md5()
     d.update(uri)
@@ -114,21 +127,26 @@ def link_callback(uri, rel):
     if os.path.exists(cache_file) and os.path.getsize(cache_file) > 0:
         return cache_file
     
-    resp, content = httplib2.Http().request(uri)
-    if resp.status == 200:
-        with open(cache_file, 'w') as f:
-            f.write(content)
-        return cache_file
-    else:
-        print 'get %s fail, status_code is %s, so return none' % (uri,resp.status)
-        return ''
+    ##XXX:暂时不缓存图片文件了，因为磁盘不够用
+    #resp, content = httplib2.Http().request(uri)
+    #if resp.status == 200:
+    #    with open(cache_file, 'w') as f:
+    #        f.write(content)
+    #    return cache_file
+    #else:
+    #    print 'get %s fail, status_code is %s, so return none' % (uri,resp.status)
+    #    return ''
 
     return uri
 
-def get_pdf_filename(uid):
-    return "thepast.me_%s.pdf" % uid
+def get_pdf_filename(uid, suffix=None):
+    if suffix:
+        return "thepast.me_%s_%s.pdf" % (uid, suffix)
+    else:
+        return "thepast.me_%s.pdf" % uid
 
 def get_pdf_full_filename(filename):
+    filename = filename.replace("..", "").replace("/", "")
     pdf_file_dir = config.PDF_FILE_DOWNLOAD_DIR
 
     if not os.path.isdir(pdf_file_dir):
@@ -144,6 +162,6 @@ def is_pdf_file_exists(filename):
         return True
     return False
 
-def is_user_pdf_file_exists(uid):
-    f = get_pdf_filename(uid)
+def is_user_pdf_file_exists(uid, suffix=None):
+    f = get_pdf_filename(uid, suffix)
     return is_pdf_file_exists(f)

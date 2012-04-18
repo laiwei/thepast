@@ -1,6 +1,8 @@
 #-*- coding:utf-8 -*-
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
+from collections import defaultdict
 
 from flask import g, request, redirect, url_for, abort, render_template,\
         make_response
@@ -179,12 +181,35 @@ def pdf(uid):
     user = User.get(uid)
     if not user:
         abort(404, "No such user")
-    
-    pdf_filename = get_pdf_filename(user.id)
+
+    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
+
+    pdf_files = []
+    start_date = Status.get_oldest_create_time(None, user.id)
+    now = datetime.now()
+    d = start_date
+    while d <= now:
+        pdf_filename = get_pdf_filename(user.id, d.strftime("%Y%m"))
+        if is_pdf_file_exists(pdf_filename):
+            pdf_files.append([d, pdf_filename])
+
+        days = calendar.monthrange(d.year, d.month)[1]
+        d += timedelta(days=days)
+        d = datetime(d.year, d.month, 1)
+    files_dict = defaultdict(list)
+    for date, filename in pdf_files:
+        files_dict[date.year].append([date, filename])
+    return render_template("pdf.html", **locals())
+
+@app.route("/pdf/<filename>")
+@require_login()
+def pdf_down(filename):
+    pdf_filename = filename
     if not is_pdf_file_exists(pdf_filename):
         abort(404, "Please wait one day to  download the PDF version, because the vps memory is limited")
 
-    full_file_name = os.path.join(config.PDF_FILE_DOWNLOAD_DIR, pdf_filename)
+    full_file_name = get_pdf_full_filename(pdf_filename)
     resp = make_response()
     resp.headers['Cache-Control'] = 'no-cache'
     resp.headers['Content-Type'] = 'application/pdf'
@@ -193,8 +218,6 @@ def pdf(uid):
     redir = '/down/pdf/' + pdf_filename
     resp.headers['X-Accel-Redirect'] = redir
     return resp
-
-
 
 ## 把status_list构造为month，day的层级结构
 def statuses_timelize(status_list):
