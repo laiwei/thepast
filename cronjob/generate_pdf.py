@@ -32,7 +32,7 @@ def generate(user_id, date, order='asc'):
             print '---- %s exists, so ignore...' % pdf_filename
             return
 
-        status_ids = Status.get_ids_by_date(user_id, start_date, end_date)
+        status_ids = Status.get_ids_by_date(user_id, start_date, end_date)[:900]
         if order == 'asc':
             status_ids = status_ids[::-1]
         if not status_ids:
@@ -52,7 +52,10 @@ def generate_pdf_by_user(user_id):
     if not user:
         return
 
-    start_date = Status.get_oldest_create_time(None, user_id)
+    #XXX:暂时只生成2012年的(uid从98开始的用户)
+    #XXX:暂时只生成2012年3月份的(uid从166开始的用户)
+    #start_date = Status.get_oldest_create_time(None, user_id)
+    start_date = datetime.datetime(2012, 3, 1, 0, 0, 0)
     if not start_date:
         return
     now = datetime.datetime.now()
@@ -68,9 +71,9 @@ def generate_pdf_by_user(user_id):
 
 
 if __name__ == "__main__":
-    start = 0
+    start = 161
     limit = 100
-    while start <= 200:
+    while start <= 800:
         for uid in User.get_ids_asc(start=start, limit=limit):
             print '------begin generate pdf of user:', uid
             generate_pdf_by_user(uid)

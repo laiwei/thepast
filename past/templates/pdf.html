@@ -25,7 +25,8 @@
                     {% if files_dict[year][i]%}
                     {%set date = files_dict[year][i][0]%}
                     {%set filename = files_dict[year][i][1]%}
-                    <td width="100px" align="left"><a href="/pdf_down/{{filename}}">{{date.month}}月</a></td>
+                    {%set filesize = files_dict[year][i][2]%}
+                    <td width="100px" align="left"><a href="/pdf/{{filename}}">{{date.month}}月</a>&nbsp;[{{filesize}}]</td>
                     {% else%}
                     <td width="100px" align="left"></td>
                     {% endif%}
@@ -38,7 +39,8 @@
                     {% if files_dict[year][i]%}
                     {%set date = files_dict[year][i][0]%}
                     {%set filename = files_dict[year][i][1]%}
-                    <td width="100px" align="left"><a href="/pdf_down/{{filename}}">{{date.month}}月</a></td>
+                    {%set filesize = files_dict[year][i][2]%}
+                    <td width="100px" align="left"><a href="/pdf/{{filename}}">{{date.month}}月</a>&nbsp;[{{filesize}}]</td>
                     {% else%}
                     <td width="100px" align="left"></td>
                     {% endif%}

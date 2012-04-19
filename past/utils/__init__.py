@@ -72,8 +72,13 @@ def is_valid_email(email):
         return EMAILRE.match(email) != None 
     return False
 
-
 def is_valid_image(content):
      return content and imghdr.what(content) in \
             [ 'rgb' ,'gif' ,'pbm' ,'pgm' ,
             'ppm' ,'tiff' ,'rast' ,'xbm' ,'jpeg' ,'bmp' ,'png']
+
+def sizeof_fmt(num):
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f%s" % (num, x)
+        num /= 1024.0

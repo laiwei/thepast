@@ -31,7 +31,11 @@
     <!-- retweeted -->
     {% set re = s.get_retweeted_data() %}
     {% if re %}
-        {{re.get_content()}}
+        {%if pdf%}
+            {{re.get_content()|wrap_long_line}}
+        {%else%}
+            {{re.get_content()}}
+        {%endif%}
 
         {%set atts = re.get_attachments()%}
         {%if atts%}
@@ -140,7 +144,11 @@
 
     {% set re = s.get_retweeted_data() %}
     {% if not s.summary and re %}
-        {{ "//" + re }} 
+        {%if pdf%}
+        {{ ("//" + re)|wrap_long_line }} 
+        {%else%}
+        {{ "//" + re}} 
+        {%endif%}
     {% endif %}
 
     {% set images = s.get_data().get_images() or [] %}

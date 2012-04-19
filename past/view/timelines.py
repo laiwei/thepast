@@ -12,7 +12,8 @@ from past import config
 from past.model.user import User
 from past.model.status import Status
 
-from past.utils.pdf import is_pdf_file_exists, get_pdf_filename
+from past.utils import sizeof_fmt
+from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_filename
 from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
 from .utils import require_login
@@ -192,14 +193,15 @@ def pdf(uid):
     while d <= now:
         pdf_filename = get_pdf_filename(user.id, d.strftime("%Y%m"))
         if is_pdf_file_exists(pdf_filename):
-            pdf_files.append([d, pdf_filename])
+            full_file_name = get_pdf_full_filename(pdf_filename)
+            pdf_files.append([d, pdf_filename, sizeof_fmt(os.path.getsize(full_file_name))])
 
         days = calendar.monthrange(d.year, d.month)[1]
         d += timedelta(days=days)
         d = datetime(d.year, d.month, 1)
     files_dict = defaultdict(list)
-    for date, filename in pdf_files:
-        files_dict[date.year].append([date, filename])
+    for date, filename, filesize in pdf_files:
+        files_dict[date.year].append([date, filename, filesize])
     return render_template("pdf.html", **locals())
 
 @app.route("/pdf/<filename>")

@@ -127,17 +127,19 @@ def link_callback(uri, rel):
     if os.path.exists(cache_file) and os.path.getsize(cache_file) > 0:
         return cache_file
     
-    ##XXX:暂时不缓存图片文件了，因为磁盘不够用
-    #resp, content = httplib2.Http().request(uri)
-    #if resp.status == 200:
-    #    with open(cache_file, 'w') as f:
-    #        f.write(content)
-    #    return cache_file
-    #else:
-    #    print 'get %s fail, status_code is %s, so return none' % (uri,resp.status)
-    #    return ''
+    resp, content = httplib2.Http().request(uri)
+    if resp.status == 200:
+        with open(cache_file, 'w') as f:
+            f.write(content)
+        if is_valid_image(cache_file):
+            return cache_file
+        else:
+            return ''
+    else:
+        print 'get %s fail, status_code is %s, so return none' % (uri,resp.status)
+        return ''
 
-    return uri
+    return ''
 
 def get_pdf_filename(uid, suffix=None):
     if suffix:
