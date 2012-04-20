@@ -71,8 +71,8 @@ def generate_pdf_by_user(user_id):
 
 
 if __name__ == "__main__":
-    start = 161
-    limit = 100
+    start = 690
+    limit = 200
     while start <= 800:
         for uid in User.get_ids_asc(start=start, limit=limit):
             print '------begin generate pdf of user:', uid

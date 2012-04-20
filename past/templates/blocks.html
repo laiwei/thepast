@@ -28,7 +28,11 @@
                 {%if unbinded%}
                     {%for ub in unbinded%}
                         <span class="from {{ub[1]}}">
+                            {%if ub[0] == 'W'%}
+                            <a title="绑定wordpress" href="/bind/{{ub[1]}}">{{ub[1]}}</a>
+                            {%else%}
                             <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
+                            {%endif%}
                         </span>
                     {%endfor%}
                 {%endif%}
@@ -131,3 +135,5 @@
 </div>
 <div class="sep10"></div>
 {%- endmacro %}
+
+

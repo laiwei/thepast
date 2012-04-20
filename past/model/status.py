@@ -17,6 +17,9 @@ from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
 
 log = logging.getLogger(__file__)
 
+#TODO:refactor,暴露在外面的接口为Status
+#把Data相关的都应该隐藏起来,不允许外部import
+
 class Status(object):
     
     STATUS_REDIS_KEY = "/status/text/%s"
