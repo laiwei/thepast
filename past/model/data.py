@@ -509,7 +509,14 @@ class QQWeiboStatusData(AbsData):
         return self.data.get("text", "") 
     
     def get_retweeted_data(self):
-        return self.data.get("origtext", "") 
+        re = self.data.get("source")
+        if re and re != 'null':
+            return QQWeiboStatusData(re)
+        else:
+            return ""
+
+    def get_user(self):
+        return QQWeiboUser(self.data) 
 
     def _get_images(self, size):
         r = []

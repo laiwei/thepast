@@ -143,15 +143,18 @@
     {%endif%}
 
     {% set re = s.get_retweeted_data() %}
-    {% if not s.summary and re %}
+    {% if re %}
         {%if pdf%}
-        {{ ("//" + re)|wrap_long_line }} 
+        {{ ("//" + re.get_user().get_nickname() + ":" + re.get_content())|wrap_long_line }} 
         {%else%}
-        {{ "//" + re}} 
+        {{ "//" + re.get_user().get_nickname() + ":" + re.get_content()}} 
         {%endif%}
     {% endif %}
 
     {% set images = s.get_data().get_images() or [] %}
+    {%if re%}
+        {%set images = images + (re.get_images() or [])%}
+    {%endif%}
     {% if images %}
         {%for image in images%}
             <div class="sep3"></div>
