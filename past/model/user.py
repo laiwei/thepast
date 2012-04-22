@@ -31,6 +31,7 @@ class User(object):
     def _clear_cache(cls, user_id):
         if user_id:
             mc.delete("user:%s" % user_id)
+            mc.delete("user_profile:%s" % user_id)
         mc.delete("user:ids")
         
     @classmethod
@@ -164,8 +165,10 @@ class User(object):
 
     def set_profile(self, profile):
         mongo_conn.set('/profile/%s' %self.id, json_encode(profile))
+        mc.delete("user_profile:%s" % self.id)
         return self.get_profile()
 
+    @cache("user_profile:{self.id}")
     def get_profile(self):
         r = mongo_conn.get('/profile/%s' %self.id)
         return json_decode(r) if r else {}

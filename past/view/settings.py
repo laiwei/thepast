@@ -12,6 +12,7 @@ from past.utils.escape import json_encode
 from past.utils import randbytes
 from past.api_client import Wordpress
 from past.store import mc
+from past import consts
 
 from .utils import require_login
 
@@ -37,6 +38,23 @@ def settings():
         else:
             flash(u'电子邮箱格式不正确', 'error')
     return render_template("settings.html", **locals())
+
+@app.route("/settings/email_remind", methods=["POST"])
+@require_login()
+def email_remind():
+    today_in_history = request.form.get("today_in_history", consts.YES)
+    g.user.set_profile_item("email_remind_today_in_history", today_in_history)
+    flash(u'邮件提醒修改成功', 'tip')
+    return redirect("/settings")
+
+@app.route("/settings/privacy", methods=["POST"])
+@require_login()
+def privacy():
+    p = request.form.get("privacy", consts.USER_PRIVACY_PUBLIC)
+    g.user.set_profile_item("user_privacy", p)
+    flash(u'隐私设置修改成功', 'tip')
+    return redirect("/settings")
+    
 
 @app.route("/bind/wordpress", methods=["GET", "POST"])
 def bind_wordpress():

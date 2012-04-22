@@ -19,6 +19,8 @@
 
 <div id="middlebar">
     <div class="timelines">
+        {{ blocks.notification_block() }}
+
         {% if not status_list and g.start == 0 %}
             <div class="sep10"></div>
             <span class="fade">正在努力从第三方网站同步你的timeline，请稍等刷新页面查看...</span>

@@ -15,6 +15,7 @@ from past.model.status import SyncTask, Status, TaskQueue, \
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
 from past.cws.cut import get_keywords
+from past import consts
 
 from past import app
 
@@ -59,6 +60,7 @@ def index():
 def home():
     user_ids = Status.get_recent_updated_user_ids()
     users = filter(None, [User.get(x) for x in user_ids])
+    users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]
     return render_template("home.html",
             users=users, config=config)
 
@@ -104,6 +106,7 @@ def user_explore():
     g.count = 24
     user_ids = User.get_ids(start=g.start, limit=g.count)
     users = [User.get(x) for x in user_ids]
+    users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]
     return render_template("user_explore.html",
             users=users, config=config)
     

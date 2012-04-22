@@ -21,6 +21,11 @@ def send_today_in_history(user_id):
     if not u:
         return
 
+    setting = u.get_profile_item("email_remind_today_in_history")
+    if setting == 'N':
+        print '---user %s does not like to receive remind mail' % u.id
+        return
+
     email = u.get_email()
     if not email:
         print '---- user %s no email' % u.id
@@ -76,6 +81,11 @@ def send_pdf(user_id):
     u = User.get(user_id)
 
     if not u:
+        return
+
+    setting = u.get_profile_item("email_remind_today_in_history")
+    if setting == 'N':
+        print '---user %s does not like to receive remind mail' % u.id
         return
 
     email = u.get_email()

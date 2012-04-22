@@ -5,7 +5,7 @@ import calendar
 from collections import defaultdict
 
 from flask import g, request, redirect, url_for, abort, render_template,\
-        make_response
+        make_response, flash
 
 from past import app
 from past import config
@@ -16,6 +16,7 @@ from past.utils import sizeof_fmt
 from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_filename
 from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
+from past import consts
 from .utils import require_login
 
 @app.route("/visual")
@@ -30,6 +31,10 @@ def visual(uid):
     if not u:
         abort(404, "no such user")
 
+    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+        flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
+        return redirect(url_for("timeline"))
+
     return render_template("visual_timeline.html", user=u, unbinded=[], 
             config=config)
 
@@ -40,6 +45,9 @@ def timeline_json(uid):
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
+
+    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+        abort(403, "not allowed")
 
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id,
@@ -141,6 +149,10 @@ def user(uid):
     if g.user and g.user.id == u.id:
         return redirect(url_for("timeline"))
     
+    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+        flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
+        return redirect(url_for("timeline"))
+
     #TODO:增加可否查看其他用户的权限检查
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
@@ -183,6 +195,10 @@ def pdf(uid):
     if not user:
         abort(404, "No such user")
 
+    if user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+        flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
+        return redirect(url_for("timeline"))
+
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
 
@@ -210,6 +226,14 @@ def pdf_down(filename):
     pdf_filename = filename
     if not is_pdf_file_exists(pdf_filename):
         abort(404, "Please wait one day to  download the PDF version, because the vps memory is limited")
+
+    user_id = pdf_filename.split('_')[1]
+    u = User.get(user_id)
+    if not u:
+        abort(400, 'Bad request')
+
+    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+        abort(403, 'Not allowed')
 
     full_file_name = get_pdf_full_filename(pdf_filename)
     resp = make_response()
