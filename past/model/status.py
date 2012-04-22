@@ -63,7 +63,7 @@ class Status(object):
         return not self.__eq__(other)
 
     def __hash__(self):
-        if self.category == config.CATE_QQWEIBO_STATUS and self.get_retweeted_data() != self.summary:
+        if self.category == config.CATE_QQWEIBO_STATUS and self.get_retweeted_data():
             return int(self.id)
         if (self.category == config.CATE_SINA_STATUS or self.category == config.CATE_DOUBAN_STATUS) \
                 and self.get_retweeted_data():

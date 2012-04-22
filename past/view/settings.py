@@ -102,9 +102,9 @@ def bind_wordpress():
                     ret['msg'] = '没有发现含有验证码的文章，请检查后再提交验证'
                 else:
                     latest_post = rs[0]
-                    if latest_post.get_content().encode("utf8")[:100].find(str(random_id)) == -1:
-                        ret['msg'] = "没有发现含有验证码的文章，请检查后再提交验证"
-                    else:
+                    if not latest_post:
+                        ret['msg'] = "你的feed地址可能无法访问，请检查下"
+                    elif latest_post.get_content().encode("utf8")[:100].find(str(random_id)) != -1:
                         ua = UserAlias.bind_to_exists_user(g.user, 
                                 config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS], feed_uri)
                         if not ua:
@@ -119,6 +119,8 @@ def bind_wordpress():
 
                             ret['ok'] = True
                             ret['msg'] = '恭喜，绑定成功啦'
+                    else:
+                        ret['msg'] = "没有发现含有验证码的文章，请检查后再提交验证"
             return json_encode(ret)
     else:
         return "method not allowed"

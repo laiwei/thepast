@@ -54,8 +54,8 @@ def generate_pdf_by_user(user_id):
 
     #XXX:暂时只生成2012年的(uid从98开始的用户)
     #XXX:暂时只生成2012年3月份的(uid从166开始的用户)
-    #start_date = Status.get_oldest_create_time(None, user_id)
-    start_date = datetime.datetime(2012, 3, 1, 0, 0, 0)
+    start_date = Status.get_oldest_create_time(None, user_id)
+    #start_date = datetime.datetime(2012, 3, 1, 0, 0, 0)
     if not start_date:
         return
     now = datetime.datetime.now()
@@ -71,10 +71,8 @@ def generate_pdf_by_user(user_id):
 
 
 if __name__ == "__main__":
-    start = 690
+    start = 760
     limit = 200
-    while start <= 800:
-        for uid in User.get_ids_asc(start=start, limit=limit):
-            print '------begin generate pdf of user:', uid
-            generate_pdf_by_user(uid)
-        start += limit
+    for uid in User.get_ids_asc(start=start, limit=limit):
+        print '------begin generate pdf of user:', uid
+        generate(uid, date=datetime.datetime(2012,3,1), order='asc')

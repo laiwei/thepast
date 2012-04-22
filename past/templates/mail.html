@@ -1,0 +1,159 @@
+
+{% import "status.html" as status_tmpl_helper %}
+
+{% macro status_in_past(status_of_yesterday, status_of_today_in_history, YESTERDAY, config, intros) -%}
+<html>
+<head>
+    <style  type="text/css">
+        #thepast {
+            width: 960px;
+            margin: 0px auto 0px auto;
+            padding: 12px 0px 30px 0px;
+            background-color: white;
+        }
+        #thepast a:link,a:visited,a:active{color:#8C7E7E;text-decoration:none;}
+        #thepast a:hover{color:#4d5256;text-decoration:underline;}
+        #thepast .fr{float:right;}
+        #thepast .fl{float:left;}
+        #thepast .clear{clear:both;}
+
+        #thepast .box {
+
+            background-color: #fff;
+            border: 1px solid #fff;
+        }
+
+        #thepast .box .cell {
+            padding: 10px;
+            font-size: 12px;
+            line-height: 16px;
+            border-bottom: 1px solid #e2e2e2;
+        }
+
+        #thepast .box .inner{
+            padding: 10px;
+            font-size: 12px;
+            line-height: 16px;
+        }
+
+        #thepast img{
+            max-width:200px;
+            max-height:150px;
+        }
+
+        #thepast .bigger {
+            font-size: 16px;
+        }
+        #thepast .smaller{
+            font-size: 11px;
+        }
+        #thepast .fade { 
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div id="thepast" style="width: 960px; margin: 0px auto 0px auto; padding: 12px 0px 30px 0px; background-color: white;">
+        <div class="box" style="background-color: #fff; border: 1px solid #fff;">
+            <div class="inner" style="padding: 10px; font-size: 12px; line-height: 16px;">
+            <p>Hi, 感谢你使用thepast整理自己的互联网印迹，thepast每天会尝试提醒你过去发生的一些事情，希望能带给你一些惊喜，一丝怀念。</p>
+            <a href="http://thepast.me/past">你可以在这里查看在线版本</a>，&nbsp;
+            另外，你可以去<a href="http://thepast.me/pdf">这里</a>下载timeline的PDF版本.
+            </div>
+        </div>
+        <br/> <br/>
+
+        <div class="box" style="background-color: #fff; border: 1px solid #fff;">
+            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
+                <h2>昨天的印迹</h2>
+            </div>
+
+            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
+                <h3>›{{YESTERDAY}}，找到{{status_of_yesterday|length}}条记录</h3>
+            </div>
+        {% for s in status_of_yesterday %}
+            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
+                    <strong>{{s.create_time.strftime("%H:%M:%S")}} 
+                    <!-- 来源 -->
+                    {%set from_ = s.get_origin_uri()%}
+                    {%if from_%}
+                        <a target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;来自{{from_[0]}}</a>
+                    {%endif%}
+                    </strong>
+                    <br/> <br/>
+
+                    {%if s.category == config.CATE_DOUBAN_STATUS%}
+                        {{status_tmpl_helper.douban_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_SINA_STATUS%}
+                        {{status_tmpl_helper.sina_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                        {{status_tmpl_helper.qq_weibo_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_TWITTER_STATUS%}
+                        {{status_tmpl_helper.twitter_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_WORDPRESS_POST%}
+                        {{status_tmpl_helper.wordpress_status(s)}}
+                    {%endif%}
+            </div>
+        {%endfor%}
+        </div>
+
+        <br/> <br/>
+
+        <div class="box" style="background-color: #fff; border: 1px solid #fff;">
+            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
+                <h2>过往的今天</h2>
+            </div>
+
+            {% set days = status_of_today_in_history.keys()|sort(reverse=True)%}
+            {% for d in days %}
+                {% set statuses = status_of_today_in_history[d] %}
+                <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
+                    <h3>›{{d}}, 找到{{statuses|length}}条记录</h3>
+                </div>
+                {%for s in statuses %}
+                <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
+                    <strong>{{s.create_time.strftime("%H:%M:%S")}} 
+                    <!-- 来源 -->
+                    {%set from_ = s.get_origin_uri()%}
+                    {%if from_%}
+                        <a target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;来自{{from_[0]}}</a>
+                    {%endif%}
+                    </strong>
+
+                    <br/><br/>
+                    {%if s.category == config.CATE_DOUBAN_STATUS%}
+                        {{status_tmpl_helper.douban_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_SINA_STATUS%}
+                        {{status_tmpl_helper.sina_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_QQWEIBO_STATUS%}
+                        {{status_tmpl_helper.qq_weibo_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_TWITTER_STATUS%}
+                        {{status_tmpl_helper.twitter_status(s)}}
+                    {%endif%}
+
+                    {%if s.category == config.CATE_WORDPRESS_POST%}
+                        {{status_tmpl_helper.wordpress_status(s)}}
+                    {%endif%}
+                </div>
+                {%endfor%}
+            {%endfor%}
+        </div>
+    </div>
+    <!--end of thepast-->
+</body>
+</html>
+{%- endmacro %}
