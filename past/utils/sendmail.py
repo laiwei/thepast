@@ -20,9 +20,9 @@ def send_mail(to, fro, subject, text, html, files=[],server="localhost"):
     msg['Subject'] = subject
  
     if text:
-        msg.attach( MIMEText(text, 'plain' ))
+        msg.attach( MIMEText(text, 'plain', 'utf-8' ))
     if html:
-        msg.attach( MIMEText(html, 'html'))
+        msg.attach( MIMEText(html, 'html', 'utf-8'))
  
     for file in files:
         part = MIMEBase('application', "octet-stream")
@@ -36,4 +36,9 @@ def send_mail(to, fro, subject, text, html, files=[],server="localhost"):
     smtp.sendmail(fro, to, msg.as_string() )
     smtp.close()
 
-#send_mail(['laiwei_ustc <laiwei.ustc@gmail.com>'],'thepast <help@thepast.me>','thepast.me 历史上的今天','http://thepast.me个人杂志计划',['/home/work/proj/thepast/past/static/img/avatar.png','/home/work/proj/thepast/var/down/pdf/thepast.me_4_201203.pdf'])
+if __name__ == "__main__":
+    send_mail(['laiwei_ustc <laiwei.ustc@gmail.com>'],
+        'thepast <help@thepast.me>',
+        'thepast.me 历史上的今天',
+        'http://thepast.me个人杂志计划', 'html',
+        ['/home/work/proj/thepast/past/static/img/avatar.png'])

@@ -75,4 +75,4 @@ if __name__ == "__main__":
     limit = 200
     for uid in User.get_ids_asc(start=start, limit=limit):
         print '------begin generate pdf of user:', uid
-        generate(uid, date=datetime.datetime(2012,3,1), order='asc')
+        generate(uid, date=datetime.datetime(2012,4,1), order='asc')
