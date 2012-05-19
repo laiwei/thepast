@@ -44,7 +44,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #news,#members{
     background:url(/static/img/new.gif);
     padding:18px;
-    margin: 10px auto 32px 0px;
+    margin: 10px auto 10px 0px;
     border:1px solid #FFF;
     box-shadow:inset 1px 1px 4px #CCC;
     line-height:30px;

@@ -31,7 +31,7 @@ def visual(uid):
     if not u:
         abort(404, "no such user")
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
         return redirect(url_for("timeline"))
 
@@ -46,7 +46,7 @@ def timeline_json(uid):
     if not u:
         abort(404, "no such user")
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         abort(403, "not allowed")
 
     cate = request.args.get("cate", None)
@@ -203,7 +203,7 @@ def pdf(uid):
     if not user:
         abort(404, "No such user")
 
-    if user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
         return redirect(url_for("timeline"))
 
@@ -240,7 +240,7 @@ def pdf_down(filename):
     if not u:
         abort(400, 'Bad request')
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if user_id != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         abort(403, 'Not allowed')
 
     full_file_name = get_pdf_full_filename(pdf_filename)

@@ -2,7 +2,7 @@
 
 <head>
 <meta charset="utf-8">
-<title>{%block title_block%} The Past of Me | 个人杂志计划{%endblock%}</title>
+<title>{%block title_block%} The Past of Me | 你好，旧时光{%endblock%}</title>
 <link rel="stylesheet" type="text/css" media="screen" href="/static/css/default.css?v=1.14">
 <script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
 <!-- 
@@ -35,9 +35,8 @@
                     <ul>
                         <a href="/i">首页</a>
                         <a href="/past">过往</a>
-                        <a href="/user">浏览</a>
                         <a href="/visual">时间线</a>
-                        <a href="/bind/wordpress">blog</a>
+                        <a href="/bind/wordpress">Blog</a>
                         <a href="/pdf">PDF</a>
                         <a href="/settings">设置</a>
                     </ul>
@@ -58,16 +57,23 @@
 
 <div id="footer">
     {%block footer_block%}
+       <span class="fade">
+           <p>总有那么一天，想回过头来看看</p>
+           <p>看看这过往</p>
+           <p>或许是美好的时光</p>
+           <p>亦或是不羁的岁月</p>
+           <p>都是我们一起逝去的青春</p>
+           <p>过去的，总是美好的</p>
+           <p>你好，旧时光... &nbsp;&nbsp;&nbsp;</p>
+           <div class="sep10"></div>
+           &copy;thepast.me && You
+       </span>
+
        <div class="sep5"></div>
        <a class="dark" href="https://github.com/laiwei/thepast"> github主页 </a> &nbsp;&nbsp;
        <a class="dark" href="/logout"> Logout</a> &nbsp;&nbsp;
        <a class="dark" href="/about"> About </a> &nbsp;&nbsp;
 
-       <div class="sep10"></div>
-       <span class="fade">
-           记录自己的过去... &nbsp;&nbsp
-           copyright thepast.me && You
-       </span>
        <div class="sep10"></div>
        <div class="sep5"></div>
        <small>
