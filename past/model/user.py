@@ -71,7 +71,7 @@ class User(object):
     @classmethod
     @cache("alias2user:{type_}{alias}")
     def get_user_by_alias(cls, type_, alias):
-        cursor = db_conn.execute('''select user_id from user_alis
+        cursor = db_conn.execute('''select user_id from user_alias
             where type=%s and alias=%s''', (type_, alias))
         row = cursor.fetchone()
         cursor and cursor.close()

@@ -99,6 +99,9 @@ def render(user, status_list, with_head=True):
     return _html
 
 def link_callback(uri, rel):
+    #FIXME: 为了节省磁盘空间，PDF中不包含图片
+    return ''
+
     lower_uri = uri.lower()
     print '%s getting %s' % (datetime.datetime.now(), uri)
     if not (lower_uri.startswith('http://') or 

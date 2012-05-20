@@ -24,9 +24,9 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .login{list-style:none;float:left;}
 .login a{background:url(/static/img/login.png) no-repeat;display:block;margin:4px 0 0 10px;width:38px;height:38px;text-indent:-9999em;opacity:0.35;}
 .login a:hover{opacity:1;}
-.login.sina a{background-position:0 -38px;}
-.login.douban a{background-position:0 -76px;}
-.login.twitter a{background-position:0 -114px;}
+.login.sina a{background-position:0 -38px !important;}
+.login.douban a{background-position:0 -76px !important;}
+.login.twitter a{background-position:0 -114px !important;}
 
 .from{display:inline-block;margin:0 0 -2px 0px;}
 .from a{background:url(/static/img/sns.png) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
@@ -44,7 +44,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #news,#members{
     background:url(/static/img/new.gif);
     padding:18px;
-    margin: 10px auto 32px 0px;
+    margin: 10px auto 10px 0px;
     border:1px solid #FFF;
     box-shadow:inset 1px 1px 4px #CCC;
     line-height:30px;

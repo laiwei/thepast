@@ -568,6 +568,7 @@ class WordpressData(AbsData):
         if content:
             c = content[0]
             return c and c.get("value")
+        return ""
 
     def get_user(self):
         return self.data.get("author", "")

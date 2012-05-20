@@ -31,7 +31,7 @@ def visual(uid):
     if not u:
         abort(404, "no such user")
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
         return redirect(url_for("timeline"))
 
@@ -41,12 +41,12 @@ def visual(uid):
 @app.route("/user/<uid>/timeline_json")
 @require_login()
 def timeline_json(uid):
-    limit = 100
+    limit = 50
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         abort(403, "not allowed")
 
     cate = request.args.get("cate", None)
@@ -93,7 +93,11 @@ def timeline_json(uid):
                 'caption': ''
             },
         }
-        date.append(tmp)
+        try:
+            json_encode(tmp)
+            date.append(tmp)
+        except:
+            pass
 
     if date:
         tmp = {
@@ -130,7 +134,9 @@ def timeline():
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
     if status_list:
-        tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
+        ##XXX:暂时去除了个人关键字的功能
+        ##tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
+        tags_list = []
     else:
         tags_list = []
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
@@ -159,7 +165,9 @@ def user(uid):
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)
     if status_list:
-        tags_list = [x[0] for x in get_keywords(u.id, 30)]
+        ##XXX:暂时去除了个人关键字的功能
+        #tags_list = [x[0] for x in get_keywords(u.id, 30)]
+        tags_list = []
     else:
         tags_list = []
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
@@ -195,7 +203,7 @@ def pdf(uid):
     if not user:
         abort(404, "No such user")
 
-    if user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if uid != g.user.id and user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
         return redirect(url_for("timeline"))
 
@@ -206,7 +214,7 @@ def pdf(uid):
     start_date = Status.get_oldest_create_time(None, user.id)
     now = datetime.now()
     d = start_date
-    while d <= now:
+    while d and d <= now:
         pdf_filename = get_pdf_filename(user.id, d.strftime("%Y%m"))
         if is_pdf_file_exists(pdf_filename):
             full_file_name = get_pdf_full_filename(pdf_filename)
@@ -232,7 +240,7 @@ def pdf_down(filename):
     if not u:
         abort(400, 'Bad request')
 
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
+    if user_id != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         abort(403, 'Not allowed')
 
     full_file_name = get_pdf_full_filename(pdf_filename)

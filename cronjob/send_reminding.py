@@ -7,6 +7,7 @@ activate_this = '../env/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 
 import datetime
+import time
 
 from past.utils import wrap_long_line, filters 
 from past.utils.escape import clear_html_element
@@ -14,6 +15,7 @@ from past.utils.sendmail import send_mail
 from past.model.status import get_status_ids_today_in_history, \
         get_status_ids_yesterday, Status
 from past.model.user import User
+from past.store import db_conn
 from past import config
 
 def send_today_in_history(user_id):
@@ -105,6 +107,17 @@ thanks''' % user_id
     send_mail(["%s" % email], "help@thepast.me", subject, text, '', files=[], server="localhost")
 
 if __name__ == '__main__':
-    for uid in xrange(4,810):
+    cursor = db_conn.execute("select max(id) from user")
+    row = cursor.fetchone()
+    cursor and cursor.close()
+    max_uid = row and row[0]
+    max_uid = int(max_uid)
+    t = 0
+    for uid in xrange(4,max_uid + 1):
+        if t >= 100:
+            t = 0
+            time.sleep(5)
         send_today_in_history(uid)
+        time.sleep(5)
+        t += 1
 

@@ -105,7 +105,7 @@ def bind_wordpress():
                                 % code
                         mc.set("wordpress_bind:%s" %g.user.id, code)
                     else:
-                        ret['msg'] = '抱歉，出错了，请重试'
+                        ret['msg'] = '抱歉，出错了，请重试, 或者给管理员捎个话:help@thepast.me'
             return json_encode(ret)
         elif step == '2':
             if not (random_id and c):
@@ -122,23 +122,25 @@ def bind_wordpress():
                     latest_post = rs[0]
                     if not latest_post:
                         ret['msg'] = "你的feed地址可能无法访问，请检查下"
-                    elif latest_post.get_content().encode("utf8")[:100].find(str(random_id)) != -1:
-                        ua = UserAlias.bind_to_exists_user(g.user, 
-                                config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS], feed_uri)
-                        if not ua:
-                            ret['msg'] = '出错了，麻烦你重试一下吧^^'
-                        else:
-                            ##添加同步任务
-                            t = SyncTask.add(config.CATE_WORDPRESS_POST, g.user.id)
-                            t and TaskQueue.add(t.id, t.kind)
-                            ##删除confiration记录
-                            c.delete()
-                            mc.delete("wordpress_bind:%s" %g.user.id)
-
-                            ret['ok'] = True
-                            ret['msg'] = '恭喜，绑定成功啦'
                     else:
-                        ret['msg'] = "没有发现含有验证码的文章，请检查后再提交验证"
+                        content = latest_post.get_content() or latest_post.get_summary()
+                        if content and content.encode("utf8")[:100].find(str(random_id)) != -1:
+                            ua = UserAlias.bind_to_exists_user(g.user, 
+                                    config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS], feed_uri)
+                            if not ua:
+                                ret['msg'] = '出错了，麻烦你重试一下吧^^'
+                            else:
+                                ##添加同步任务
+                                t = SyncTask.add(config.CATE_WORDPRESS_POST, g.user.id)
+                                t and TaskQueue.add(t.id, t.kind)
+                                ##删除confiration记录
+                                c.delete()
+                                mc.delete("wordpress_bind:%s" %g.user.id)
+
+                                ret['ok'] = True
+                                ret['msg'] = '恭喜，绑定成功啦'
+                        else:
+                            ret['msg'] = "没有发现含有验证码的文章，请检查后再提交验证"
             return json_encode(ret)
     else:
         return "method not allowed"
