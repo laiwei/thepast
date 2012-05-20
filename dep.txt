@@ -8,6 +8,11 @@ mysql_secure_installation
 sudo apt-get install python-mysqldb
 #cd env/lib/python2.6/ && ln -s /usr/lib/pymodules/python2.6/MySQLdb/ MySQLdb && ln -s /usr/lib/pymodules/python2.6/_mysql_exceptions.py _mysql_exceptions.py && ln -s /usr/lib/pymodules/python2.6/_mysql.so _mysql.so
 
+##cd env/lib/python2.7
+##ln -s /usr/lib/python2.7/dist-packages/MySQLdb MySQLdb
+##ln -s /usr/lib/python2.7/dist-packages/_mysql_exceptions.py  _mysql_exceptions.py
+##ln -s /usr/lib/python2.7/dist-packages/_mysql.so _mysql.so
+
 
 #redis not use any more, instead by memcached and mongodb
 #sudo apt-get install redis-server
