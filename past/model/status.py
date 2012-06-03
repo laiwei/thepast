@@ -55,7 +55,7 @@ class Status(object):
         ##FIXME:abs(self.create_time - other.create_time) <= datetime.timedelta(1) 
         if self.user_id == other.user_id \
                 and abs(self.create_time.day - other.create_time.day) == 0 \
-                and  self.bare_text[:15] == other.bare_text[:15]:
+                and  self.bare_text == other.bare_text:
             return True
         return False
 
@@ -71,7 +71,7 @@ class Status(object):
         if self.category == config.CATE_DOUBAN_STATUS and \
                 self.get_data() and self.get_data().get_attachments():
             return int(self.id)
-        s = u"%s%s%s" % (self.user_id, self.bare_text[:15], self.create_time.day)
+        s = u"%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
         d = hashlib.md5()
         d.update(s.encode("utf8"))
         return int(d.hexdigest(),16)

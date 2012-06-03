@@ -82,7 +82,7 @@ class Douban(object):
         if until_id is not None:
             qs['until_id'] = until_id
         qs = urllib.urlencode(qs)
-        contents = self.get("/shuo/statuses/user_timeline/%s?%s" % (user_id, qs))
+        contents = self.get("/shuo/v2/statuses/user_timeline/%s?%s" % (user_id, qs))
         contents = json_decode(contents) if contents else []
 
         return [DoubanStatusData(c) for c in contents]
