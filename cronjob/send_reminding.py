@@ -77,7 +77,7 @@ def send_today_in_history(user_id):
     text = ''
     
     print '--- send reminding to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "help@thepast.me", subject, text, html, files=[], server="localhost")
+    send_mail(["%s" % email], "Today of The Past<help@thepast.me>", subject, text, html, files=[], server="localhost")
 
 def send_pdf(user_id):
     u = User.get(user_id)

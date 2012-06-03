@@ -72,7 +72,7 @@ def generate_pdf_by_user(user_id):
 
 if __name__ == "__main__":
     start = 0
-    limit = 1000
+    limit = 2000
     for uid in User.get_ids_asc(start=start, limit=limit):
         print '------begin generate pdf of user:', uid
         #generate(uid, date=datetime.datetime(2012,4,1), order='asc')
