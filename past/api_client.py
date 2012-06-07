@@ -214,6 +214,7 @@ class SinaWeibo(object):
         d = {}
         d["uid"] = self.alias
         d["trim_user"] = 0
+        d["count"] = count
         if since_id is not None:
             d["since_id"] = since_id 
         if until_id is not None:
