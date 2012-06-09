@@ -11,9 +11,10 @@ from past.utils.logger import logging
 from past.store import mongo_conn, mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
 from .user import UserAlias
+from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
-        WordpressData
+        WordpressData, ThepastNoteData
 
 log = logging.getLogger(__file__)
 
@@ -34,15 +35,14 @@ class Status(object):
         self.site = site
         self.category = category
         self.title = title
-        self.origin_user_id = UserAlias.get_by_user_and_type(self.user_id, self.site).alias
-        _raw_data_obj = self.get_data()
+        _data_obj = self.get_data()
         ##对于140字以内的消息，summary和text相同；对于wordpress等长文，summary只是摘要，text为全文
         ##summary当作属性来，可以缓存在mc中，text太大了，作为一个method
-        self.summary = _raw_data_obj and _raw_data_obj.get_summary()
+        self.summary = _data_obj and _data_obj.get_summary() or ""
         if self.site == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             self.create_time += datetime.timedelta(seconds=8*3600)
-
-        self.bare_text = self._generate_bare_text()
+        
+        self._bare_text = self._generate_bare_text()
 
     def __repr__(self):
         return "<Status id=%s, user_id=%s, origin_id=%s, cate=%s>" \
@@ -55,7 +55,7 @@ class Status(object):
         ##FIXME:abs(self.create_time - other.create_time) <= datetime.timedelta(1) 
         if self.user_id == other.user_id \
                 and abs(self.create_time.day - other.create_time.day) == 0 \
-                and  self.bare_text == other.bare_text:
+                and  self._bare_text == other._bare_text:
             return True
         return False
 
@@ -71,7 +71,9 @@ class Status(object):
         if self.category == config.CATE_DOUBAN_STATUS and \
                 self.get_data() and self.get_data().get_attachments():
             return int(self.id)
-        s = u"%s%s%s" % (self.user_id, self.bare_text, self.create_time.day)
+        if self.category == config.CATE_THEPAST_NOTE:
+            return int(self.id)
+        s = u"%s%s%s" % (self.user_id, self._bare_text, self.create_time.day)
         d = hashlib.md5()
         d.update(s.encode("utf8"))
         return int(d.hexdigest(),16)
@@ -99,13 +101,21 @@ class Status(object):
 
     @property
     def text(self):
-        _text = mongo_conn.get(Status.STATUS_REDIS_KEY % self.id)
-        return json_decode(_text) if _text else ""
+        if self.category == config.CATE_THEPAST_NOTE:
+            note = Note.get(self.origin_id)
+            return note and note.content
+        else:
+            _text = mongo_conn.get(Status.STATUS_REDIS_KEY % self.id)
+            return json_decode(_text) if _text else ""
 
     @property
     def raw(self):
-        _raw = mongo_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
-        return json_decode(_raw) if _raw else ""
+        if self.category == config.CATE_THEPAST_NOTE:
+            note = Note.get(self.origin_id)
+            return note
+        else:
+            _raw = mongo_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
+            return json_decode(_raw) if _raw else ""
         
     @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 
@@ -163,6 +173,10 @@ class Status(object):
         if row:
             status = cls(status_id, *row)
         cursor and cursor.close()
+
+        if status.category == config.CATE_THEPAST_NOTE:
+            note = Note.get(status.origin_id)
+            status.title = note and note.title
 
         return status
 
@@ -297,6 +311,8 @@ class Status(object):
             return DoubanStatusData(self.raw)
         elif self.category == config.CATE_WORDPRESS_POST:
             return WordpressData(self.raw)
+        elif self.category == config.CATE_THEPAST_NOTE:
+            return ThepastNoteData(self.raw)
         else:
             return None
 
@@ -319,6 +335,8 @@ class Status(object):
             return (config.OPENID_QQ, config.QQWEIBO_STATUS % self.origin_id)
         elif self.category == config.CATE_WORDPRESS_POST:
             return (config.OPENID_WORDPRESS, d.get_origin_uri())
+        elif self.category == config.CATE_THEPAST_NOTE:
+            return (config.OPENID_THEPAST, d.get_origin_uri())
         else:
             return None
 

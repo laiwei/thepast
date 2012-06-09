@@ -122,3 +122,8 @@ pip install feedparser
 #http://stackoverflow.com/questions/2244836/rss-feed-parser-library-in-python
 #http://packages.python.org/feedparser/
 
+## add note
+pip install markdown2
+https://github.com/trentm/python-markdown2
+
+

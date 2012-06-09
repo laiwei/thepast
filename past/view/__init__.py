@@ -1,3 +1,3 @@
 #-*- coding:utf-8 -*-
 
-import views, settings, timelines
+import views, settings, timelines, note
