@@ -2,6 +2,10 @@
 
 {% import "blocks.html" as blocks %}
 
+{% block css %}
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/markdown.css?v=1.14">
+{% endblock %}
+
 {% block content_block %}
     <div id="sidebar"></div>
     <div id="rightbar">
@@ -12,7 +16,7 @@
 
     <div id="middlebar">
         <div class="box">
-            <div class="inner"><a href="/i">首页</a> &gt; 日记</div>
+            <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a> &gt; 添加</div>
         </div>
         <div class="sep10"></div>
         <!--提醒-->
@@ -39,7 +43,7 @@
             <div class="cell">
                 <a href="#preview" id="preview_button" name="preview" class="btn_flat">预览</a><span style="margin-right:30px;"></span>
                 <input type="submit" name="submit"  class="btn" value="发表"></input>
-                <input type="button" name="cancel"  class="btn_flat" value="取消" style="float:right;margin-right:70px;"></input>
+                <input type="submit" name="cancel"  class="btn_flat" value="取消" style="float:right;margin-right:70px;"></input>
             </div>
             <!--预览-->
             <div class="inner">

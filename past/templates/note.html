@@ -10,13 +10,17 @@
     <div id="sidebar"></div>
     <div id="rightbar">
         {{blocks.rightbar_intros_block(intros)}}
-
+        {{blocks.rightbar_markdown_block()}}
         {{blocks.rightbar_feedback_block()}}
     </div>
 
     <div id="middlebar">
         <div class="box">
-            <div class="inner"><a href="/i">首页</a> &gt; 日记</div>
+            <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a>
+                {%if g.user%}
+                    <span class="fr"><a href="/note/create">写日记</a></span>
+                {%endif%}
+            </div>
         </div>
         <div class="sep10"></div>
         <!--提醒-->

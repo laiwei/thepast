@@ -17,18 +17,19 @@ from past import config
 
 from .utils import require_login
 
-@app.route("/user/<uid>/notes", methods=["GET", "POST"])
+@app.route("/notes", methods=["GET"])
 @require_login()
-def notes(uid):
+def my_notes():
+    return redirect("/user/%s/notes" % g.user.id)
+
+@app.route("/user/<uid>/notes", methods=["GET"])
+@require_login()
+def user_notes(uid):
     
     user = User.get(uid)
     if not user:
         abort(403, "no_such_user")
-
-    note_ids = Note.get_ids_by_user(uid, g.start, g.count)
-    notes = Note.gets(note_ids)
-
-    return notes
+    return redirect("/user/%s?cate=%s" % (uid, config.CATE_THEPAST_NOTE))
 
 @app.route("/note/<nid>", methods=["GET",])
 def note(nid):
