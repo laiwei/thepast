@@ -22,9 +22,9 @@ a:hover{color:#4d5256;text-decoration:underline;}
     z-index:1;
 }
 #site{width:100%;margin:0px auto 0px auto;}
-#logo a{display:block;width: 258px;height: 50px;background-image:url(/static/img/logo.png);text-indent:-9999em;}
+#logo a{display:block;width: 258px;height: 50px;background-image:url(/static/img/logo.png?ver=1.00);text-indent:-9999em;}
 
-#navi {float:right;font-size:16px;color:#FFF;margin-top:30px;}
+#navi {float:right;font-size:16px;color:#FFF;margin-top:0px;}
 #navi ul{height:29px;}
 
 .login{list-style:none;float:left;}
@@ -35,7 +35,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .login.twitter a{background-position:0 -114px !important;}
 
 .from{display:inline-block;margin:0 0 -2px 0px;}
-.from a{background:url(/static/img/sns.png) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
+.from a{background:url(/static/img/sns.png?ver=1.00) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
 .from.twitter a{background-position:0 -16px;}
 .from.sina a{background-position:0 -32px;}
 .from.douban a{background-position:0 -48px;}
@@ -103,7 +103,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #news p strong{border-bottom:1px dotted;}
 
 #members{background:url(/static/img/members.png);padding:18px 0 0;}
-.member{font-size:13.5px;width:210px;height:48px;float:left;margin: 0 15px 18px 15px;border:1px solid #FFF;box-shadow:0px 0px 2px #CCC;line-height:24px;overflow:hidden;background-color:rgba(170, 170, 170, 0.07);}
+.member{font-size:13.5px;width:210px;height:48px;float:left;margin: 0 10px 18px 10px;border:1px solid #FFF;box-shadow:0px 0px 2px #CCC;line-height:24px;overflow:hidden;background-color:rgba(170, 170, 170, 0.07);}
 .avatar{width:48px;height:48px;float:left;}
 .entry{margin-left:55px;}
 .name{margin:0 6px 2px 4px;}

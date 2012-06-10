@@ -96,6 +96,7 @@ create table `note` (
     `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON update CURRENT_TIMESTAMP,
     `fmt` varchar(2) NOT NULL DEFAULT 'P',
+    `privacy` varchar(2) DEFAULT 'P',
     PRIMARY KEY (`id`),
     KEY `idx_uid` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='note';
