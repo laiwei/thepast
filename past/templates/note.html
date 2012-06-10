@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% import "blocks.html" as blocks %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/markdown.css?v=1.20">
+{% endblock %}
+
+{% block content_block %}
+    <div id="sidebar"></div>
+    <div id="rightbar">
+        {{blocks.rightbar_intros_block(intros)}}
+        {{blocks.rightbar_markdown_block()}}
+        {{blocks.rightbar_feedback_block()}}
+    </div>
+
+    <div id="middlebar">
+        <div class="box">
+            <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a>
+                {%if g.user%}
+                    <span class="fr"><a href="/note/create">写日记</a></span>
+                {%endif%}
+            </div>
+        </div>
+        <div class="sep10"></div>
+        <!--提醒-->
+        {{ blocks.notification_block() }}
+        
+        <!--single post-->
+        <div class="box">
+            <div class="cell">
+                <div class="markdown"><h1>{{title}}</h1></div>
+                <div class="sep3"></div>
+                <span class="fade">{{create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
+                {%if g.user and g.user.id == note.user_id%}
+                <span class="fr"><a href="/note/edit/{{note.id}}">编辑</a></span>
+                {%endif%}
+            </div>
+            <div class="cell">
+                <div class="markdown">
+                    {%if note.fmt == consts.NOTE_FMT_MARKDOWN%}
+                        {{content|safe}}
+                    {%else%}
+                        <pre>{{content}}</pre>
+                    {%endif%}
+                </div>
+            </div>
+
+            <div class="inner">
+                <label class="fade">格式：</label>
+                {%if not fmt or fmt==consts.NOTE_FMT_PLAIN%}
+                    <span class="fade">文本</span></label>
+                {%elif fmt==consts.NOTE_FMT_MARKDOWN %}
+                    <span class="fade">Markdown</span></label>
+                {%endif%}
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

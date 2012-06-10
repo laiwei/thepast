@@ -87,6 +87,19 @@ CREATE TABLE `status` (
 ) ENGINE=InnoDB AUTO_INCREMENT=32302780 DEFAULT CHARSET=utf8 COMMENT='status';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+create table `note` (
+    `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) unsigned NOT NULL,
+    `title` varchar(150) NOT NULL DEFAULT '',
+    `content` TEXT NOT NULL DEFAULT '',
+    `create_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON update CURRENT_TIMESTAMP,
+    `fmt` varchar(2) NOT NULL DEFAULT 'P',
+    PRIMARY KEY (`id`),
+    KEY `idx_uid` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='note';
+
 --
 -- Table structure for table `sync_task`
 --

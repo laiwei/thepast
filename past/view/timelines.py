@@ -153,14 +153,13 @@ def user(uid):
         abort(404, "no such user")
 
     if g.user and g.user.id == u.id:
-        return redirect(url_for("timeline"))
+        return redirect("/i?cate=%s" % g.cate)
     
     if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
         return redirect(url_for("timeline"))
 
     #TODO:增加可否查看其他用户的权限检查
-    cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
     status_list  = statuses_timelize(status_list)

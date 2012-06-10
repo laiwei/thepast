@@ -37,6 +37,8 @@ OPENID_DOUBAN = 'douban'
 OPENID_SINA = 'sina'
 OPENID_QQ = 'qq' ##qq weibo
 OPENID_TWITTER = 'twitter'
+OPENID_THEPAST = 'thepast'
+
 ##命名需要商榷
 OPENID_WORDPRESS = 'wordpress'
 
@@ -46,6 +48,8 @@ OPENID_TYPE_DICT = {
     OPENID_QQ : "Q",
     OPENID_TWITTER : "T",
     OPENID_WORDPRESS : "W",
+
+    OPENID_THEPAST : "M",
 }
 
 OPENID_TYPE_NAME_DICT = {
@@ -54,6 +58,7 @@ OPENID_TYPE_NAME_DICT = {
     "T" : u"twitter",
     "Q" : u"腾讯微博",
     "W" : u"Wordpress",
+    "M" : u"Thepast",
 }
 
 #-- oauth key & secret config --
@@ -89,6 +94,8 @@ CATE_SINA_STATUS = 200
 CATE_WORDPRESS_POST = 300
 CATE_TWITTER_STATUS = 400
 CATE_QQWEIBO_STATUS = 500
+## thepast 的日记
+CATE_THEPAST_NOTE = 600
 
 CATE_LIST = (
     CATE_DOUBAN_NOTE,
@@ -96,6 +103,7 @@ CATE_LIST = (
     CATE_SINA_STATUS,
     CATE_TWITTER_STATUS,
     CATE_QQWEIBO_STATUS,
+    CATE_THEPAST_NOTE,
 )
 
 DOUBAN_NOTE = 'http://douban.com/note/%s'
@@ -104,7 +112,7 @@ DOUBAN_STATUS = 'http://douban.com/people/%s/status/%s'
 WEIBO_STATUS = 'http://weibo.com/%s'
 QQWEIBO_STATUS = 'http://t.qq.com/t/%s'
 TWITTER_STATUS = 'http://twitter.com/#!/%s/status/%s'
-
+THEPAST_NOTE = 'http://thepast.me/note/%s'
 
 DOUBAN_SITE = "http://www.douban.com"
 SINA_SITE = "http://weibo.com"

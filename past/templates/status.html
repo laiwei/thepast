@@ -170,7 +170,20 @@
 
 {% macro wordpress_status(s, pdf=False) -%}
     {% set origin_uri = s.get_origin_uri() %}
-    <a href="http://thepast.me/post/{{s.id}}">{{s.title}}</a>
+    <a href="{{origin_uri[1]}}">{{s.title}}</a>
+    {%if pdf%}
+        {{s.text}}
+    {%endif%}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}
+
+{% macro thepast_note_status(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    <a href="{{origin_uri[1]}}">{{s.title}}</a>
     {%if pdf%}
         {{s.text}}
     {%endif%}

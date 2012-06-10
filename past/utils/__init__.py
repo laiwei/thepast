@@ -7,6 +7,7 @@ import imghdr
 import httplib2
 import random
 import string
+import markdown2
 from past import config
 
 def randbytes(bytes_):
@@ -82,3 +83,7 @@ def sizeof_fmt(num):
         if num < 1024.0:
             return "%3.1f%s" % (num, x)
         num /= 1024.0
+
+def markdownize(content):
+    return markdown2.markdown(content)
+    

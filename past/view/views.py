@@ -31,7 +31,7 @@ def before_request():
 
     if g.user:
         unbinded= list(set(config.OPENID_TYPE_DICT.values()) - 
-                set([ua.type for ua in g.user.get_alias()]))
+                set([ua.type for ua in g.user.get_alias()]) - set([config.OPENID_TYPE_DICT[config.OPENID_THEPAST]]))
         tmp = {}
         for k,v in config.OPENID_TYPE_DICT.items():
             tmp[v] = k

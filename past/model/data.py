@@ -5,6 +5,7 @@ import hashlib
 
 from past import config
 from past.utils.escape import json_decode , clear_html_element
+from past.model.note import Note
 
 ## User数据接口 
 class AbsUserData(object):
@@ -260,6 +261,38 @@ class AbsData(object):
     ##摘要信息，对于blog等长文来说很有用,视情况在子类中覆盖该方法
     def get_summary(self):
         return self.get_content()
+
+
+class ThepastNoteData(AbsData):
+    
+    def __init__(self, note):
+        self.site = config.OPENID_TYPE_DICT[config.OPENID_THEPAST]
+        self.category = config.CATE_THEPAST_NOTE
+        self.data = note
+        super(ThepastNoteData, self).__init__(
+                self.site, self.category, self.data)
+
+    def get_origin_id(self):
+        return self.data and self.data.id
+
+    def get_create_time(self):
+        return self.data and self.data.create_time
+
+    def get_title(self):
+        return self.data and self.data.title
+
+    def get_content(self):
+        if self.data:
+            return self.data.render_content()
+
+    def get_origin_uri(self):
+        if self.data:
+            return config.THEPAST_NOTE % self.data.id
+        return ""
+
+    def get_summary(self):
+        return self.data and self.data.content[:140]
+        
 
 class DoubanData(AbsData):
     
