@@ -115,7 +115,7 @@ class User(object):
     def set_email(self, email):
         cursor = None
         try:
-            cursor = db_conn.execute('''insert into passwd (user_id, email) values (%s,%s)''',
+            cursor = db_conn.execute('''replace into passwd (user_id, email) values (%s,%s)''',
                     (self.id, email))
             db_conn.commit()
             return True

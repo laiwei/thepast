@@ -95,8 +95,8 @@ def post(id):
     intros = filter(None, intros)
 
     status = Status.get(id)
-    if not status:
-        flash(u"访问的文章不存在^^","error")
+    if not (status and status.category == config.CATE_WORDPRESS_POST):
+        abort(404, "访问的文章不存在^^")
 
     return render_template("post.html", **locals())
 

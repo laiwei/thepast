@@ -336,7 +336,7 @@ class DoubanStatusData(DoubanData):
         return self.data.get("created_at")
 
     def get_content(self):
-        return self.data.get("text", "")
+        return self.data.get("title", "") + " " + self.data.get("text", "")
 
     def get_retweeted_data(self):
         r = self.data.get("reshared_status")
