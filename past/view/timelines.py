@@ -17,7 +17,7 @@ from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_fi
 from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
 from past import consts
-from .utils import require_login
+from .utils import require_login, can_access_user
 
 @app.route("/visual")
 @require_login()
@@ -39,15 +39,15 @@ def visual(uid):
             config=config)
 
 @app.route("/user/<uid>/timeline_json")
-@require_login()
 def timeline_json(uid):
     limit = 50
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
 
-    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
-        abort(403, "not allowed")
+    r = can_access_user(u)
+    if r:
+        abort(r[0], r[1])
 
     cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id,
@@ -55,6 +55,13 @@ def timeline_json(uid):
     ids = ids[::-1]
 
     status_list = Status.gets(ids)
+    if g.user and g.user.id == uid:
+        pass
+    elif g.user and g.user.id != uid:
+        status_list = [x for x in status_list if x.privacy() != consts.STATUS_PRIVACY_PRIVATE]
+    elif not g.user:
+        status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
+
     if not status_list:
         return json_encode({})
 
@@ -130,38 +137,28 @@ def timeline_json(uid):
 @app.route("/i")
 @require_login()
 def timeline():
-    ids = Status.get_ids(user_id=g.user.id, start=g.start, limit=g.count, cate=g.cate)
-    status_list = Status.gets(ids)
-    status_list  = statuses_timelize(status_list)
-    if status_list:
-        ##XXX:暂时去除了个人关键字的功能
-        ##tags_list = [x[0] for x in get_keywords(g.user.id, 30)]
-        tags_list = []
-    else:
-        tags_list = []
-    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
-    intros = filter(None, intros)
-    return render_template("timeline.html", user=g.user, tags_list=tags_list,
-            intros=intros, status_list=status_list, config=config)
-
+    return redirect("/user/%s?cate=%s" % (g.user.id, g.cate))
 
 @app.route("/user/<uid>")
-@require_login()
 def user(uid):
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
 
-    if g.user and g.user.id == u.id:
-        return redirect("/i?cate=%s" % g.cate)
-    
-    if u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
-        flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
-        return redirect(url_for("timeline"))
+    r = can_access_user(u)
+    if r:
+        flash(r[1].decode("utf8"), "tip")
+        return redirect(url_for("home"))
 
-    #TODO:增加可否查看其他用户的权限检查
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)
+    if g.user and g.user.id == uid:
+        pass
+    elif g.user and g.user.id != uid:
+        status_list = [x for x in status_list if x.privacy() != consts.STATUS_PRIVACY_PRIVATE]
+    elif not g.user:
+        status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
+        
     status_list  = statuses_timelize(status_list)
     if status_list:
         ##XXX:暂时去除了个人关键字的功能
@@ -195,6 +192,7 @@ def demo_pdf():
     resp.headers['X-Accel-Redirect'] = redir
     return resp
     
+#PDF只允许登录用户查看
 @app.route("/<uid>/pdf")
 @require_login()
 def pdf(uid):

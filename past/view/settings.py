@@ -37,7 +37,7 @@ def settings():
                 flash(u'电子邮箱已被占用了', 'error')
         else:
             flash(u'电子邮箱格式不正确', 'error')
-    return render_template("settings.html", **locals())
+    return render_template("settings.html", consts=consts, **locals())
 
 @app.route("/settings/email_remind", methods=["POST"])
 @require_login()
@@ -79,7 +79,7 @@ def bind_wordpress():
     
 
     if request.method == "GET":
-        return render_template("bind_wordpress.html", **locals())
+        return render_template("bind_wordpress.html", consts=consts, **locals())
     
     elif request.method == "POST":
         ret = {}

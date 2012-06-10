@@ -12,7 +12,7 @@ from past import config
 
 class Note(object):
     
-    def __init__(self, id, user_id, title, content, create_time, update_time, fmt):
+    def __init__(self, id, user_id, title, content, create_time, update_time, fmt, privacy):
         self.id = id
         self.user_id = str(user_id)
         self.title = title
@@ -20,6 +20,7 @@ class Note(object):
         self.create_time = create_time
         self.update_time = update_time
         self.fmt = fmt
+        self.privacy = privacy
 
     @classmethod
     def _clear_cache(cls, user_id, note_id):
@@ -36,11 +37,11 @@ class Note(object):
     @classmethod
     @cache("note:{id}")
     def get(cls, id):
-        cursor = db_conn.execute('''select id, user_id, title, content, create_time, update_time, fmt 
+        cursor = db_conn.execute('''select id, user_id, title, content, create_time, update_time, fmt, privacy 
             from note where id = %s''', id)
         row = cursor.fetchone()
         if row:
-            return cls(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            return cls(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
 
     def render_content(self):
         if self.fmt == consts.NOTE_FMT_MARKDOWN:
@@ -49,12 +50,12 @@ class Note(object):
             return self.content
 
     @classmethod
-    def add(cls, user_id, title, content, fmt=consts.NOTE_FMT_PLAIN):
+    def add(cls, user_id, title, content, fmt=consts.NOTE_FMT_PLAIN, privacy=consts.STATUS_PRIVACY_PUBLIC):
         cursor = None
         try:
-            cursor = db_conn.execute('''insert into note (user_id, title, content, create_time, fmt) 
-                    values (%s, %s, %s, %s, %s)''',
-                    (user_id, title, content, datetime.datetime.now(), fmt))
+            cursor = db_conn.execute('''insert into note (user_id, title, content, create_time, fmt, privacy) 
+                    values (%s, %s, %s, %s, %s, %s)''',
+                    (user_id, title, content, datetime.datetime.now(), fmt, privacy))
             db_conn.commit()
 
             note_id = cursor.lastrowid
@@ -70,13 +71,14 @@ class Note(object):
         finally:
             cursor and cursor.close()
 
-    def update(self, title, content, fmt):
-        if title and title != self.title or fmt and fmt != self.fmt or content and content != self.content:
+    def update(self, title, content, fmt, privacy):
+        if title and title != self.title or fmt and fmt != self.fmt or content and content != self.content or privacy and privacy != self.privacy:
             _fmt = fmt or self.fmt
             _title = title or self.title
             _content = content or self.content
-            db_conn.execute('''update note set title = %s, content = %s, fmt = %s where id = %s''', 
-                    (_title, _content, _fmt, self.id))
+            _privacy = privacy or self.privacy
+            db_conn.execute('''update note set title = %s, content = %s, fmt = %s, privacy = %s where id = %s''', 
+                    (_title, _content, _fmt, _privacy, self.id))
             db_conn.commit()
             self.flush_note()
             

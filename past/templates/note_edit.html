@@ -45,6 +45,17 @@
                 <label><input class="note_fmt" type="radio" name="fmt" 
                     value="{{consts.NOTE_FMT_MARKDOWN}}" {%if fmt==consts.NOTE_FMT_MARKDOWN%}checked{%endif%}></input>
                     <span class="fade">Markdown</span></label>
+                <div class="sep5"></div>
+                <label class="fade">隐私：</label>
+                <label><input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" {%if privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
+                    <span class="fade">公开</span></label>&nbsp;&nbsp;&nbsp;
+                <label><input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_THEPAST}}" {%if privacy==consts.STATUS_PRIVACY_THEPAST%}checked{%endif%}></input>
+                    <span class="fade">登录用户可见</span></label>&nbsp;&nbsp;&nbsp;
+                <label><input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PRIVATE}}" {%if privacy==consts.STATUS_PRIVACY_PRIVATE%}checked{%endif%}></input>
+                    <span class="fade">仅自己可见</span></label>
             </div>
             <div class="cell">
                 <a href="#preview" id="preview_button" name="preview" class="btn_flat">预览</a><span style="margin-right:30px;"></span>

@@ -3,7 +3,7 @@
 #past.view.note
 
 import markdown2
-from flask import g, flash, request, render_template, redirect, abort
+from flask import g, flash, request, render_template, redirect, abort, url_for
 from past import app
 
 from past.utils.escape import json_encode
@@ -15,7 +15,7 @@ from past.model.note import Note
 from past import consts
 from past import config
 
-from .utils import require_login
+from .utils import require_login, can_access_note
 
 @app.route("/notes", methods=["GET"])
 @require_login()
@@ -23,12 +23,12 @@ def my_notes():
     return redirect("/user/%s/notes" % g.user.id)
 
 @app.route("/user/<uid>/notes", methods=["GET"])
-@require_login()
 def user_notes(uid):
     
     user = User.get(uid)
     if not user:
         abort(403, "no_such_user")
+
     return redirect("/user/%s?cate=%s" % (uid, config.CATE_THEPAST_NOTE))
 
 @app.route("/note/<nid>", methods=["GET",])
@@ -36,6 +36,11 @@ def note(nid):
     note = Note.get(nid)
     if not note:
         abort(404, "no such note")
+    
+    r = can_access_note(note)
+    if r:
+        flash(r[1].decode("utf8"), "tip")
+        return redirect(url_for("home"))
 
     title = note.title
     content = note.content
@@ -46,13 +51,12 @@ def note(nid):
     return render_template("note.html", consts=consts, **locals())
 
 @app.route("/note/edit/<nid>", methods=["GET", "POST"])
+@require_login()
 def note_edit(nid):
     note = Note.get(nid)
     if not note:
         abort(404, "no such note")
 
-    if not g.user:
-        abort(403, "please login first")
     if g.user.id != note.user_id:
         abort(403, "not edit privileges")
     
@@ -61,6 +65,7 @@ def note_edit(nid):
         title = note.title
         content = note.content
         fmt = note.fmt
+        privacy = note.privacy
         return render_template("note_edit.html", consts=consts, **locals())
         
     elif request.method == "POST":
@@ -68,6 +73,7 @@ def note_edit(nid):
         title = request.form.get("title", "")       
         content = request.form.get("content", "")
         fmt = request.form.get("fmt", consts.NOTE_FMT_PLAIN)
+        privacy = request.form.get("privacy", consts.STATUS_PRIVACY_PUBLIC)
 
         if request.form.get("cancel"):
             return redirect("/note/%s" % note.id)
@@ -75,7 +81,7 @@ def note_edit(nid):
         if request.form.get("submit"):
             error = check_note(title, content)
             if not error:
-                note.update(title, content, fmt)
+                note.update(title, content, fmt, privacy)
                 flash(u"日记修改成功", "tip")
                 return redirect("/note/%s" % note.id)
             else:
@@ -87,7 +93,7 @@ def note_edit(nid):
     
 
 @app.route("/note/create", methods=["GET", "POST"])
-@require_login()
+@require_login(msg="先登录才能写日记")
 def note_create():
     error = ""
     if request.method == "POST":
@@ -95,6 +101,7 @@ def note_create():
         title = request.form.get("title", "")       
         content = request.form.get("content", "")
         fmt = request.form.get("fmt", consts.NOTE_FMT_PLAIN)
+        privacy = request.form.get("privacy", consts.STATUS_PRIVACY_PUBLIC)
 
         if request.form.get("cancel"):
             return redirect("/i")
@@ -103,7 +110,7 @@ def note_create():
         error = check_note(title, content)
 
         if not error:
-            note = Note.add(g.user.id, title, content, fmt)
+            note = Note.add(g.user.id, title, content, fmt, privacy)
             if note:
                 flash(u"日记写好了，看看吧", "tip")
                 return redirect("/note/%s" % note.id)
@@ -111,10 +118,10 @@ def note_create():
                 error = "添加日记的时候失败了，真不走运，再试试吧^^"
         if error:
             flash(error.decode("utf8"), "error")
-            return render_template("note_create.html", **locals())
+            return render_template("note_create.html", consts=consts, **locals())
 
     elif request.method == "GET":
-        return render_template("note_create.html", **locals())
+        return render_template("note_create.html", consts=consts, **locals())
 
     else:
         abort("wrong_http_method")

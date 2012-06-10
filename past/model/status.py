@@ -5,7 +5,6 @@ import hashlib
 import re
 from MySQLdb import IntegrityError
 
-from past import config
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import mongo_conn, mc, db_conn
@@ -15,6 +14,8 @@ from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
         WordpressData, ThepastNoteData
+from past import config
+from past import consts
 
 log = logging.getLogger(__file__)
 
@@ -99,6 +100,13 @@ class Status(object):
             if cate:
                 mc.delete("status_ids:user:%scate:%s" % (user_id, cate))
 
+    def privacy(self):
+        if self.category == config.CATE_THEPAST_NOTE:
+            note = Note.get(self.origin_id)
+            return note and note.privacy
+        else:
+            return consts.STATUS_PRIVACY_PUBLIC
+        
     @property
     def text(self):
         if self.category == config.CATE_THEPAST_NOTE:
