@@ -14,7 +14,7 @@ class Note(object):
     
     def __init__(self, id, user_id, title, content, create_time, update_time, fmt):
         self.id = id
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.title = title
         self.content = content
         self.create_time = create_time
@@ -30,7 +30,8 @@ class Note(object):
             mc.delete("note:%s" % note_id)
 
     def flush_note(self):
-        mc.set("note:%s" % self.id, self)
+        Note._clear_cache(None, self.id)
+        return Note.get(self.id)
 
     @classmethod
     @cache("note:{id}")

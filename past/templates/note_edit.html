@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% import "blocks.html" as blocks %}
+
+{% block content_block %}
+    <div id="sidebar"></div>
+    <div id="rightbar">
+        {{blocks.rightbar_intros_block(intros)}}
+
+        {{blocks.rightbar_feedback_block()}}
+    </div>
+
+    <div id="middlebar">
+        <div class="box">
+            <div class="inner"><a href="/i">首页</a> &gt; 日记 &gt; 编辑</div>
+        </div>
+        <div class="sep10"></div>
+        <!--提醒-->
+        {{ blocks.notification_block() }}
+        
+        <!--single post-->
+        <div class="box">
+        <form action="/note/edit/{{note.id}}" method="post">
+            <div class="inner">
+                <label for="note_title">题目：</label><br/>
+                <input type="text" id="note_title" name="title" value="{{title}}"></input>
+            </div>
+            <div class="inner">
+                <label for="note_content">正文：</label><br/>
+                <textarea id="note_content" name="content">{{content}}</textarea>
+            </div>
+            <div class="inner">
+                <label class="fade">格式：</label>
+                <label><input class="note_fmt" type="radio" name="fmt" 
+                    value="{{consts.NOTE_FMT_PLAIN}}" {%if fmt==consts.NOTE_FMT_PLAIN%}checked{%endif%}></input>
+                    <span class="fade">文本</span></label>&nbsp;&nbsp;&nbsp;
+                <label><input class="note_fmt" type="radio" name="fmt" 
+                    value="{{consts.NOTE_FMT_MARKDOWN}}" {%if fmt==consts.NOTE_FMT_MARKDOWN%}checked{%endif%}></input>
+                    <span class="fade">Markdown</span></label>
+            </div>
+            <div class="cell">
+                <a href="#preview" id="preview_button" name="preview" class="btn_flat">预览</a><span style="margin-right:30px;"></span>
+                <input type="submit" name="submit"  class="btn" value="修改"></input>
+                <input type="button" name="cancel"  class="btn_flat" value="取消" style="float:right;margin-right:70px;"></input>
+            </div>
+            <!--预览-->
+            <div class="inner">
+                <a name="preview"></a>
+                <div class="markdown" id="preview"></div>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <script>
+        $("#preview_button").click(function(){
+            var content = $("textarea[name='content']").val();
+            var fmt = $("input[name='fmt']:checked").val();
+            $.post("/note/preview", {content:content, fmt:fmt}, 
+                function(data){
+                    var pre = $("#preview");
+                    if(fmt == 'M'){
+                        pre.html("<h2>预览：</h2>" + data.data);
+                    }else {
+                        pre.html("<pre><h2>预览：</h2>" + data.data + "</pre>");
+                    }
+                }, "json");
+        });
+    </script>
+{% endblock %}
