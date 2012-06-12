@@ -1,6 +1,5 @@
 import sys
 sys.path.append('../')
-import datetime
 
 from past.store import db_conn
 
