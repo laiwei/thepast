@@ -15,7 +15,7 @@ from past.model.note import Note
 from past import consts
 from past import config
 
-from .utils import require_login, can_access_note
+from .utils import require_login, check_access_note
 
 @app.route("/notes", methods=["GET"])
 @require_login()
@@ -37,7 +37,7 @@ def note(nid):
     if not note:
         abort(404, "no such note")
     
-    r = can_access_note(note)
+    r = check_access_note(note)
     if r:
         flash(r[1].decode("utf8"), "tip")
         return redirect(url_for("home"))
@@ -48,6 +48,7 @@ def note(nid):
     if fmt == consts.NOTE_FMT_MARKDOWN:
         content = markdown2.markdown(note.content)
     create_time = note.create_time
+    user = User.get(note.user_id)
     return render_template("note.html", consts=consts, **locals())
 
 @app.route("/note/edit/<nid>", methods=["GET", "POST"])

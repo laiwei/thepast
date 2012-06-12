@@ -34,6 +34,8 @@
                 <span class="fade">{{create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
                 {%if g.user and g.user.id == note.user_id%}
                 <span class="fr"><a href="/note/edit/{{note.id}}">编辑</a></span>
+                {%else%}
+                <span class="fr">作者：<a href="/user/{{user.id}}">{{user.name}}</a></span>
                 {%endif%}
             </div>
             <div class="cell">

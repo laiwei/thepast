@@ -4,7 +4,7 @@ import sys
 sys.path.append('../')
 import datetime
 
-from past.store import mongo_conn, redis_conn, db_conn
+from past.store import mongo_conn, db_conn
 from past.utils.escape import json_decode, json_encode
 
 def move_user_profile():

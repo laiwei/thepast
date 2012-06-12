@@ -19,12 +19,11 @@ from past import consts
 
 from past import app
 
-from .utils import require_login
+from .utils import require_login, check_access_user
 
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    g.user = User.get(5)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -42,16 +41,13 @@ def before_request():
 
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 30))
-    g.cate = request.args.get("cate", None)
+    g.cate = request.args.get("cate", "")
+    if not g.cate.isdigit():
+        g.cate = ""
 
 @app.teardown_request
 def teardown_request(exception):
     pass
-
-@app.route("/favicon.ico")
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-        "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 @app.route("/")
 def index():
@@ -90,16 +86,21 @@ def past():
     return render_template("past.html", **locals())
 
 @app.route("/post/<id>")
-@require_login()
 def post(id):
-    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
-    intros = filter(None, intros)
-
     status = Status.get(id)
-    if not (status and status.category == config.CATE_WORDPRESS_POST):
+    if not status:
         abort(404, "访问的文章不存在^^")
+    else:
+        user = User.get(status.user_id)
+        if user and not check_access_user(user):
+            if status.category == config.CATE_THEPAST_NOTE:
+                return redirect("/note/%s" % status.origin_id)
+            intros = [user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+            intros = filter(None, intros)
+            return render_template("post.html", config=config, **locals())
+        else:
+            abort(403, "没有权限访问该文章")
 
-    return render_template("post.html", **locals())
 
 #TODO:xxx
 @app.route("/user")

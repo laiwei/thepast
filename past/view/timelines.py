@@ -17,22 +17,23 @@ from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_fi
 from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
 from past import consts
-from .utils import require_login, can_access_user
+from .utils import require_login, check_access_user
 
 @app.route("/visual")
-@require_login()
+@require_login(msg="登录后才能查看^^")
 def myvisual():
     return redirect("/user/%s/visual" % g.user.id)
 
 @app.route("/user/<uid>/visual")
-@require_login()
+@require_login(msg="登录后才能查看^^")
 def visual(uid):
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
 
-    if uid != g.user.id and u.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
-        flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
+    r = check_access_user(u)
+    if r:
+        flash(r[1].decode("utf8"), "tip")
         return redirect(url_for("timeline"))
 
     return render_template("visual_timeline.html", user=u, unbinded=[], 
@@ -45,11 +46,10 @@ def timeline_json(uid):
     if not u:
         abort(404, "no such user")
 
-    r = can_access_user(u)
+    r = check_access_user(u)
     if r:
         abort(r[0], r[1])
 
-    cate = request.args.get("cate", None)
     ids = Status.get_ids(user_id=u.id,
             start=g.start, limit=limit, cate=g.cate)
     ids = ids[::-1]
@@ -137,7 +137,10 @@ def timeline_json(uid):
 @app.route("/i")
 @require_login()
 def timeline():
-    return redirect("/user/%s?cate=%s" % (g.user.id, g.cate))
+    redir = "/user/%s" %g.user.id 
+    if g.cate:
+        redir = "%s?cate=%s" % (redir, g.cate)
+    return redirect(redir)
 
 @app.route("/user/<uid>")
 def user(uid):
@@ -145,7 +148,7 @@ def user(uid):
     if not u:
         abort(404, "no such user")
 
-    r = can_access_user(u)
+    r = check_access_user(u)
     if r:
         flash(r[1].decode("utf8"), "tip")
         return redirect(url_for("home"))

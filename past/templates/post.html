@@ -6,7 +6,6 @@
     <div id="sidebar"></div>
     <div id="rightbar">
         {{blocks.rightbar_intros_block(intros)}}
-
         {{blocks.rightbar_feedback_block()}}
     </div>
 
@@ -24,8 +23,15 @@
                 {{status.title}}
                 <div class="sep3"></div>
                 <span class="fade">{{status.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
+                <span class="fr">作者：<a href="/user/{{user.id}}">{{user.name}}</a></span>
             </div>
-            <div class="inner"><div class="post">{{status.text|safe}}</div></div>
+            <div class="inner"><div class="post">
+                {%if status.category == config.CATE_WORDPRESS_POST%}
+                    {{status.text|safe}}
+                {%else%}
+                    {{status.text}}
+                {%endif%}
+            </div></div>
         </div>
     </div>
 {% endblock %}

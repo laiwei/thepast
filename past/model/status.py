@@ -92,11 +92,11 @@ class Status(object):
 
     ##TODO:这个clear_cache需要拆分
     @classmethod
-    def _clear_cache(cls, user_id, status_id, cate=None):
+    def _clear_cache(cls, user_id, status_id, cate=""):
         if status_id:
             mc.delete("status:%s" % status_id)
         if user_id:
-            mc.delete("status_ids:user:%scate:None" % user_id)
+            mc.delete("status_ids:user:%scate:" % user_id)
             if cate:
                 mc.delete("status_ids:user:%scate:%s" % (user_id, cate))
 
@@ -182,7 +182,7 @@ class Status(object):
             status = cls(status_id, *row)
         cursor and cursor.close()
 
-        if status.category == config.CATE_THEPAST_NOTE:
+        if status and status.category == config.CATE_THEPAST_NOTE:
             note = Note.get(status.origin_id)
             status.title = note and note.title
 
@@ -190,22 +190,22 @@ class Status(object):
 
     @classmethod
     @pcache("status_ids:user:{user_id}cate:{cate}")
-    def get_ids(cls, user_id, start=0, limit=20, cate=None):
+    def get_ids(cls, user_id, start=0, limit=20, cate=""):
         return cls._get_ids(user_id, start, limit, 
                 order="create_time desc", cate=cate)
 
     @classmethod
     @pcache("status_ids_asc:user:{user_id}cate:{cate}")
-    def get_ids_asc(cls, user_id, start=0, limit=20, cate=None):
+    def get_ids_asc(cls, user_id, start=0, limit=20, cate=""):
         return cls._get_ids(user_id, start, limit, 
                 order="create_time", cate=cate)
 
     @classmethod
-    def _get_ids(cls, user_id, start=0, limit=20, order="create_time desc", cate=None):
+    def _get_ids(cls, user_id, start=0, limit=20, order="create_time desc", cate=""):
         cursor = None
         if not user_id:
             return []
-        if cate is not None:
+        if cate:
             if str(cate) == str(config.CATE_DOUBAN_NOTE):
                 return []
             sql = """select id from status where user_id=%s and category=%s
