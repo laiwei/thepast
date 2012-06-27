@@ -362,6 +362,18 @@ class DoubanStatusData(DoubanData):
         super(DoubanStatusData, self).__init__(
             config.CATE_DOUBAN_STATUS, data)
 
+    def _parse_score(title):
+        r1 = title.find("[score]")
+        r2 = title.find("[/score]")
+        if r1 >= 0 and r2 >= 0:
+            result = title[0:r1]
+            star = int(title[r1+7:r2])
+            for i in range(0, star):
+                result += "\u2605"
+            result += title[r2+8:]
+        else:
+            return title
+
     def get_origin_id(self):
         return str(self.data.get("id", ""))
 
@@ -369,7 +381,9 @@ class DoubanStatusData(DoubanData):
         return self.data.get("created_at")
 
     def get_content(self):
-        return self.data.get("title", "") + " " + self.data.get("text", "")
+        title = self.data.get("title", "")
+        title = self._parse_score(title)
+        return title + " " + self.data.get("text", "")
 
     def get_retweeted_data(self):
         r = self.data.get("reshared_status")

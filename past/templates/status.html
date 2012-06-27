@@ -145,9 +145,9 @@
     {% set re = s.get_retweeted_data() %}
     {% if re %}
         {%if pdf%}
-        {{ ("//" + re.get_user().get_nickname() + ":" + re.get_content())|wrap_long_line }} 
+        {{ ("//" + re.get_user().get_nickname() + ":" + re.get_content())|wrap_long_line|safe }} 
         {%else%}
-        {{ "//" + re.get_user().get_nickname() + ":" + re.get_content()}} 
+        {{ ("//" + re.get_user().get_nickname() + ":" + re.get_content())|safe}} 
         {%endif%}
     {% endif %}
 
