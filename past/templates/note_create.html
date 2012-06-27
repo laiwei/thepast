@@ -35,14 +35,14 @@
             </div>
             <div class="inner">
                 <label class="fade">格式：</label>
-                <label><input class="note_fmt" type="radio" name="fmt" value="P" {%if not fmt or fmt=="P"%}checked{%endif%}></input>
+                <label><input class="note_fmt" type="radio" name="fmt" value="P" {%if fmt=="P"%}checked{%endif%}></input>
                     <span class="fade">文本</span></label>&nbsp;&nbsp;&nbsp;
-                <label><input class="note_fmt" type="radio" name="fmt" value="M" {%if fmt=="M"%}checked{%endif%}></input>
+                <label><input class="note_fmt" type="radio" name="fmt" value="M" {%if not fmt or fmt=="M"%}checked{%endif%}></input>
                     <span class="fade">Markdown</span></label>
                 <div class="sep5"></div>
                 <label class="fade">隐私：</label>
                 <label><input class="note_privacy" type="radio" name="privacy" 
-                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" {%if privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
+                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" {%if not privacy or privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
                     <span class="fade">公开</span></label>&nbsp;&nbsp;&nbsp;
                 <label><input class="note_privacy" type="radio" name="privacy" 
                     value="{{consts.STATUS_PRIVACY_THEPAST}}" {%if privacy==consts.STATUS_PRIVACY_THEPAST%}checked{%endif%}></input>

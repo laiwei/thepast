@@ -3,6 +3,8 @@
 {% import "status.html" as status_tmpl_helper %}
 {% import "blocks.html" as blocks %}
 
+{% block title_block %} {{user.name}}{%endblock%}
+
 {% block content_block %}
 <div id="sidebar"></div>
 <div id="rightbar">
