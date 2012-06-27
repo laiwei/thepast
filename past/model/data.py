@@ -362,7 +362,7 @@ class DoubanStatusData(DoubanData):
         super(DoubanStatusData, self).__init__(
             config.CATE_DOUBAN_STATUS, data)
 
-    def _parse_score(title):
+    def _parse_score(self, title):
         r1 = title.find("[score]")
         r2 = title.find("[/score]")
         if r1 >= 0 and r2 >= 0:
