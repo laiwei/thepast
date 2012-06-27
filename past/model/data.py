@@ -369,8 +369,9 @@ class DoubanStatusData(DoubanData):
             result = title[0:r1]
             star = int(title[r1+7:r2])
             for i in range(0, star):
-                result += "\u2605"
+                result += u"\u2605"
             result += title[r2+8:]
+            return result
         else:
             return title
 
@@ -383,7 +384,7 @@ class DoubanStatusData(DoubanData):
     def get_content(self):
         title = self.data.get("title", "")
         title = self._parse_score(title)
-        return title + " " + self.data.get("text", "")
+        return "%s %s" %(title, self.data.get("text", ""))
 
     def get_retweeted_data(self):
         r = self.data.get("reshared_status")
