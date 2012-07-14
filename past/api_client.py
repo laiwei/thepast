@@ -51,6 +51,7 @@ class Douban(object):
         if resp.status == 200:
             return content
         else:
+            #TODO: 在这里如果access_token过期了需要refresh
             log.warn("get %s fail, status code=%s, msg=%s" \
                     % (uri, resp.status, content))
         return None
