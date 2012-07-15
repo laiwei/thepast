@@ -15,6 +15,7 @@ from past.utils.escape import json_encode, json_decode
 from past.utils import randbytes
 from past.utils import httplib2_request
 from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, QQWeiboUser
+from past.model.user import OAuth2Token
 
 class OAuthLoginError(Exception):
     def __init__(self, msg):
@@ -122,6 +123,9 @@ class OAuth2Login(object):
                     %(resp.status, resp.reason, content))
         return json_decode(content)
 
+    def update_tokens(self, refresh_token):
+        raise NotImplementedError
+
 class DoubanLogin(OAuth2Login):
     provider = config.OPENID_DOUBAN   
 
@@ -148,6 +152,23 @@ class DoubanLogin(OAuth2Login):
         user_info = DoubanUser(r)
 
         return user_info
+
+    def update_tokens(self, refresh_token):
+        qs = {}
+        qs["client_id"] = self.apikey
+        qs["client_secret"] = self.apikey_secret
+        qs["redirect_uri"] = self.redirect_uri
+        qs["grant_type"] = "refresh_token"
+        qs["refresh_token"] = refresh_token
+
+        resp, content = httplib2_request(self.access_token_uri, "POST", 
+            body=urllib.urlencode(qs))
+        if resp.status != 200:
+            raise OAuthLoginError('refres_tokens fail, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content)
+        
+        return OAuth2Token.add(r.get("douban_user_id"), r.get("access_token"), r.get("refresh_token"))
         
 class SinaLogin(OAuth2Login):
     provider = config.OPENID_SINA

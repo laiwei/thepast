@@ -12,7 +12,7 @@ from past.model.data import (DoubanNoteData, DoubanStatusData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
     QQWeiboStatusData, WordpressData)
 from past.model.user import User,UserAlias, OAuth2Token
-from past.oauth_login import QQOAuth1Login
+from past.oauth_login import QQOAuth1Login, DoubanLogin, OAuthLoginError
 
 log = logging.getLogger(__file__)
 
@@ -52,8 +52,14 @@ class Douban(object):
             return content
         else:
             #TODO: 在这里如果access_token过期了需要refresh
-            log.warn("get %s fail, status code=%s, msg=%s" \
+            log.warn("get %s fail, status code=%s, msg=%s. go to refresh token" \
                     % (uri, resp.status, content))
+            d = config.APIKEY_DICT.get(config.OPENID_DOUBAN)
+            login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+            try:
+                login_service.update_tokens(self.refresh_token)
+            except OAuthLoginError, e:
+                log.warn("refresh token fail: %s" % e)
         return None
 
     def post(self):
