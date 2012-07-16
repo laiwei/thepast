@@ -14,6 +14,7 @@ from past.model.status import SyncTask, Status, TaskQueue, \
         get_status_ids_today_in_history, get_status_ids_yesterday
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
+from past.api_client import Douban
 from past.cws.cut import get_keywords
 from past import consts
 
@@ -24,6 +25,7 @@ from .utils import require_login, check_access_user
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
+    #g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -199,6 +201,12 @@ def connect_callback(provider):
 
     if user:
         _add_sync_task_and_push_queue(provider, user)
+
+        if provider == config.OPENID_DOUBAN and user.id == '7':
+            print "++++++++++post status"
+            client = Douban.get_client(user.id)
+            if client:
+                client.post_status("#thepast.me#")
         # 没有email的用户跳转到email补充页面
         if not user.get_email():
             flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")

@@ -33,6 +33,19 @@ class Douban(object):
                 self.refresh_token, self.api_host)
     __str__ = __repr__
 
+    @classmethod
+    def get_client(cls, user_id):
+        alias = UserAlias.get_by_user_and_type(user_id, 
+                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
+        if not alias:
+            return None
+
+        token = OAuth2Token.get(alias.id)
+        if not token:
+            return None
+
+        return cls(alias.alias, token.access_token, token.refresh_token)
+
     def get(self, url, extra_dict=None):
         uri = urlparse.urljoin(self.api_host, url)
         if extra_dict is None:
@@ -62,8 +75,18 @@ class Douban(object):
                 log.warn("refresh token fail: %s" % e)
         return None
 
-    def post(self):
-        raise NotImplementedError
+    def post(self, url, body, headers=None):
+        if headers is not None:
+            headers.update({"Authorization": "Bearer %s" % self.access_token})
+        else:
+            headers = {"Authorization": "Bearer %s" % self.access_token}     
+
+        resp, content = httplib2_request(url, "POST", body=body, headers=headers)
+        if resp.status == 200:
+            return content
+        else:
+            log.warn("post %s fail, status code=%s, msg=%s" %(url, resp.status, content))
+            return None
 
     def put(self):
         raise NotImplementedError
@@ -93,6 +116,36 @@ class Douban(object):
         contents = json_decode(contents) if contents else []
 
         return [DoubanStatusData(c) for c in contents]
+
+    def get_home_timeline(self, since_id=None, until_id=None, count=200):
+        qs = {}
+        qs['count'] = count
+        if since_id is not None:
+            qs['since_id'] = since_id
+        if until_id is not None:
+            qs['until_id'] = until_id
+        qs = urllib.urlencode(qs)
+        contents = self.get("/shuo/v2/statuses/home_timeline?%s" % qs)
+        contents = json_decode(contents) if contents else []
+
+        return [DoubanStatusData(c) for c in contents]
+
+    # 发广播，只限文本
+    def post_status(self, text, attach=None):
+        qs = {}
+        qs["text"] = text
+        if attach is not None:
+            qs["attachments"] = attach
+        qs = urllib.urlencode(qs)
+        contents = self.post("/shuo/statuses/", body=qs)
+
+    def post_status_with_image(self, text, image):
+        from past.utils import encode_multipart_data
+        d = {}
+        d['text'] = text
+        d['image'] = image
+        body, headers = encode_multipart_data(d, {})
+        contents = self.post("/shuo/statuses/", body=body, headers=headers)
         
     #FIXED
     def get_notes(self, start, count):
