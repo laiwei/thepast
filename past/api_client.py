@@ -76,12 +76,13 @@ class Douban(object):
         return None
 
     def post(self, url, body, headers=None):
+        uri = urlparse.urljoin(self.api_host, url)
         if headers is not None:
             headers.update({"Authorization": "Bearer %s" % self.access_token})
         else:
             headers = {"Authorization": "Bearer %s" % self.access_token}     
 
-        resp, content = httplib2_request(url, "POST", body=body, headers=headers)
+        resp, content = httplib2_request(uri, "POST", body=body, headers=headers)
         if resp.status == 200:
             return content
         else:
