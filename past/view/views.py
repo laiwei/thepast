@@ -206,7 +206,9 @@ def connect_callback(provider):
             print "++++++++++post status"
             client = Douban.get_client(user.id)
             if client:
-                client.post_status("#thepast.me#")
+                now = datetime.datetime.now()
+                client.post_status("#thepast.me# %s" % now)
+                client.post_status_with_image("#thepast.me# image test %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
         # 没有email的用户跳转到email补充页面
         if not user.get_email():
             flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")

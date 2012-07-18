@@ -140,12 +140,11 @@ class Douban(object):
         qs = urllib.urlencode(qs)
         contents = self.post("/shuo/statuses/", body=qs)
 
-    def post_status_with_image(self, text, image):
+    def post_status_with_image(self, text, image_file):
         from past.utils import encode_multipart_data
-        d = {}
-        d['text'] = text
-        d['image'] = image
-        body, headers = encode_multipart_data(d, {})
+        d = {"text": text}
+        f = {"image" : image_file}
+        body, headers = encode_multipart_data(d, f)
         contents = self.post("/shuo/statuses/", body=body, headers=headers)
         
     #FIXED
