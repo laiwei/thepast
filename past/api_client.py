@@ -267,8 +267,20 @@ class SinaWeibo(object):
                     % (uri, resp.status, content))
         return None
 
-    def post(self):
-        raise NotImplementedError
+    def post(self, url, body, headers=None):
+        uri = urlparse.urljoin(self.api_host, self.api_version)
+        uri = urlparse.urljoin(uri, url)
+        if body:
+            body.append("&access_token=%s" %self.access_token)
+
+        log.info("posting %s %s" %(url, body))
+        resp, content = httplib2_request(uri, "POST", body=body)
+        if resp.status == 200:
+            return content
+        else:
+            log.warn("post %s fail, status code=%s, msg=%s" \
+                    %(uri, resp.status, content))
+        return None
 
     def get_timeline(self, since_id=None, until_id=None, count=200):
         d = {}
@@ -286,6 +298,19 @@ class SinaWeibo(object):
         if contents:
             print '---get sinawebo succ, result length is:', len(contents)
         return [SinaWeiboStatusData(c) for c in contents]
+
+    def post_status(self, text):
+        qs = {}
+        qs["status"] = text
+        body = urllib.urlencode(qs)
+        contents = self.post("/statuses/update.json", body=body)
+
+    def post_status_with_image(self, text, image_file):
+        from past.utils import encode_multipart_data
+        d = {"status": text}
+        f = {"pic" : image_file}
+        body, headers = encode_multipart_data(d, f)
+        contents = self.post("/statuses/upload.json", body=body)
 
 class Twitter(object):
     def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
