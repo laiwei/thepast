@@ -46,7 +46,7 @@ def note(nid):
     content = note.content
     fmt = note.fmt
     if fmt == consts.NOTE_FMT_MARKDOWN:
-        content = markdown2.markdown(note.content)
+        content = markdown2.markdown(note.content, extras=["wiki-tables", "code-friendly"])
     create_time = note.create_time
     user = User.get(note.user_id)
     return render_template("note.html", consts=consts, **locals())
@@ -133,7 +133,7 @@ def note_preview():
     content = request.form.get("content", "")
     fmt = request.form.get("fmt", consts.NOTE_FMT_PLAIN)
     if fmt == consts.NOTE_FMT_MARKDOWN:
-        r['data'] = markdown2.markdown(content)
+        r['data'] = markdown2.markdown(content, extras=["wiki-tables", "code-friendly"])
     else:
         r['data'] = content
 

@@ -45,7 +45,7 @@ class Note(object):
 
     def render_content(self):
         if self.fmt == consts.NOTE_FMT_MARKDOWN:
-            return markdown2.markdown(self.content)
+            return markdown2.markdown(self.content, extras=["wiki-tables", "code-friendly"])
         else:
             return self.content
 

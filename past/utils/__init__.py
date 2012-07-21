@@ -121,5 +121,5 @@ def sizeof_fmt(num):
         num /= 1024.0
 
 def markdownize(content):
-    return markdown2.markdown(content)
+    return markdown2.markdown(content, extras=["wiki-tables", "code-friendly"])
     
