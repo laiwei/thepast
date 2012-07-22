@@ -241,6 +241,18 @@ class SinaWeibo(object):
                 self.api_host, self.api_version)
     __str__ = __repr__
 
+    @classmethod                                                                   
+    def get_client(cls, user_id):                                                  
+        alias = UserAlias.get_by_user_and_type(user_id,                            
+                config.OPENID_TYPE_DICT[config.OPENID_SINA])                       
+        if not alias:                                                              
+            return None                                                            
+                                                                                   
+        token = OAuth2Token.get(alias.id)                                          
+        if not token:                                                              
+            return None                                                            
+                                                                                   
+        return cls(alias.alias, token.access_token, token.refresh_token)
 
     def get(self, url, extra_dict=None):
         uri = urlparse.urljoin(self.api_host, self.api_version)
@@ -270,11 +282,9 @@ class SinaWeibo(object):
     def post(self, url, body, headers=None):
         uri = urlparse.urljoin(self.api_host, self.api_version)
         uri = urlparse.urljoin(uri, url)
-        if body:
-            body.append("&access_token=%s" %self.access_token)
 
-        log.info("posting %s %s" %(url, body))
-        resp, content = httplib2_request(uri, "POST", body=body)
+        log.info("posting %s" %url)
+        resp, content = httplib2_request(uri, "POST", body=body, headers=headers)
         if resp.status == 200:
             return content
         else:
@@ -302,15 +312,16 @@ class SinaWeibo(object):
     def post_status(self, text):
         qs = {}
         qs["status"] = text
+        qs["access_token"] = self.access_token
         body = urllib.urlencode(qs)
         contents = self.post("/statuses/update.json", body=body)
 
     def post_status_with_image(self, text, image_file):
         from past.utils import encode_multipart_data
-        d = {"status": text}
+        d = {"status": text, "access_token": self.access_token}
         f = {"pic" : image_file}
         body, headers = encode_multipart_data(d, f)
-        contents = self.post("/statuses/upload.json", body=body)
+        contents = self.post("/statuses/upload.json", body=body, headers=headers)
 
 class Twitter(object):
     def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
@@ -324,6 +335,15 @@ class Twitter(object):
 
         self.auth = tweepy.OAuthHandler(self.apikey, self.apikey_secret)        
         self.auth.set_access_token(self.access_token, self.access_token_secret)
+        
+    @classmethod                                                                   
+    def get_client(cls, user_id):                                                  
+        alias = UserAlias.get_by_user_and_type(user_id,                            
+                config.OPENID_TYPE_DICT[config.OPENID_TWITTER])                       
+        if not alias:                                                              
+            return None                                                            
+                                                                                   
+        return cls(alias.alias)
     
     def api(self):
         return tweepy.API(self.auth, parser=tweepy.parsers.JSONParser())
@@ -331,6 +351,9 @@ class Twitter(object):
     def get_timeline(self, since_id=None, max_id=None, count=200):
         contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
         return [TwitterStatusData(c) for c in contents]
+
+    def post_status(self, text):
+        self.api().update_status(status=text)
 
 class QQWeibo(object):
     ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
@@ -347,6 +370,15 @@ class QQWeibo(object):
 
         self.auth = QQOAuth1Login(self.apikey, self.apikey_secret, 
                 token=self.access_token, token_secret=self.access_token_secret)
+
+    @classmethod                                                                   
+    def get_client(cls, user_id):                                                  
+        alias = UserAlias.get_by_user_and_type(user_id,                            
+                config.OPENID_TYPE_DICT[config.OPENID_QQ])                       
+        if not alias:                                                              
+            return None                                                            
+                                                                                   
+        return cls(alias.alias)
     
     def get_old_timeline(self, pagetime, reqnum=200):
         return self.get_timeline(reqnum=reqnum, pageflag=1, pagetime=pagetime)
@@ -388,6 +420,20 @@ class QQWeibo(object):
         print '---status from qqweibo, len is: %s' % len(info)
 
         return [QQWeiboStatusData(c) for c in info]
+
+    def post_status(self, text):
+        qs = {}
+        qs["format"] = "json"
+        qs["content"] = text
+        return self.auth.access_resource("POST", "/t/add", qs)
+
+    def post_status_with_image(self, text, image_file):
+        from past.utils import encode_multipart_data
+        d = {"content": text, "format": "json"}
+        qs = urllib.urlencode(d)
+        f = {"pic" : image_file}
+        body, headers = encode_multipart_data({}, f)
+        contents = self.post("/statuses/upload.json?%s" %qs, body=body, headers=headers)
         
 class Wordpress(object):
     

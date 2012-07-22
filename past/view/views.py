@@ -14,7 +14,7 @@ from past.model.status import SyncTask, Status, TaskQueue, \
         get_status_ids_today_in_history, get_status_ids_yesterday
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
         TwitterOAuthLogin, QQOAuth1Login
-from past.api_client import Douban
+from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
 from past.cws.cut import get_keywords
 from past import consts
 
@@ -203,12 +203,34 @@ def connect_callback(provider):
         _add_sync_task_and_push_queue(provider, user)
 
         if provider == config.OPENID_DOUBAN and user.id == '7':
-            print "++++++++++post status"
+            print "++++++++++post douban status"
             client = Douban.get_client(user.id)
             if client:
                 now = datetime.datetime.now()
                 client.post_status("#thepast.me# %s" % now)
                 client.post_status_with_image("#thepast.me# image test %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
+        if provider == config.OPENID_SINA and user.id == '4':
+            print "++++++++++post sina status"
+            client = SinaWeibo.get_client(user.id)
+            if client:
+                now = datetime.datetime.now()
+                client.post_status("#thepast.me# %s" % now)
+                client.post_status_with_image("#thepast.me# image test %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
+        if provider == config.OPENID_TWITTER and user.id == '4':
+            print "++++++++post twitter status"
+            client = Twitter.get_client(user.id)
+            if client:
+                now = datetime.datetime.now()
+                client.post_status("#thepast.me# %s" % now)
+
+        if provider == config.OPENID_QQ and user.id == '4':
+            print "++++++++post qq weibo status"
+            client = Twitter.get_client(user.id)
+            if client:
+                now = datetime.datetime.now()
+                client.post_status("#thepast.me# %s" % now)
+                client.post_status_with_image("#thepast.me# %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
+                
         # 没有email的用户跳转到email补充页面
         if not user.get_email():
             flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")

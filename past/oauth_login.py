@@ -296,19 +296,19 @@ class QQOAuth1Login(object):
 
     ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
     ##params为dict，是需要传递的参数
-    def access_resource(self, method, api, params=None):
+    def access_resource(self, method, api, body=None, headers=None, params=None):
         uri = self.__class__.api_uri + api
 
         if method == "GET":
             return self.GET(uri, oauth_token=self.token, **params)
         if method == "POST":
-            return self.POST(uri, oauth_token=self.token, **params)
+            return self.POST(uri, oauth_token=self.token, body=body, headers=headers, **params)
 
     def GET(self, uri, **kw):
-        return self._request("GET", uri, **kw)
+        return self._request("GET", uri, None, None, **kw)
 
-    def POST(self, uri, **kw):
-        return self._request("POST", uri, **kw)
+    def POST(self, uri, body, headers, **kw):
+        return self._request("POST", uri, body, headers, **kw)
 
     def DELETE(self):
         raise NotImplementedError
@@ -316,14 +316,14 @@ class QQOAuth1Login(object):
     def PUT(self):
         raise NotImplementedError
 
-    def _request(self, method, uri, **kw):
+    def _request(self, method, uri, body, headers, **kw):
         signature, qs = QQOAuth1Login.sign(method, uri, self.consumer_key, 
                 self.consumer_secret, self.token_secret, **kw)
         if method == "GET":
             full_uri = "%s?%s" % (uri, qs)
             resp, content = httplib2_request(full_uri, method)
         else:
-            resp, content = httplib2_request(uri, method, qs)
+            resp, content = httplib2_request(uri, method, qs, body=body, headers=headers)
             
         if resp.status != 200:
             raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
