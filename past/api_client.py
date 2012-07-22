@@ -433,7 +433,7 @@ class QQWeibo(object):
         qs = urllib.urlencode(d)
         f = {"pic" : image_file}
         body, headers = encode_multipart_data({}, f)
-        contents = self.post("/statuses/upload.json?%s" %qs, body=body, headers=headers)
+        contents = self.auth.access_resource("/statuses/upload.json?%s" %qs, body=body, headers=headers)
         
 class Wordpress(object):
     

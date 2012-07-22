@@ -323,7 +323,9 @@ class QQOAuth1Login(object):
             full_uri = "%s?%s" % (uri, qs)
             resp, content = httplib2_request(full_uri, method)
         else:
-            resp, content = httplib2_request(uri, method, qs, body=body, headers=headers)
+            if body:
+                qs = "%s&%s" %(qs, body)
+            resp, content = httplib2_request(uri, method, qs, headers=headers)
             
         if resp.status != 200:
             raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
