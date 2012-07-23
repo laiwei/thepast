@@ -248,7 +248,7 @@ class QQOAuth1Login(object):
         ##oauth_token=9bae21d3bbe2407da94a4c4e4355cfcb&oauth_token_secret=128b87904122d43cde6b02962d8eeea6&oauth_callback_confirmed=true
         uri = self.__class__.request_token_uri
         try:
-            r = self.GET(uri, oauth_callback=self.callback)
+            r = self.GET(uri, {'oauth_callback':self.callback})
             qs = urlparse.parse_qs(r)
             self.set_token(qs.get('oauth_token')[0], qs.get('oauth_token_secret')[0])
 
@@ -279,7 +279,7 @@ class QQOAuth1Login(object):
             "oauth_verifier": oauth_verifier,
         }
         
-        r = self.GET(uri, **qs)
+        r = self.GET(uri, qs)
         d = urlparse.parse_qs(r)
         self.token = d['oauth_token'][0]
         self.token_secret = d['oauth_token_secret'][0]
@@ -288,27 +288,30 @@ class QQOAuth1Login(object):
 
     #TODO:这个应当移动到api_client相应的地方
     def get_user_info(self):
-        #uri = self.__class__.api_uri + "/user/info"
-        #r = self.GET(uri, format="json", oauth_token=self.token)
         r = self.access_resource("GET", "/user/info", {"format":"json"})
         r = json_decode(r) if r else {}
         return QQWeiboUser(r.get('data'))
 
     ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
-    ##params为dict，是需要传递的参数
-    def access_resource(self, method, api, body=None, headers=None, params=None):
+    ##params为dict，是需要传递的参数, body 和 headers不加入签名
+    def access_resource(self, method, api, params, file_params=None):
         uri = self.__class__.api_uri + api
 
+        if params:
+            params['oauth_token'] = self.token
+        else:
+            params = {'oauth2_token':self.token,}
+        print "+++++++ accesss qq resource:", uri, params
         if method == "GET":
-            return self.GET(uri, oauth_token=self.token, **params)
+            return self.GET(uri, params)
         if method == "POST":
-            return self.POST(uri, oauth_token=self.token, body=body, headers=headers, **params)
+            return self.POST(uri, params, file_params)
 
-    def GET(self, uri, **kw):
-        return self._request("GET", uri, None, None, **kw)
+    def GET(self, uri, params):
+        return self._request("GET", uri, params, None)
 
-    def POST(self, uri, body, headers, **kw):
-        return self._request("POST", uri, body, headers, **kw)
+    def POST(self, uri, params, file_params):
+        return self._request("POST", uri, params, file_params)
 
     def DELETE(self):
         raise NotImplementedError
@@ -316,21 +319,26 @@ class QQOAuth1Login(object):
     def PUT(self):
         raise NotImplementedError
 
-    def _request(self, method, uri, body, headers, **kw):
-        signature, qs = QQOAuth1Login.sign(method, uri, self.consumer_key, 
+    def _request(self, method, uri, kw, file_params):
+        raw_qs, qs = QQOAuth1Login.sign(method, uri, self.consumer_key, 
                 self.consumer_secret, self.token_secret, **kw)
+        print "+++++ sign:", raw_qs, qs
         if method == "GET":
             full_uri = "%s?%s" % (uri, qs)
             resp, content = httplib2_request(full_uri, method)
         else:
-            if body:
-                qs = "%s&%s" %(qs, body)
-            resp, content = httplib2_request(uri, method, qs, headers=headers)
+            if file_params:
+                from past.utils import encode_multipart_data
+                body, headers = encode_multipart_data(raw_qs, file_params)
+            else:
+                body = qs
+                headers = None
+            resp, content = httplib2_request(uri, method, body, headers=headers)
             
         if resp.status != 200:
             raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
-
+        print "++++++ qq request content:", resp.status, resp.reason, content
         return content
         
     @classmethod
@@ -360,7 +368,7 @@ class QQOAuth1Login(object):
 
         d_ = sorted(d.items(), key=lambda x:x[0])
 
-        dd_ = [urllib.urlencode([x]) for x in d_]
+        dd_ = [urllib.urlencode([x]).replace("+", "%20") for x in d_]
         part3 = urllib.quote("&".join(dd_))
         
         key = consumer_secret + "&"
@@ -374,9 +382,10 @@ class QQOAuth1Login(object):
 
         hashed = hmac.new(key, raw, hashlib.sha1)
         hashed = binascii.b2a_base64(hashed.digest())[:-1]
+        d["oauth_signature"] = hashed
         
-        qs = urllib.urlencode(d_)
+        qs = urllib.urlencode(d_).replace("+", "%20")
         qs += "&" + urllib.urlencode({"oauth_signature":hashed})
 
-        return (hashed, qs)
+        return (d, qs)
 

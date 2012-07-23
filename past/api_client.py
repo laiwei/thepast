@@ -422,18 +422,20 @@ class QQWeibo(object):
         return [QQWeiboStatusData(c) for c in info]
 
     def post_status(self, text):
-        qs = {}
-        qs["format"] = "json"
-        qs["content"] = text
+        #from flask import request
+        #qs = {"content": text, "format": "json", "clientip": request.remote_addr,}
+        qs = {"content": text, "format": "json", "clientip": "202.38.64.1",}
         return self.auth.access_resource("POST", "/t/add", qs)
 
     def post_status_with_image(self, text, image_file):
-        from past.utils import encode_multipart_data
-        d = {"content": text, "format": "json"}
-        qs = urllib.urlencode(d)
+        #from flask import request
+        #qs = {"content": text, "format": "json", "clientip": request.remote_addr,}
+        qs = {"content": text, "format": "json", "clientip": "202.38.64.1",}
+        qs["jing"]=10
+        qs["wei"]=10
+        qs["syncflag"]=0
         f = {"pic" : image_file}
-        body, headers = encode_multipart_data({}, f)
-        contents = self.auth.access_resource("/statuses/upload.json?%s" %qs, body=body, headers=headers)
+        contents = self.auth.access_resource("POST", "/t/add_pic", qs, f)
         
 class Wordpress(object):
     

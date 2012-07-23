@@ -225,7 +225,7 @@ def connect_callback(provider):
 
         if provider == config.OPENID_QQ and user.id == '4':
             print "++++++++post qq weibo status"
-            client = Twitter.get_client(user.id)
+            client = QQWeibo.get_client(user.id)
             if client:
                 now = datetime.datetime.now()
                 client.post_status("#thepast.me# %s" % now)
