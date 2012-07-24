@@ -305,7 +305,7 @@ form {
     line-height:30px;
 }
 
-#note_title, #note_content {
+#note_title, #note_content, #status_post_content {
     width: 582px;
     margin-top: 5px;
     padding: 3px;
@@ -315,6 +315,9 @@ form {
 
 #note_content {
     height:350px;
+}
+#status_post_content {
+    height:100px;
 }
 .note_fmt{
     position: relative;

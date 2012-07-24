@@ -61,6 +61,13 @@ OPENID_TYPE_NAME_DICT = {
     "M" : u"Thepast",
 }
 
+WELCOME_MSG_DICT = {
+    "D": u"#thepast.me# 你好，旧时光| 我在用thepast, 广播备份，往事提醒，你也来试试吧 >> http://thepast.me ",
+    "S": u"#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me ",
+    "T": u"#thepast.me# 你好，旧时光| 我在用thepast, twitter备份，往事提醒，你也来试试吧 >> http://thepast.me ",
+    "Q": u"#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me ",
+}
+
 #-- oauth key & secret config --
 APIKEY_DICT = {
     OPENID_DOUBAN : {

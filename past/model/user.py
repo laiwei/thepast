@@ -186,7 +186,12 @@ class User(object):
     ##获取第三方帐号的profile信息
     def get_thirdparty_profile(self, openid_type):
         p = self.get_profile_item(openid_type)
-        return json_decode(p) if p else {}
+        return p or {}
+
+    def set_thirdparty_profile(self, openid_type, k, v):
+        p = self.get_thirdparty_profile(openid_type)
+        p[k] = v
+        self.set_profile_item(openid_type, p)
         
     def get_avatar_url(self):
         return self.get_profile().get("avatar_url", "")

@@ -201,36 +201,7 @@ def connect_callback(provider):
 
     if user:
         _add_sync_task_and_push_queue(provider, user)
-
-        if provider == config.OPENID_DOUBAN and user.id == '7':
-            print "++++++++++post douban status"
-            client = Douban.get_client(user.id)
-            if client:
-                now = datetime.datetime.now()
-                client.post_status("#thepast.me# %s" % now)
-                client.post_status_with_image("#thepast.me# image test %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
-        if provider == config.OPENID_SINA and user.id == '4':
-            print "++++++++++post sina status"
-            client = SinaWeibo.get_client(user.id)
-            if client:
-                now = datetime.datetime.now()
-                client.post_status("#thepast.me# %s" % now)
-                client.post_status_with_image("#thepast.me# image test %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
-        if provider == config.OPENID_TWITTER and user.id == '4':
-            print "++++++++post twitter status"
-            client = Twitter.get_client(user.id)
-            if client:
-                now = datetime.datetime.now()
-                client.post_status("#thepast.me# %s" % now)
-
-        if provider == config.OPENID_QQ and user.id == '4':
-            print "++++++++post qq weibo status"
-            client = QQWeibo.get_client(user.id)
-            if client:
-                now = datetime.datetime.now()
-                client.post_status("#thepast.me# %s" % now)
-                client.post_status_with_image("#thepast.me# %s" % now, "/home/work/proj/thepast/past/static/img/logo.png")
-                
+        
         # 没有email的用户跳转到email补充页面
         if not user.get_email():
             flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
@@ -240,6 +211,52 @@ def connect_callback(provider):
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
         return redirect(url_for("home"))
 
+
+@app.route("/share", methods=["GET", "POST"])
+@require_login()
+def share():
+    support_providers = [ 
+        config.OPENID_TYPE_DICT[config.OPENID_DOUBAN],
+        config.OPENID_TYPE_DICT[config.OPENID_SINA], 
+        config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
+        config.OPENID_TYPE_DICT[config.OPENID_QQ], ]
+    user_binded_providers = [ua.type for ua in g.user.get_alias() if ua.type in support_providers]
+
+    sync_list = []
+    for t in user_binded_providers:
+        p = g.user.get_thirdparty_profile(t)
+        if p and p.get("share") == "Y":
+            sync_list.append([t, "Y"])
+        else:
+            sync_list.append([t, "N"])
+    
+    if request.method == "POST":
+        text = request.form.get("text", "")
+        providers = request.form.getlist("provider")
+
+        if not providers:
+            flash(u"同步到哪里去呢...", "error")
+            return render_template("share.html", **locals())
+        providers = [x for x in providers if x in user_binded_providers]
+        for p in user_binded_providers:
+            if p in providers:
+                g.user.set_thirdparty_profile(p, "share", "Y")
+            else:
+                g.user.set_thirdparty_profile(p, "share", "N")
+
+        if not text:
+            flash(u"至少要说点什么东西的吧...", "error")
+            return render_template("share.html", **locals())
+        
+        for p in providers:
+            post_status(g.user, p, text)
+        flash(u"同步成功啦...", "tip")
+        return redirect("/share")
+
+    if request.method == "GET":
+        text = request.args.get("text", "")
+        first = request.args.get("first")
+        return render_template("share.html", config=config, **locals())
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 @require_login()
@@ -341,6 +358,7 @@ def _twitter_callback(request):
     
 ## 保存用户信息到数据库，并保存token
 def _save_user_and_token(token_dict, user_info, openid_type):
+    first_connect = False
     ua = UserAlias.get(openid_type, user_info.get_user_id())
     if not ua:
         if not g.user:
@@ -349,6 +367,7 @@ def _save_user_and_token(token_dict, user_info, openid_type):
         else:
             ua = UserAlias.bind_to_exists_user(g.user, 
                     openid_type, user_info.get_user_id())
+        first_connect = True
     if not ua:
         return None
 
@@ -366,6 +385,7 @@ def _save_user_and_token(token_dict, user_info, openid_type):
         "avatar": user_info.get_avatar(),
         "icon": user_info.get_icon(),
         "email": user_info.get_email(),
+        "first_connect": "Y" if first_connect else "N",
     }
     u.set_profile_item(k, json_encode(v))
 
@@ -405,3 +425,36 @@ def _add_sync_task_and_push_queue(provider, user):
         if str(config.CATE_QQWEIBO_STATUS) not in task_ids:
             t = SyncTask.add(config.CATE_QQWEIBO_STATUS, user.id)
             t and TaskQueue.add(t.id, t.kind)
+
+def post_status(user, provider=None, msg=""):
+    if not provider or provider == config.OPENID_DOUBAN:
+        print "++++++++++post douban status"
+        client = Douban.get_client(user.id)
+        if client:
+            if not msg:
+                msg = "#thepast.me# 你好，旧时光| 我在用thepast, 广播备份，往事提醒，你也来试试吧 >> http://thepast.me "
+            client.post_status(msg)
+
+    if not provider or provider == config.OPENID_SINA:
+        print "++++++++++post sina status"
+        client = SinaWeibo.get_client(user.id)
+        if client:
+            if not msg:
+                msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
+            client.post_status(msg)
+
+    if not provider or provider == config.OPENID_TWITTER:
+        print "++++++++post twitter status"
+        client = Twitter.get_client(user.id)
+        if client:
+            if not msg:
+                msg = "#thepast.me# 你好，旧时光| 我在用thepast, twitter备份，往事提醒，你也来试试吧 >> http://thepast.me "
+            client.post_status(msg)
+
+    if not provider or provider == config.OPENID_QQ:
+        print "++++++++post qq weibo status"
+        client = QQWeibo.get_client(user.id)
+        if client:
+            if not msg:
+                msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
+            client.post_status(msg)
