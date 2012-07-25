@@ -175,12 +175,14 @@ def connect_callback(provider):
     login_service = None
     user = None
 
+    openid_type = config.OPENID_TYPE_DICT.get(provider)
+    if not openid_type:
+        abort(404, "not support such provider")
+
     if provider in [config.OPENID_DOUBAN, config.OPENID_SINA,]:
         if provider == config.OPENID_DOUBAN:
-            openid_type = config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]
             login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
         elif provider == config.OPENID_SINA:
-            openid_type = config.OPENID_TYPE_DICT[config.OPENID_SINA]
             login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
 
         ## oauth2方式授权处理
