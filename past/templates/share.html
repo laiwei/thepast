@@ -19,16 +19,16 @@
         
         <div class="box">
             <form action="/share" method="post">
-                {%if first%}
+                {%if first_connect%}
                 <div class="cell">
                     把thepast分享给朋友们:
                 </div>
                 {%endif%}
                 <div class="inner">
-                    {%if first%}
+                    {%if first_connect%}
                     <textarea id="status_post_content" name="text">{{config.WELCOME_MSG_DICT.get("S", "")}}</textarea>
                     {%else%}
-                    <textarea id="status_post_content" name="text">{{text or "说点什么..."}}</textarea>
+                    <textarea id="status_post_content" name="text">{{text}}</textarea>
                     {%endif%}
                 </div>
                 

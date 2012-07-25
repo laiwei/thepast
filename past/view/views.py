@@ -53,6 +53,14 @@ def teardown_request(exception):
 
 @app.route("/")
 def index():
+    if g.user:
+        # 没有email的用户跳转到email补充页面
+        is_new_user = g.user.get_profile_item("is_new_user")
+        if is_new_user != 'N' and (not g.user.get_email()):
+            g.user.set_profile_item("is_new_user", "N")
+            flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
+            return redirect("/settings")
+
     return redirect(url_for("home"))
 
 @app.route("/home")
@@ -201,11 +209,10 @@ def connect_callback(provider):
 
     if user:
         _add_sync_task_and_push_queue(provider, user)
-        
-        # 没有email的用户跳转到email补充页面
-        if not user.get_email():
-            flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
-            return redirect("/settings")
+        first_connect = user.get_thirdparty_profile(openid_type).get("first_connect") == "Y"
+        if first_connect:
+            return redirect("/share?first_connect=1")
+
         return redirect(url_for('index'))
     else:
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
@@ -255,7 +262,7 @@ def share():
 
     if request.method == "GET":
         text = request.args.get("text", "")
-        first = request.args.get("first")
+        first_connect = request.args.get("first_connect")
         return render_template("share.html", config=config, **locals())
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
