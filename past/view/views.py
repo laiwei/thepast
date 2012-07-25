@@ -53,6 +53,10 @@ def teardown_request(exception):
 
 @app.route("/")
 def index():
+    return redirect(url_for("home"))
+
+@app.route("/home")
+def home():
     if g.user:
         # 没有email的用户跳转到email补充页面
         is_new_user = g.user.get_profile_item("is_new_user")
@@ -61,10 +65,6 @@ def index():
             flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
             return redirect("/settings")
 
-    return redirect(url_for("home"))
-
-@app.route("/home")
-def home():
     user_ids = Status.get_recent_updated_user_ids()
     users = filter(None, [User.get(x) for x in user_ids])
     users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]

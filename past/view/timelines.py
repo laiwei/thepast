@@ -144,6 +144,14 @@ def timeline():
 
 @app.route("/user/<uid>")
 def user(uid):
+    if g.user:
+        # 没有email的用户跳转到email补充页面
+        is_new_user = g.user.get_profile_item("is_new_user")
+        if is_new_user != 'N' and (not g.user.get_email()):
+            g.user.set_profile_item("is_new_user", "N")
+            flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
+            return redirect("/settings")
+
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
