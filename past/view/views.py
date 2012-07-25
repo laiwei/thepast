@@ -25,7 +25,7 @@ from .utils import require_login, check_access_user
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    #g.user = User.get(2)
+    g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -57,14 +57,6 @@ def index():
 
 @app.route("/home")
 def home():
-    if g.user:
-        # 没有email的用户跳转到email补充页面
-        is_new_user = g.user.get_profile_item("is_new_user")
-        if is_new_user != 'N' and (not g.user.get_email()):
-            g.user.set_profile_item("is_new_user", "N")
-            flash(u"请补充一下你的邮箱，PDF文件定期更新之后，会发送到你的邮箱", "error")
-            return redirect("/settings")
-
     user_ids = Status.get_recent_updated_user_ids()
     users = filter(None, [User.get(x) for x in user_ids])
     users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]

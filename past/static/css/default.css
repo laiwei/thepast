@@ -42,17 +42,13 @@ a:hover{color:#4d5256;text-decoration:underline;}
 .from.wordpress a{background-position:0 -64px;}
 .from.thepast a{background-position:0 -80px;}
 
-#notification {
-    margin:5px auto 5px 5px;
-    font-size: 12px;
-    color: #999;
-}
-
 #content {
     width: 960px;
     margin: 0px auto 0px auto;
     padding: 12px 0px 30px 0px;
 }
+
+#notification{}
 
 #news,#members{
     background:url(/static/img/new.gif);
@@ -190,8 +186,9 @@ a:hover{color:#4d5256;text-decoration:underline;}
 }
 
 .box .highlighted {
+    padding:5px;
     border-left: 3px solid #3c3;
-    background-color: #f5f5f5;
+    background-color: #E7F3E7;
 }
 
 .box .yellow {

@@ -57,15 +57,25 @@
 {%- endmacro %}
 
 
-{% macro notification_block(with_flash=True) -%}
-    {% if with_flash %}
+{% macro notification_block(user, with_flash=True) -%}
+    {% set fillup_email = user and not user.get_email()%}
+
+    {% if with_flash or fillup_email %}
     {% with msgs = get_flashed_messages(with_categories=true) %}
-        {% if msgs %}
-<div id="notification">
+        {% if msgs or fillup_email%}
+<div class="box" id="notification">
+    <div class="highlighted">
+            {%if fillup_email%}
+                <li>请在<a href="/settings">设置页面</a>补充一下你的邮箱，PDF文件和往事提醒，会发送到你的邮箱。</li>
+            {%endif%}
+
             {% for cate, msg in msgs %}
                 <li class="{{cate}}">{{msg}}</li>
             {% endfor %}
+
+    </div>
 </div>
+<div class="sep5"></div>
         {% endif %}
     {% endwith %}
     {% endif %}
@@ -153,9 +163,7 @@
     <div class="cell"> <span class="bigger">日记</span> </div>
 
     <div class="cell">
-        &gt; <a href="/note/create">写日记 </a>
-        <div class="sep5"></div>
-        &gt; <a href="/notes">日记列表 </a>
+        &gt; <a href="/note/create">写日记 </a> &nbsp;&nbsp; &gt; <a href="/notes">日记列表 </a>
     </div>
 
     <div class="inner">
