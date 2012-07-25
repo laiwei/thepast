@@ -434,7 +434,9 @@ def _add_sync_task_and_push_queue(provider, user):
             t and TaskQueue.add(t.id, t.kind)
 
 def post_status(user, provider=None, msg=""):
-    if not provider or provider == config.OPENID_DOUBAN:
+    if msg and isinstance(msg, unicode):                                           
+            msg = msg.encode("utf8") 
+    if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
         print "++++++++++post douban status"
         client = Douban.get_client(user.id)
         if client:
@@ -442,7 +444,7 @@ def post_status(user, provider=None, msg=""):
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 广播备份，往事提醒，你也来试试吧 >> http://thepast.me "
             client.post_status(msg)
 
-    if not provider or provider == config.OPENID_SINA:
+    if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
         print "++++++++++post sina status"
         client = SinaWeibo.get_client(user.id)
         if client:
@@ -450,7 +452,7 @@ def post_status(user, provider=None, msg=""):
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
             client.post_status(msg)
 
-    if not provider or provider == config.OPENID_TWITTER:
+    if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
         print "++++++++post twitter status"
         client = Twitter.get_client(user.id)
         if client:
@@ -458,7 +460,7 @@ def post_status(user, provider=None, msg=""):
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, twitter备份，往事提醒，你也来试试吧 >> http://thepast.me "
             client.post_status(msg)
 
-    if not provider or provider == config.OPENID_QQ:
+    if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
         print "++++++++post qq weibo status"
         client = QQWeibo.get_client(user.id)
         if client:
