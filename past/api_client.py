@@ -431,9 +431,6 @@ class QQWeibo(object):
         #from flask import request
         #qs = {"content": text, "format": "json", "clientip": request.remote_addr,}
         qs = {"content": text, "format": "json", "clientip": "202.38.64.1",}
-        qs["jing"]=10
-        qs["wei"]=10
-        qs["syncflag"]=0
         f = {"pic" : image_file}
         contents = self.auth.access_resource("POST", "/t/add_pic", qs, f)
         
