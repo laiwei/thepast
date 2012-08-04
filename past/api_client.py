@@ -292,7 +292,7 @@ class SinaWeibo(object):
                     %(uri, resp.status, content))
         return None
 
-    def get_timeline(self, since_id=None, until_id=None, count=200):
+    def get_timeline(self, since_id=None, until_id=None, count=100):
         d = {}
         d["uid"] = self.alias
         d["trim_user"] = 0
@@ -307,6 +307,21 @@ class SinaWeibo(object):
         ##debug
         if contents:
             print '---get sinawebo succ, result length is:', len(contents)
+        return [SinaWeiboStatusData(c) for c in contents]
+
+    ## 新浪微博也很2，通过page可以拿到过往的所有微博
+    def get_timeline_by_page(self, page=1, count=100):
+        d = {}
+        d["uid"] = self.alias
+        d["trim_user"] = 0
+        d["count"] = count
+        d["page"] = page
+
+        contents = self.get("/statuses/user_timeline.json", d)
+        contents = json_decode(contents).get("statuses", []) if contents else []
+        ##debug
+        if contents:
+            print '---get sinawebo page %s succ, result length is: %s' %(page, len(contents))
         return [SinaWeiboStatusData(c) for c in contents]
 
     def post_status(self, text):

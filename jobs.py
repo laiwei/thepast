@@ -97,6 +97,11 @@ def sync(t, old=False):
             if old:
                 log.info("will get sinaweibo order than %s..." % origin_min_id)
                 status_list = client.get_timeline(until_id=origin_min_id)
+                ## 如果根据max_id拿不到数据，那么根据page再拿一次
+                if len(status_list) <= 1:
+                    downloaded_status_count = Status.get_count_by_user(t.user_id)
+                    page = downloaded_status_count / 100 + 2
+                    status_list = client.get_timeline_by_page(page=page)
             else:
                 log.info("will get sinaweibo newer than %s..." % origin_min_id)
                 status_list = client.get_timeline(since_id=origin_min_id, count=20)
