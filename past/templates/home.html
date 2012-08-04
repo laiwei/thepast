@@ -3,7 +3,7 @@
 {% block content_block %}
     <!-- 个人杂志计划简介 -->
     <div class="sep3"></div>
-    {{ blocks.notification_block() }}
+    {{ blocks.notification_block(g.user) }}
     <div id="news">
         <h2>你好，旧时光<sup><a target="_blank" href="https://github.com/laiwei/thepast">[开源]</a></sup></h2>
         <p>1. 实时聚合你在“豆瓣”、“新浪微博”、“腾讯微博”、“Twitter”、“wordpress”等平台的 Timeline。</p>

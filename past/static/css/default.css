@@ -292,9 +292,11 @@ form {
 
 .error{
     color:red;
+    font-size: 14px;
 }
 .tip{
     color:blue;
+    font-size: 14px;
 }
 
 .post img{

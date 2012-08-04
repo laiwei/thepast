@@ -18,7 +18,10 @@ from past.model.user import User
 from past.store import db_conn
 from past import config
 
-def send_today_in_history(user_id):
+def send_today_in_history(user_id, now=None):
+    if not now:
+        now = datetime.datetime.now()
+
     u = User.get(user_id)
     if not u:
         return
@@ -33,19 +36,17 @@ def send_today_in_history(user_id):
         print '---- user %s no email' % u.id
         return
     
-    yesterday_ids = get_status_ids_yesterday(u.id, 
-            day=(datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d"))
+    yesterday_ids = get_status_ids_yesterday(u.id, now) 
     status_of_yesterday = Status.gets(yesterday_ids)
 
-    history_ids = get_status_ids_today_in_history(u.id, 
-            day=datetime.datetime.now().strftime("%Y-%m-%d"))
+    history_ids = get_status_ids_today_in_history(u.id, now)
     status_of_today_in_history = Status.gets(history_ids)
 
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
     
-    history_ids = get_status_ids_today_in_history(u.id, 
-            day=datetime.datetime.now().strftime("%Y-%m-%d"))
+    history_ids = get_status_ids_today_in_history(u.id, now)
+
     d = {}
     for s in Status.gets(history_ids):
         t = s.create_time.strftime("%Y-%m-%d")
@@ -70,10 +71,14 @@ def send_today_in_history(user_id):
     m = t.module
 
 
-    html = m.status_in_past(status_of_yesterday, status_of_today_in_history, YESTERDAY, config, intros)
+    if now:
+        y = (now - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    else:
+        y = YESTERDAY
+    html = m.status_in_past(status_of_yesterday, status_of_today_in_history, y, config, intros)
     html = html.encode("utf8")
 
-    subject = '''来自thepast.me的提醒 %s''' % datetime.datetime.now().strftime("%Y-%m-%d")
+    subject = '''来自thepast.me的提醒 %s''' % now.strftime("%Y-%m-%d")
     text = ''
     
     print '--- send reminding to %s %s' %(user_id, email)

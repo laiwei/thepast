@@ -18,7 +18,7 @@
 
 <div id="middlebar">
     <div class="timelines">
-        {{ blocks.notification_block() }}
+        {{ blocks.notification_block(g.user) }}
 
         {% if not status_list and g.start == 0 %}
             <div class="box">

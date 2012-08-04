@@ -501,15 +501,15 @@ def get_all_text_by_user(user_id, limit=1000):
             print e
     return text
 
-@cache("sids:{user_id}:{day}", expire=3600*24)
-def get_status_ids_yesterday(user_id, day):
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    ids = Status.get_ids_by_date(user_id, day, today)
+@cache("sids:{user_id}:{now}", expire=3600*24)
+def get_status_ids_yesterday(user_id, now):
+    s = (now - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    e = now.strftime("%Y-%m-%d")
+    ids = Status.get_ids_by_date(user_id, s, e)
     return ids
 
-@cache("sids_today_in_history:{user_id}:{day}", expire=3600*24)
-def get_status_ids_today_in_history(user_id, day):
-    now = datetime.datetime.now()
+@cache("sids_today_in_history:{user_id}:{now}", expire=3600*24)
+def get_status_ids_today_in_history(user_id, now):
     years = range(now.year-1, 2005, -1)
     dates = [("%s-%s" %(y,now.strftime("%m-%d")), 
         "%s-%s" %(y,(now+datetime.timedelta(days=1)).strftime("%m-%d"))) for y in years]
