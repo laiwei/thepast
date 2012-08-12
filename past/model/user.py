@@ -421,3 +421,51 @@ class Confirmation(object):
             db_conn.rollback()
         finally:
             cursor and cursor.close()
+
+
+class PdfSettings(object):
+    def __init__(self, user_id, time):
+        self.user_id = user_id
+        self.time = time
+
+    @classmethod
+    def _clear_cache(cls, user_id=None):
+        if user_id:
+            mc.delete("pdf_settings:u%s" % user_id)
+        mc.delete("pdf_settings:all_uids")
+            
+
+    @classmethod
+    @cache("pdf_settings:all_uids")
+    def get_all_user_ids(cls):
+        cursor = db_conn.execute('''select user_id from pdf_settings''')
+        rows = cursor.fetchall()
+        cursor and cursor.close()
+        return [str(row[0]) for row in rows]
+
+    @classmethod
+    @cache("pdf_settings:u{user_id}")
+    def is_user_id_exists(cls, user_id):
+        cursor = db_conn.execute('''select user_id from pdf_settings where user_id=%s''', user_id)
+        row = cursor.fetchone()
+        cursor and cursor.close()
+        return True if row else False
+
+    @classmethod
+    def add_user_id(cls, user_id):
+        cursor = None
+        try:
+            cursor = db_conn.execute('''insert into pdf_settings (user_id) values (%s)''', user_id)
+            db_conn.commit()
+            cls._clear_cache(user_id)
+            return True
+        except IntegrityError:
+            db_conn.rollback()
+        finally:
+            cursor and cursor.close()
+
+    @classmethod
+    def remove_user_id(cls, user_id):
+        cursor = db_conn.execute('''delete from pdf_settings where user_id=%s''', user_id)
+        db_conn.commit()
+        cls._clear_cache(user_id)

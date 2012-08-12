@@ -11,7 +11,7 @@ activate_this = '../env/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 
 from past.utils.pdf import generate_pdf, get_pdf_filename, is_pdf_file_exists
-from past.model.user import User, UserAlias
+from past.model.user import User, UserAlias, PdfSettings
 from past.model.status import Status
 from past import config
 
@@ -71,9 +71,6 @@ def generate_pdf_by_user(user_id):
 
 
 if __name__ == "__main__":
-    start = 0
-    limit = 2000
-    for uid in User.get_ids_asc(start=start, limit=limit):
+    for uid in PdfSettings.get_all_user_ids():
         print '------begin generate pdf of user:', uid
-        #generate(uid, date=datetime.datetime(2012,4,1), order='asc')
         generate_pdf_by_user(uid)

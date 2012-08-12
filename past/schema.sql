@@ -150,6 +150,12 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=654 DEFAULT CHARSET=utf8 COMMENT='user';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE TABLE `pdf_settings` (
+  `user_id` int(11) unsigned NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='pdf_settings';
+
 --
 -- Table structure for table `user_alias`
 --

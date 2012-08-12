@@ -89,6 +89,8 @@ def render(user, status_list, with_head=True):
             r = m.qq_weibo_status(s, pdf=True)
         elif s.category == config.CATE_WORDPRESS_POST:
             r = m.wordpress_status(s, pdf=True)
+        elif s.category == config.CATE_THEPAST_NOTE:
+            r = m.thepast_note_status(s, pdf=True)
         else:
             r = ''
         if not r:
@@ -100,7 +102,7 @@ def render(user, status_list, with_head=True):
 
 def link_callback(uri, rel):
     #FIXME: 为了节省磁盘空间，PDF中不包含图片
-    return ''
+    #return ''
 
     lower_uri = uri.lower()
     print '%s getting %s' % (datetime.datetime.now(), uri)

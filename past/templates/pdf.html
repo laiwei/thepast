@@ -5,14 +5,6 @@
 {% block content_block %}
     <div id="sidebar"></div>
     <div id="rightbar">
-        <div class="box">
-        <div class="cell"><span class="bigger">说明</span></div>
-        <div class="inner">
-        <span class="fade">由于服务器的磁盘空间有限（Linode的磁盘很贵^^），所以生成的PDF中没有包含图片，如果有需求，请发邮件给help@thepast.me告知，会尽量满足需求的。</span>
-        </div>
-        </div>
-        <div class="sep10"></div>
-
         {{blocks.rightbar_intros_block(intros)}}
         <div class="sep10"></div>
         {{blocks.rightbar_feedback_block()}}
@@ -25,6 +17,34 @@
         <!--PDF下载列表-->
         <div class="box">
             <div class="cell"><a href="/i">首页</a> &gt; PDF下载 [PDF会按月归档，下载链接如下]</div>
+            <div class="cell">
+            <table>
+                {%if not pdf_applyed%}
+                <form action="/pdf/apply" method="post">
+                    <tr>
+                    <p>由于系统资源受限（主要是磁盘），为了给大家提供更好的服务，</p>
+                    <p>PDF备份功能只开放给切实需要的用户，请点下面的按钮申请（申请后，自动开通！）</p>
+                    </tr>
+                    <tr height="30px">
+                        <td><input type="submit" value="提交PDF备份申请"></input></td>
+                        <td></td>
+                    </tr>
+                </form>
+                {%else%}
+                <form action="/pdf/apply" method="post">
+                    <tr>
+                    <p>由于系统资源受限（主要是磁盘），为了给大家提供更好的服务，</p>
+                    <p>如果PDF文件你已经下载完毕了，那么请点下面的按钮，系统会在接下里的一天，删除掉生成的PDF！</p>
+                    </tr>
+                    <input type="hidden" name="delete" value="true"></input>
+                    <tr height="30px">
+                        <td><input type="submit" value="提交PDF删除申请"></input></td>
+                        <td></td>
+                    </tr>
+                </form>
+                {%endif%}
+            </table>
+            </div>
             {% for year in files_dict.keys()|sort(reverse=True)%}
             <div class="cell">{{year}}年</div>
                 <div class="cell"><table>

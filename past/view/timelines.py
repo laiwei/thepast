@@ -9,7 +9,7 @@ from flask import g, request, redirect, url_for, abort, render_template,\
 
 from past import app
 from past import config
-from past.model.user import User
+from past.model.user import User, PdfSettings
 from past.model.status import Status
 
 from past.utils import sizeof_fmt
@@ -182,6 +182,20 @@ def mypdf():
     else:
         return redirect(url_for("pdf", uid=g.user.id))
 
+@app.route("/pdf/apply", methods=["POST"])
+@require_login()
+def pdf_apply():
+    delete = request.form.get("delete")
+    if delete:
+        PdfSettings.remove_user_id(g.user.id)
+        flash(u"删除PDF的请求提交成功，系统会在接下来的一天里删除掉PDF文件！", "tip")
+        return redirect("/pdf")
+    else:
+        PdfSettings.add_user_id(g.user.id)
+        flash(u"申请已通过，请明天早上来下载数据吧！", "tip")
+        return redirect("/pdf")
+
+
 @app.route("/demo-pdf")
 def demo_pdf():
     pdf_filename = "demo.pdf"
@@ -226,6 +240,8 @@ def pdf(uid):
     files_dict = defaultdict(list)
     for date, filename, filesize in pdf_files:
         files_dict[date.year].append([date, filename, filesize])
+
+    pdf_applyed = PdfSettings.is_user_id_exists(g.user.id)
     return render_template("pdf.html", **locals())
 
 @app.route("/pdf/<filename>")
