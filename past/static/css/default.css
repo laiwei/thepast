@@ -21,7 +21,6 @@ a:hover{color:#4d5256;text-decoration:underline;}
     position:relative;
     z-index:1;
 }
-#site{width:100%;margin:0px auto 0px auto;}
 #logo a{display:block;width: 258px;height: 50px;background-image:url(/static/img/logo.png?ver=1.00);text-indent:-9999em;}
 
 #navi {float:right;font-size:16px;color:#FFF;margin-top:0px;}
@@ -46,7 +45,9 @@ a:hover{color:#4d5256;text-decoration:underline;}
     width: 960px;
     margin: 0px auto 0px auto;
     padding: 12px 0px 30px 0px;
+    text-align: left;
 }
+
 
 #notification{}
 
@@ -93,7 +94,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
     padding: 10px 10px 10px 0px;
 }
 
-#main{}
+#main{text-align:center;}
 
 #news h2{font-weight:bold;font-size:19.5px;line-height:35px;}
 #news p strong{border-bottom:1px dotted;}

@@ -19,20 +19,7 @@
 
 <div id="head"> 
     {% block head_block %}
-        <div id="site">
             <div id="logo" class="fl"><h1><a href="/home">ThePast.Me</a><h1></div>
-
-            {%if not g.user%}
-                <!-- 授权平台图标导航 -->
-                {{blocks.connect_block()}}
-            {%elif user %}
-                <!-- 其他用户的个人信息框 -->
-                {{blocks.people_info_block(user, [])}}
-            {%elif g.user%}
-                <!-- 自己的个人信息框 -->
-                {{blocks.people_info_block(g.user, g.unbinded)}}
-            {%endif%}
-
             {%block mini_navi_block%}
                 <div class="mini_navi">
                     <ul>
@@ -47,7 +34,17 @@
                     </ul>
                 </div>
             {%endblock%}
-        </div>
+
+            {%if not g.user%}
+                <!-- 授权平台图标导航 -->
+                {{blocks.connect_block()}}
+            {%elif user %}
+                <!-- 其他用户的个人信息框 -->
+                {{blocks.people_info_block(user, [])}}
+            {%elif g.user%}
+                <!-- 自己的个人信息框 -->
+                {{blocks.people_info_block(g.user, g.unbinded)}}
+            {%endif%}
     {%endblock%}
 </div>
 
