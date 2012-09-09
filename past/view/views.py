@@ -202,9 +202,9 @@ def connect_callback(provider):
 
     if user:
         _add_sync_task_and_push_queue(provider, user)
-        first_connect = user.get_thirdparty_profile(openid_type).get("first_connect") == "Y"
-        if first_connect:
-            return redirect("/share?first_connect=1")
+
+        if not user.get_email():
+            return redirect("/settings")
 
         return redirect(url_for('index'))
     else:
@@ -255,7 +255,12 @@ def share():
 
     if request.method == "GET":
         text = request.args.get("text", "")
-        first_connect = request.args.get("first_connect")
+        f = "N"
+        for x in user_binded_providers:
+            if g.user.get_thirdparty_profile(x).get("first_connect") == "Y":
+                f = "Y"
+                break
+        first_connect = request.args.get("first_connect") or f == 'Y'
         return render_template("share.html", config=config, **locals())
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])

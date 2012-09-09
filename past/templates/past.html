@@ -47,6 +47,11 @@
                             {%if s.category == config.CATE_WORDPRESS_POST%}
                                 {{status_tmpl_helper.wordpress_status(s)}}
                             {%endif%}
+
+                            {%if s.category == config.CATE_THEPAST_NOTE%}
+                                {{status_tmpl_helper.thepast_note_status(s)}}
+                            {%endif%}
+
                             </div>
                         </div>
                     </li>
@@ -94,6 +99,11 @@
                             {%if s.category == config.CATE_WORDPRESS_POST%}
                                 {{status_tmpl_helper.wordpress_status(s)}}
                             {%endif%}
+
+                            {%if s.category == config.CATE_THEPAST_NOTE%}
+                                {{status_tmpl_helper.thepast_note_status(s)}}
+                            {%endif%}
+
                             </div>
                         </div>
                     </li>

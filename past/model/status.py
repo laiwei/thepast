@@ -87,7 +87,7 @@ class Status(object):
         bare_text = re.sub("http://t.co/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://url.cn/[a-zA-Z0-9]+", "", bare_text)
         bare_text = re.sub("http://goo.gl/[a-zA-Z0-9]+", "", bare_text)
-        bare_text = re.sub("http://dou.bz/[a-zA-Z0-9]+", "", bare_text)
+        bare_text = re.sub("http://dou.bz/[a-zA-Z0-9]+", "", bare_text).replace(u"说：", "")
         return bare_text  
 
     ##TODO:这个clear_cache需要拆分
