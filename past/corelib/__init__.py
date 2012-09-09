@@ -1,7 +1,6 @@
 #-*- coding:utf-8 -*-
 
 from past import config 
-from past.model.user import User
 from past.utils import randbytes
 
 from past.corelib.cache import cache
@@ -11,6 +10,8 @@ def auth_user_from_session(session_):
     if config.SITE_COOKIE in session_:
         cookies = session_[config.SITE_COOKIE]
         user_id, session_id = cookies.split(":")
+        ## 这里存在循环引用，所以放到函数内部，长远看这个函数不应该放在corelib中
+        from past.model.user import User
         _user = User.get(user_id)
         if _user and _user.session_id == session_id:
             user = _user

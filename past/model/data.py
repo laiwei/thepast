@@ -216,7 +216,7 @@ class AbsData(object):
             try:
                 self.data = json_decode(data)
             except Exception, e:
-                import traceback; print traceback.format_exc()
+                #import traceback; print traceback.format_exc()
                 self.data = {}
 
     ## 注释以微博为例

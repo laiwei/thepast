@@ -6,6 +6,10 @@ from flask import Flask
 app = Flask(__name__)
 app.config.from_object("past.config")
 
+##-- register blueprint --
+from past.visual import blue_print as visual_bp
+app.register_blueprint(visual_bp, url_prefix="/visual")
+
 import view
 
 from utils import filters
