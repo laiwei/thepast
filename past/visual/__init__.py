@@ -83,10 +83,21 @@ def timeline_json(uid, start):
             images.extend(re_images)
             text = re_tweet and re_tweet.get_content() or ''
 
+        if s.category in [config.CATE_DOUBAN_STATUS]:
+            atts = s.get_data() and s.get_data().get_attachments()
+            if atts:
+                for att in atts:
+                    text += att.get_title() + "\n" + att.get_description()
+
         if s.category in [config.CATE_QQWEIBO_STATUS]:
             text = s.get_retweeted_data() or ''
         
         if s.category in [config.CATE_WORDPRESS_POST]:
+            uri = s.get_origin_uri()
+            headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
+            text = s.text or ''
+
+        if s.category in [config.CATE_THEPAST_NOTE]:
             uri = s.get_origin_uri()
             headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
             text = s.text or ''
