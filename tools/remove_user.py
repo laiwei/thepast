@@ -1,9 +1,10 @@
 import sys
 sys.path.append('../')
 
-from past.store import db_conn, mongo_conn
+from past.store import db_conn
 from past.model.user import User
 from past.model.status import Status
+from past.model.kv import RawStatus
 from past import consts
 
 
@@ -23,8 +24,7 @@ def remove_user(uid):
         for row in rows:
             sid = row[0]
             print "---- delete mongo text, sid=", sid
-            mongo_conn.remove("/status/text/%s" %sid)
-            mongo_conn.remove("/status/raw/%s" %sid)
+            RawStatus.remove(sid)
 
     print "---- delete from status, uid=", uid
     db_conn.execute("delete from status where user_id=%s", uid)
@@ -47,8 +47,7 @@ def remove_status(uid):
         for row in rows:
             sid = row[0]
             print "---- delete mongo text, sid=", sid
-            mongo_conn.remove("/status/text/%s" %sid)
-            mongo_conn.remove("/status/raw/%s" %sid)
+            RawStatus.remove(sid)
 
     print "---- delete from status, uid=", uid
     db_conn.execute("delete from status where user_id=%s", uid)

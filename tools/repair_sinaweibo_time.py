@@ -5,8 +5,9 @@ sys.path.append('../')
 
 import datetime
 import past
-from past.store import db_conn, mongo_conn
+from past.store import db_conn
 from past.utils.escape import json_decode
+from past.model.kv import RawStatus
 
 cursor = db_conn.execute("select id from status where category=200")
 rows = cursor.fetchall()
@@ -15,7 +16,8 @@ ids = [x[0] for x in rows]
 
 for x in ids:
     try:
-        raw = mongo_conn.get("/status/raw/%s" %x)
+        r = RawStatus.get(x)
+        raw = r.raw if r else ""
         if raw:
             print x
             data = json_decode(raw)

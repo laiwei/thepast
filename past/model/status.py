@@ -7,13 +7,14 @@ from MySQLdb import IntegrityError
 
 from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
-from past.store import mongo_conn, mc, db_conn
+from past.store import mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
 from .user import UserAlias
 from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
         WordpressData, ThepastNoteData
+from .kv import RawStatus
 from past import config
 from past import consts
 
@@ -23,9 +24,6 @@ log = logging.getLogger(__file__)
 #把Data相关的都应该隐藏起来,不允许外部import
 
 class Status(object):
-    
-    STATUS_REDIS_KEY = "/status/text/%s"
-    RAW_STATUS_REDIS_KEY = "/status/raw/%s"
     
     def __init__(self, id, user_id, origin_id, 
             create_time, site, category, title=""):
@@ -113,7 +111,8 @@ class Status(object):
             note = Note.get(self.origin_id)
             return note and note.content
         else:
-            _text = mongo_conn.get(Status.STATUS_REDIS_KEY % self.id)
+            r = RawStatus.get(self.id)
+            _text = r.text if r else ""
             return json_decode(_text) if _text else ""
 
     @property
@@ -122,7 +121,8 @@ class Status(object):
             note = Note.get(self.origin_id)
             return note
         else:
-            _raw = mongo_conn.get(Status.RAW_STATUS_REDIS_KEY % self.id)
+            r = RawStatus.get(self.id)
+            _raw = r.raw if r else ""
             return json_decode(_raw) if _raw else ""
         
     @classmethod
@@ -137,10 +137,9 @@ class Status(object):
                     (user_id, origin_id, create_time, site, category, title))
             status_id = cursor.lastrowid
             try:
-                if text is not None:
-                    mongo_conn.set(cls.STATUS_REDIS_KEY %status_id, json_encode(text))
-                if raw is not None:
-                    mongo_conn.set(cls.RAW_STATUS_REDIS_KEY %status_id, raw)
+                text = json_encode(text) if text is not None else ""
+                raw = json_encode(raw) if raw is not None else ""
+                RawStatus.set(status_id, text, raw)
             except Exception, e:
                 log.warning('ERROR_MONGODB:%s' % e)
                 db_conn.rollback()

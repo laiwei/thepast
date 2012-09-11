@@ -2,14 +2,13 @@
 
 from MySQLdb import IntegrityError
 from past.corelib.cache import cache, pcache
-from past.store import mongo_conn, mc, db_conn
+from past.store import mc, db_conn
 from past.utils import randbytes
 from past.utils.escape import json_decode, json_encode
+from .kv import Kv, UserProfile
 from past import config
 
 class User(object):
-    RAW_USER_REDIS_KEY = "/user/raw/%s"
-
     def __init__(self, id):
         self.id = str(id)
         self.uid = None
@@ -24,7 +23,8 @@ class User(object):
 
     @property
     def raw(self):
-        _raw = mongo_conn.get(User.RAW_USER_REDIS_KEY % self.id)
+        r = Kv.get("/profile/%s" % self.id)
+        _raw = r.val if r else ""
         return json_decode(_raw) if _raw else ""
 
     @classmethod
@@ -164,14 +164,15 @@ class User(object):
         User._clear_cache(self.id)
 
     def set_profile(self, profile):
-        mongo_conn.set('/profile/%s' %self.id, json_encode(profile))
+        UserProfile.set(self.id, json_encode(profile))
         mc.delete("user_profile:%s" % self.id)
         return self.get_profile()
 
     @cache("user_profile:{self.id}")
     def get_profile(self):
-        r = mongo_conn.get('/profile/%s' %self.id)
-        return json_decode(r) if r else {}
+        r = UserProfile.get(self.id)
+        p = r.val if r else ""
+        return json_decode(p) if p else {}
     
     def set_profile_item(self, k, v):
         p = self.get_profile()
