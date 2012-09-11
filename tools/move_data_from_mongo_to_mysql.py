@@ -49,4 +49,4 @@ def move_status():
 
 
 move_user_profile()
-move_status()
+#move_status()
