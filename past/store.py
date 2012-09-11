@@ -66,7 +66,12 @@ class MongoDB(object):
         if r:
             return r.get("v")
         return None
-    
+
+    def mget(self, keys):
+        d = {"k": {"$in" : keys}}
+        rs = self._conn.find(d)
+        return [r["v"] for r in rs]
+
     def set(self, k, v):
         self._conn.update({"k":k},{"k":k, "v":v}, upsert=True)
 
