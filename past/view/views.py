@@ -136,7 +136,7 @@ def about():
 @app.route("/connect/", defaults={"provider": config.OPENID_DOUBAN})
 @app.route("/connect/<provider>")
 def connect(provider):
-    return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
+    #return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
     d = config.APIKEY_DICT.get(provider)
     login_service = None
     if provider == config.OPENID_DOUBAN:

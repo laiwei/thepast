@@ -21,17 +21,17 @@ class User(object):
                 % (self.id, self.uid, self.session_id)
     __str__ = __repr__
 
-    @property
-    def raw(self):
-        r = Kv.get("/profile/%s" % self.id)
-        _raw = r.val if r else ""
-        return json_decode(_raw) if _raw else ""
+    #@property
+    #def raw(self):
+    #    r = Kv.get("/profile/%s" % self.id)
+    #    _raw = r.val if r else ""
+    #    return json_decode(_raw) if _raw else ""
 
     @classmethod
     def _clear_cache(cls, user_id):
         if user_id:
             mc.delete("user:%s" % user_id)
-            mc.delete("user_profile:%s" % user_id)
+            UserProfile.clear_cache(user_id)
         mc.delete("user:ids")
         
     @classmethod
@@ -165,10 +165,8 @@ class User(object):
 
     def set_profile(self, profile):
         UserProfile.set(self.id, json_encode(profile))
-        mc.delete("user_profile:%s" % self.id)
         return self.get_profile()
 
-    @cache("user_profile:{self.id}")
     def get_profile(self):
         r = UserProfile.get(self.id)
         p = r.val if r else ""

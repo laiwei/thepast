@@ -136,14 +136,10 @@ class Status(object):
                     values (%s,%s,%s,%s,%s,%s)""",
                     (user_id, origin_id, create_time, site, category, title))
             status_id = cursor.lastrowid
-            try:
+            if status_id:
                 text = json_encode(text) if text is not None else ""
                 raw = json_encode(raw) if raw is not None else ""
                 RawStatus.set(status_id, text, raw)
-            except Exception, e:
-                log.warning('ERROR_MONGODB:%s' % e)
-                db_conn.rollback()
-            else:
                 db_conn.commit()
                 status = cls.get(status_id)
         except IntegrityError:

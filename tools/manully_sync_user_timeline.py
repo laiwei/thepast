@@ -14,6 +14,8 @@ import jobs
 
 if __name__ == '__main__':
     user = User.get(sys.argv[1])
+    old = sys.argv[2] == "ord"
+
     if not user:
         print "no such user"
         exit(1)
@@ -27,7 +29,7 @@ if __name__ == '__main__':
             if t.category == config.CATE_WORDPRESS_POST:
                 jobs.sync_wordpress(t)
             else:
-                jobs.sync(t, old=True)
+                jobs.sync(t, old=old)
         except Exception, e:
             import traceback
             print "%s %s" % (datetime.datetime.now(), traceback.format_exc())
