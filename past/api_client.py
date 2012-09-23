@@ -431,7 +431,7 @@ class QQWeibo(object):
             return []
         
         data  = contents.get("data")
-        info = data and data.get("info")
+        info = data and data.get("info") or []
         print '---status from qqweibo, len is: %s' % len(info)
 
         return [QQWeiboStatusData(c) for c in info]

@@ -28,11 +28,11 @@
                 <span class="fr">作者：<a href="/user/{{user.id}}">{{user.name}}</a></span>
             </div>
             <div class="inner"><div class="post">
-                {%if status.category == config.CATE_WORDPRESS_POST%}
-                    {{status.text|safe}}
-                {%else%}
-                    {{status.text}}
-                {%endif%}
+{%if status.category == config.CATE_WORDPRESS_POST%}
+{{status.text|safe}}
+{%else%}
+{{status.text|safe}}
+{%endif%}
             </div></div>
         </div>
     </div>

@@ -14,7 +14,7 @@ import jobs
 
 if __name__ == '__main__':
     user = User.get(sys.argv[1])
-    old = sys.argv[2] == "ord"
+    old = sys.argv[2] == "old"
 
     if not user:
         print "no such user"

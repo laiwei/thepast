@@ -6,6 +6,7 @@ from flask import g, session, request, send_from_directory, \
     redirect, url_for, abort, render_template, flash
 
 from past import config
+from past.store import db_conn
 from past.corelib import auth_user_from_session, set_user_cookie, \
         logout_user, category2provider
 from past.utils.escape import json_encode
@@ -49,7 +50,8 @@ def before_request():
 
 @app.teardown_request
 def teardown_request(exception):
-    pass
+    #http://stackoverflow.com/questions/9318347/why-are-some-mysql-connections-selecting-old-data-the-mysql-database-after-a-del
+    db_conn.commit()
 
 @app.route("/")
 def index():

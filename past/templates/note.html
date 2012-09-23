@@ -45,7 +45,7 @@
                     {%if note.fmt == consts.NOTE_FMT_MARKDOWN%}
                         {{content|safe}}
                     {%else%}
-                        <pre>{{content}}</pre>
+<div class="post">{{content}}</div>
                     {%endif%}
                 </div>
             </div>
