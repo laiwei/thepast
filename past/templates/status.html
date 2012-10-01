@@ -92,13 +92,15 @@
 {% macro sina_status(s, pdf=False) -%}
     {%if pdf%}
         {{s.summary|wrap_long_line}}
+        {%set img_size="middle"%}
     {%else%}
+        {%set img_size="origin"%}
         {{s.summary}}
     {%endif%}
 
-    {% set images = s.get_data().get_images() or [] %}
+    {% set images = s.get_data().get_images(img_size) or [] %}
     {% set re = s.get_retweeted_data() %}
-    {% set re_images = re and re.get_images() or [] %}
+    {% set re_images = re and re.get_images(img_size) or [] %}
     {% set images = images + re_images %}
     {% if re %}
         {%set re_text = "//@" + re.get_user().get_nickname() + " " + re.get_content() %} 

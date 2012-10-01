@@ -38,7 +38,7 @@ def generate(user_id, date, order='asc'):
         if not status_ids:
             print '----- status ids is none', status_ids
             return
-        generate_pdf(pdf_filename, user_id, status_ids, capacity=-1)
+        generate_pdf(pdf_filename, user_id, status_ids)
         if not is_pdf_file_exists(pdf_filename):
             print '----%s generate pdf for user:%s fail' % (datetime.datetime.now(), user_id)
         else:

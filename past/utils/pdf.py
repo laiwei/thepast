@@ -116,6 +116,10 @@ def link_callback(uri, rel):
     if lower_uri.find("\n") != -1:
         return ''
 
+    if not (lower_uri.endswith(".jpg") or lower_uri.endswith(".jpeg")  or 
+            lower_uri.endswith(".png")):
+        return ''
+
     d = hashlib.md5()
     d.update(uri)
     d = d.hexdigest()

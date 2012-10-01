@@ -62,10 +62,10 @@ OPENID_TYPE_NAME_DICT = {
 }
 
 WELCOME_MSG_DICT = {
-    "D": u"#thepast.me# 你好，旧时光 | 我在用thepast， 广播备份，往事提醒，你也来试试吧 >> http://thepast.me ",
-    "S": u"#thepast.me# 你好，旧时光 | 我在用thepast， 微博备份，往事提醒，你也来试试吧 >> http://thepast.me ",
-    "T": u"#thepast.me# 你好，旧时光 | 我在用thepast， twitter备份，往事提醒，你也来试试吧 >> http://thepast.me ",
-    "Q": u"#thepast.me# 你好，旧时光 | 我在用thepast， 微博备份，往事提醒，你也来试试吧 >> http://thepast.me ",
+    "D": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份广播，往事提醒 >> http://thepast.me ",
+    "S": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份微博，往事提醒 >> http://thepast.me ",
+    "T": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份twitter，往事提醒 >> http://thepast.me ",
+    "Q": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份微博，往事提醒 >> http://thepast.me ",
 }
 
 #-- oauth key & secret config --
