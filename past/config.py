@@ -38,6 +38,7 @@ OPENID_SINA = 'sina'
 OPENID_QQ = 'qq' ##qq weibo
 OPENID_TWITTER = 'twitter'
 OPENID_THEPAST = 'thepast'
+OPENID_RENREN = 'renren'
 
 ##命名需要商榷
 OPENID_WORDPRESS = 'wordpress'
@@ -48,8 +49,8 @@ OPENID_TYPE_DICT = {
     OPENID_QQ : "Q",
     OPENID_TWITTER : "T",
     OPENID_WORDPRESS : "W",
-
     OPENID_THEPAST : "M",
+    OPENID_RENREN: "R",
 }
 
 OPENID_TYPE_NAME_DICT = {
@@ -59,13 +60,15 @@ OPENID_TYPE_NAME_DICT = {
     "Q" : u"腾讯微博",
     "W" : u"Wordpress",
     "M" : u"Thepast",
+    "R" : u"人人",
 }
 
 WELCOME_MSG_DICT = {
-    "D": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份广播，往事提醒 >> http://thepast.me ",
-    "S": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份微博，往事提醒 >> http://thepast.me ",
-    "T": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份twitter，往事提醒 >> http://thepast.me ",
-    "Q": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast， 备份微博，往事提醒 >> http://thepast.me ",
+    "D": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份广播，往事提醒 >> http://thepast.me ",
+    "S": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份微博，往事提醒 >> http://thepast.me ",
+    "T": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份twitter，往事提醒 >> http://thepast.me ",
+    "Q": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份微博，往事提醒 >> http://thepast.me ",
+    "R": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份人人，往事提醒 >> http://thepast.me ",
 }
 
 #-- oauth key & secret config --
@@ -90,6 +93,11 @@ APIKEY_DICT = {
         "secret" : "",
         "redirect_uri" : "http://thepast.me/connect/qq/callback",
     },
+    OPENID_RENREN: {
+        "key" : "",
+        "secret" : "",
+        "redirect_uri" : "http://thepast.me/connect/renren/callback",
+    },
 }
 
 #-- category of status --
@@ -103,6 +111,11 @@ CATE_TWITTER_STATUS = 400
 CATE_QQWEIBO_STATUS = 500
 ## thepast 的日记
 CATE_THEPAST_NOTE = 600
+CATE_RENREN_STATUS = 700
+CATE_RENREN_FEED = 701
+CATE_RENREN_BLOG = 702
+CATE_RENREN_ALBUM = 703
+CATE_RENREN_PHOTO = 704
 
 CATE_LIST = (
     CATE_DOUBAN_NOTE,
@@ -111,6 +124,11 @@ CATE_LIST = (
     CATE_TWITTER_STATUS,
     CATE_QQWEIBO_STATUS,
     CATE_THEPAST_NOTE,
+    CATE_RENREN_STATUS,
+    CATE_RENREN_FEED,
+    CATE_RENREN_BLOG,
+    CATE_RENREN_ALBUM,
+    CATE_RENREN_PHOTO,
 )
 
 DOUBAN_NOTE = 'http://douban.com/note/%s'
@@ -120,11 +138,13 @@ WEIBO_STATUS = 'http://weibo.com/%s'
 QQWEIBO_STATUS = 'http://t.qq.com/t/%s'
 TWITTER_STATUS = 'http://twitter.com/#!/%s/status/%s'
 THEPAST_NOTE = 'http://thepast.me/note/%s'
+RENREN_BLOG = 'http://blog.renren.com/blog/%s/%s'
 
 DOUBAN_SITE = "http://www.douban.com"
 SINA_SITE = "http://weibo.com"
 TWITTER_SITE = "http://twitter.com/#!"
 QQWEIBO_SITE = "http://t.qq.com"
+RENREN_SITE = "http://www.renren.com"
 
 #uid of laiwei
 MY_USER_ID = 4

@@ -8,7 +8,7 @@ from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import datetime2timestamp
-from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo, Wordpress
+from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo, Wordpress, Renren
 from past.corelib import category2provider
 from past.model.data import (DoubanNoteData, DoubanMiniBlogData)
 from past.model.status import Status, SyncTask
@@ -37,6 +37,9 @@ def sync(t, old=False):
         elif provider == config.OPENID_QQ:
             alias = UserAlias.get_by_user_and_type(t.user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_QQ])
+        elif provider == config.OPENID_RENREN:
+            alias = UserAlias.get_by_user_and_type(t.user_id,
+                    config.OPENID_TYPE_DICT[config.OPENID_RENREN])
         if not alias:
             log.warn("no alias...")
             return 0
@@ -55,6 +58,8 @@ def sync(t, old=False):
             client = Twitter(alias.alias)
         elif provider == config.OPENID_QQ:
             client = QQWeibo(alias.alias)
+        elif provider == config.OPENID_RENREN:
+            client = Renren(alias.alias, token.access_token, token.refresh_token)
         if not client:
             log.warn("get client fail, break...")
             return 0
@@ -101,11 +106,6 @@ def sync(t, old=False):
                 if len(status_list) < 20:
                     log.info("again will get sinaweibo order than %s..." % (int(origin_min_id)-1))
                     status_list = client.get_timeline(until_id=int(origin_min_id)-1)
-                    
-                #if len(status_list) <= 1:
-                #    downloaded_status_count = Status.get_count_by_user(t.user_id)
-                #    page = downloaded_status_count / 100 + 2
-                #    status_list = client.get_timeline_by_page(page=page)
             else:
                 log.info("will get sinaweibo newer than %s..." % origin_min_id)
                 status_list = client.get_timeline(since_id=origin_min_id, count=20)
@@ -142,6 +142,66 @@ def sync(t, old=False):
                 for x in status_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 return len(status_list)
+        elif t.category == config.CATE_RENREN_STATUS:
+            if old:
+                count = 100
+                total_count = Status.get_count_by_cate(t.category, t.user_id)
+                page = int(total_count / count) + 1
+                log.info("will get older renren status, page=%s, count=%s" %(page, count))
+                status_list = client.get_timeline(page, count)
+            else:
+                count = 20
+                page = 1
+                log.info("will get newest renren status, page=%s, count=%s" %(page, count))
+                status_list = client.get_timeline(page, count)
+            if status_list:
+                log.info("get renren status succ, result length is:%s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+        elif t.category == config.CATE_RENREN_BLOG:
+            if old:
+                count = 50
+                total_count = Status.get_count_by_cate(t.category, t.user_id)
+                page = int(total_count / count) + 1
+                log.info("will get older renren blog, page=%s, count=%s" %(page, count))
+                status_list = client.get_blog(page, count)
+            else:
+                count = 20
+                page = 1
+                log.info("will get newest renren blog, page=%s, count=%s" %(page, count))
+                status_list = client.get_blog(page, count)
+            if status_list:
+                log.info("get renren blog succ, result length is:%s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+        elif t.category == config.CATE_RENREN_ALBUM:
+            status_list = client.get_album()
+            if status_list:
+                log.info("get renren album succ, result length is:%s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
+        elif t.category == config.CATE_RENREN_PHOTO:
+            albums_ids = Status.get_ids(user_id=t.user_id, limit=1000, cate=config.CATE_RENREN_ALBUM)
+            albums = Status.gets(albums_ids)
+            if not albums:
+                return 0
+            for x in albums:
+                d = x.get_data()
+                if not d:
+                    continue
+                aid = d.get_origin_id()
+                size = int(d.get_size())
+                count = 50
+                for i in xrange(1, size/count + 2):
+                    status_list = client.get_photo(aid, i, count)
+                    if status_list:
+                        log.info("get renren photo of album %s succ, result length is:%s" \
+                                % (aid, len(status_list)))
+                        for x in status_list:
+                            Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
     except:
         import traceback; print traceback.format_exc()
     return 0

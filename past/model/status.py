@@ -13,7 +13,8 @@ from .user import UserAlias
 from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
-        WordpressData, ThepastNoteData
+        WordpressData, ThepastNoteData, RenrenStatusData, RenrenBlogData, \
+        RenrenAlbumData, RenrenPhotoData
 from .kv import RawStatus
 from past import config
 from past import consts
@@ -299,6 +300,7 @@ class Status(object):
         else:
             return 0
 
+    #TODO:每次新增第三方，需要修改这里
     def get_data(self):
         if self.category == config.CATE_DOUBAN_MINIBLOG:
             return DoubanMiniBlogData(self.raw)
@@ -316,13 +318,22 @@ class Status(object):
             return WordpressData(self.raw)
         elif self.category == config.CATE_THEPAST_NOTE:
             return ThepastNoteData(self.raw)
+        elif self.category == config.CATE_RENREN_STATUS:
+            return RenrenStatusData(self.raw)
+        elif self.category == config.CATE_RENREN_BLOG:
+            return RenrenBlogData(self.raw)
+        elif self.category == config.CATE_RENREN_ALBUM:
+            return RenrenAlbumData(self.raw)
+        elif self.category == config.CATE_RENREN_PHOTO:
+            return RenrenPhotoData(self.raw)
         else:
             return None
 
     def get_origin_uri(self):
         ##d是AbsData的子类实例
         d = self.get_data()
-        if self.category == config.CATE_DOUBAN_MINIBLOG or self.category == config.CATE_DOUBAN_STATUS:
+        if self.category == config.CATE_DOUBAN_MINIBLOG or \
+                self.category == config.CATE_DOUBAN_STATUS:
             ua = UserAlias.get_by_user_and_type(self.user_id, 
                     config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
             if ua:
@@ -340,6 +351,11 @@ class Status(object):
             return (config.OPENID_WORDPRESS, d.get_origin_uri())
         elif self.category == config.CATE_THEPAST_NOTE:
             return (config.OPENID_THEPAST, d.get_origin_uri())
+        elif self.category == config.CATE_RENREN_STATUS or \
+                self.category == config.CATE_RENREN_BLOG or \
+                self.category == config.CATE_RENREN_ALBUM or \
+                self.category == config.CATE_RENREN_PHOTO:
+            return (config.OPENID_RENREN, d.get_origin_uri())
         else:
             return None
 

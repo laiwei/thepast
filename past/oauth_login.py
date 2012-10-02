@@ -14,7 +14,7 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import randbytes
 from past.utils import httplib2_request
-from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, QQWeiboUser
+from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, QQWeiboUser, RenrenUser
 from past.model.user import OAuth2Token
 
 class OAuthLoginError(Exception):
@@ -322,7 +322,6 @@ class QQOAuth1Login(object):
     def _request(self, method, uri, kw, file_params):
         raw_qs, qs = QQOAuth1Login.sign(method, uri, self.consumer_key, 
                 self.consumer_secret, self.token_secret, **kw)
-        print "+++++ sign:", raw_qs, qs
         if method == "GET":
             full_uri = "%s?%s" % (uri, qs)
             resp, content = httplib2_request(full_uri, method)
@@ -338,7 +337,6 @@ class QQOAuth1Login(object):
         if resp.status != 200:
             raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
-        print "++++++ qq request content:", resp.status, resp.reason, content
         return content
         
     @classmethod
@@ -389,3 +387,68 @@ class QQOAuth1Login(object):
 
         return (d, qs)
 
+class RenrenLogin(OAuth2Login):
+    provider = config.OPENID_RENREN
+
+    authorize_uri = 'https://graph.renren.com/oauth/authorize'
+    access_token_uri = 'https://graph.renren.com/oauth/token' 
+    user_info_uri = 'http://api.renren.com/restserver.do'
+
+    def __init__(self, apikey, apikey_secret, redirect_uri):
+        super(RenrenLogin, self).__init__(apikey, apikey_secret, redirect_uri,
+            "read_user_status status_update read_user_feed publish_feed read_user_blog publish_blog read_user_photo photo_upload read_user_album"),
+
+    def get_user_info(self, access_token, uid):
+        user = None
+        qs = {
+            "method": "users.getInfo",
+            "v": "1.0",
+            "access_token": access_token,
+            "uid": uid or "",
+            "format": "json",
+            "fields": "uid,name,sex,star,zidou,vip,birthday,tinyurl,headurl,mainurl,hometown_location,work_history,university_history",
+        }
+        _, qs = RenrenLogin.sign(self.apikey_secret, **qs)
+        uri = "%s?%s" % (self.user_info_uri, qs)
+        resp, content = httplib2_request(uri, "POST")
+        print "-------renren user_info result", content
+        if resp.status != 200:
+            raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content)
+        if r and len(r) >= 1:
+            user = RenrenUser(r[0])
+        return user
+
+    ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
+    ##params为dict，是需要传递的参数, body 和 headers不加入签名
+    def access_resource(self, method, api, params, file_params=None):
+        uri = self.__class__.api_uri + api
+
+        if params:
+            params['oauth_token'] = self.token
+        else:
+            params = {'oauth2_token':self.token,}
+        if method == "GET":
+            return self.GET(uri, params)
+        if method == "POST":
+            return self.POST(uri, params, file_params)
+
+    @classmethod
+    def sign(cls, token_secret, **kw):
+        
+        d = {}
+        for k, v in kw.items():
+            d[k] = v
+        d_ = sorted(d.items(), key=lambda x:x[0])
+
+        dd_ = ["%s=%s" %(x[0], x[1]) for x in d_]
+        raw = "%s%s" %("".join(dd_), token_secret)
+        hashed = hashlib.md5(raw).hexdigest()
+
+        d["sig"] = hashed
+        
+        qs = urllib.urlencode(d_).replace("+", "%20")
+        qs += "&" + urllib.urlencode({"sig":hashed})
+
+        return (d, qs)

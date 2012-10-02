@@ -205,6 +205,36 @@ class QQWeiboUser(AbsUserData):
         return "%s-%s-%s" % (self.data.get("birth_year", ""),
             self.data.get("birth_month", ""), self.data.get("birth_day"))
 
+## renren user数据接口
+class RenrenUser(AbsUserData):
+
+    def __init__(self, data):
+        super(RenrenUser, self).__init__(data)
+
+    def get_user_id(self):
+        return self.data.get("uid","")
+
+    def get_uid(self):
+        return self.data.get("uid", "")
+
+    def get_nickname(self):
+        return self.data.get("name", "")
+
+    def get_intro(self):
+        return ""
+
+    def get_signature(self):
+        return ""
+
+    def get_avatar(self):
+        return self.data.get("headurl", "")
+
+    def get_icon(self):
+        return self.data.get("tinyurl", "")
+
+    def get_email(self):
+        return ""
+
 ## 第三方数据接口
 class AbsData(object):
     
@@ -626,3 +656,142 @@ class WordpressData(AbsData):
 
     def get_summary(self):
         return clear_html_element(self.data.get("summary", ""))[:150]
+
+class RenrenData(AbsData):
+    
+    def __init__(self, category, data):
+        super(RenrenData, self).__init__( 
+                config.OPENID_TYPE_DICT[config.OPENID_RENREN], category, data)
+
+class RenrenStatusData(RenrenData):
+    def __init__(self, data):
+        super(RenrenStatusData, self).__init__(
+                config.CATE_RENREN_STATUS, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("status_id", ""))
+
+    def get_create_time(self):
+        return self.data.get("time")
+
+    def get_title(self):
+        return ""
+
+    def get_content(self):
+        return self.data.get("message", "") 
+    
+    def get_retweeted_data(self):
+        d = {}
+        d["status_id"] = self.data.get("root_status_id")
+        d["message"] = "%s %s" %(self.data.get("forward_message"), self.data.get("root_message"))
+        d["uid"] = self.data.get("root_uid")
+        d["username"] = self.data.get("root_username")
+        d["time"] = self.data.get("time")
+        
+        return RenrenStatusData(d)
+
+    def get_user(self):
+        return self.data.get("uid", "")
+
+    def get_origin_uri(self):
+        return "%s/%s#//status/status?id=%s" %(config.RENREN_SITE, self.data.get("uid"), self.data.get("uid"))
+
+    def get_place(self):
+        return self.data.get("place")
+
+class RenrenFeedData(RenrenData):
+    def __init__(self, data):
+        super(RenrenFeedData, self).__init__(
+                config.CATE_RENREN_FEED, data)
+    
+class RenrenBlogData(RenrenData):
+    def __init__(self, data):
+        super(RenrenBlogData, self).__init__(
+                config.CATE_RENREN_BLOG, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("id", ""))
+
+    def get_create_time(self):
+        return self.data.get("time")
+
+    def get_title(self):
+        return self.data.get("title", "")
+
+    def get_content(self):
+        return self.data.get("content", "") 
+
+    def get_user(self):
+        return self.data.get("uid", "")
+    
+    def get_origin_uri(self):
+        return config.RENREN_BLOG %(self.get_user(), self.get_origin_id())
+
+class RenrenAlbumData(RenrenData):
+    def __init__(self, data):
+        super(RenrenAlbumData, self).__init__(
+                config.CATE_RENREN_ALBUM, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("aid", ""))
+
+    def get_create_time(self):
+        return self.data.get("create_time")
+
+    def get_title(self):
+        return self.data.get("name", "")
+
+    def get_content(self):
+        return self.data.get("description", "")
+
+    def get_user(self):
+        return self.data.get("uid", "")
+
+    def get_images(self):
+        return [self.data.get("url", "")]
+
+    def get_size(self):
+        return self.data.get("size", 100)
+        
+
+class RenrenPhotoData(RenrenData):
+    def __init__(self, data):
+        super(RenrenPhotoData, self).__init__(
+                config.CATE_RENREN_PHOTO, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("pid", ""))
+
+    def get_create_time(self):
+        return self.data.get("time")
+
+    def get_title(self):
+        return self.data.get("caption", "")
+
+    def get_content(self):
+        return ""
+
+    def get_user(self):
+        return self.data.get("uid", "")
+    
+    def get_origin_pic(self):
+        return self.data.get("url_large", "")
+
+    def get_thumbnail_pic(self):
+        return self.data.get("url_tiny", "")
+
+    def get_middle_pic(self):
+        return self.data.get("url_head", "")
+
+    def get_images(self, size="middle"):
+        method = "get_%s_pic" % size
+        r = []
+        if hasattr(self, method):
+            p = getattr(self, method)()
+            if p:
+                if not isinstance(p, list):
+                    r.append(p)
+                else:
+                    r.extend(p)
+        return r
+

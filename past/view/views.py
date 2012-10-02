@@ -14,7 +14,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue, \
         get_status_ids_today_in_history, get_status_ids_yesterday
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
-        TwitterOAuthLogin, QQOAuth1Login
+        TwitterOAuthLogin, QQOAuth1Login, RenrenLogin
 from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
 from past.cws.cut import get_keywords
 from past import consts
@@ -149,6 +149,8 @@ def connect(provider):
         login_service = QQOAuth1Login(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_TWITTER:
         login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_RENREN:
+        login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
     try:
         login_uri = login_service.get_login_uri()
     except OAuthLoginError, e:
@@ -164,7 +166,7 @@ def connect(provider):
 @app.route("/connect/<provider>/callback")
 def connect_callback(provider):
     code = request.args.get("code")
-
+    print "----------code:",code
     d = config.APIKEY_DICT.get(provider)
     login_service = None
     user = None
@@ -173,23 +175,28 @@ def connect_callback(provider):
     if not openid_type:
         abort(404, "not support such provider")
 
-    if provider in [config.OPENID_DOUBAN, config.OPENID_SINA,]:
+    if provider in [config.OPENID_DOUBAN, config.OPENID_SINA, config.OPENID_RENREN,]:
         if provider == config.OPENID_DOUBAN:
             login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
         elif provider == config.OPENID_SINA:
             login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+        elif provider == config.OPENID_RENREN:
+            login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
 
         ## oauth2方式授权处理
         try:
             token_dict = login_service.get_access_token(code)
+            print "-------token_dict",token_dict
         except OAuthLoginError, e:
             abort(401, e.msg)
 
         if not ( token_dict and token_dict.get("access_token") ):
             abort(401, "no_access_token")
         try:
-            user_info = login_service.get_user_info(
-                token_dict.get("access_token"), token_dict.get("uid"))
+            access_token = token_dict.get("access_token")
+            uid = token_dict.get("uid") or token_dict.get("user", {}).get("uid")
+            user_info = login_service.get_user_info(access_token, uid)
+            print "---------user_info", user_info
         except OAuthLoginError, e:
             abort(401, e.msg)
 
@@ -433,6 +440,12 @@ def _add_sync_task_and_push_queue(provider, user):
         if str(config.CATE_QQWEIBO_STATUS) not in task_ids:
             t = SyncTask.add(config.CATE_QQWEIBO_STATUS, user.id)
             t and TaskQueue.add(t.id, t.kind)
+    elif provider == config.OPENID_RENREN:
+        for cate in (config.CATE_RENREN_STATUS, config.CATE_RENREN_BLOG, 
+                config.CATE_RENREN_ALBUM, config.CATE_RENREN_PHOTO):
+            if str(cate) not in task_ids:
+                t = SyncTask.add(cate, user.id)
+                t and TaskQueue.add(t.id, t.kind)
 
 def post_status(user, provider=None, msg=""):
     if msg and isinstance(msg, unicode):                                           

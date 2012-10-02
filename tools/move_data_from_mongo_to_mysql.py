@@ -70,5 +70,5 @@ def move_status():
         start += limit
 
 
-#move_user_profile()
+move_user_profile()
 move_status()

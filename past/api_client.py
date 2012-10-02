@@ -10,9 +10,10 @@ from past.utils.logger import logging
 from past.utils import httplib2_request
 from past.model.data import (DoubanNoteData, DoubanStatusData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
-    QQWeiboStatusData, WordpressData)
+    QQWeiboStatusData, WordpressData, 
+    RenrenStatusData, RenrenFeedData, RenrenBlogData, RenrenPhotoData, RenrenAlbumData)
 from past.model.user import User,UserAlias, OAuth2Token
-from past.oauth_login import QQOAuth1Login, DoubanLogin, OAuthLoginError
+from past.oauth_login import QQOAuth1Login, DoubanLogin, OAuthLoginError, RenrenLogin
 
 log = logging.getLogger(__file__)
 
@@ -490,4 +491,129 @@ class Wordpress(object):
         if (not refresh) and hasattr(d,  'etag'):
             self.set_etag(d.etag)
         return [WordpressData(x) for x in entries]
+
+class Renren(object):
+    ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
+    def __init__(self, alias, access_token, refresh_token=None,
+            api_host = "http://api.renren.com/restserver.do", api_version=1):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.alias = alias
+        self.api_host = api_host
+        self.api_version = str(api_version)
+
+        self.apikey = config.APIKEY_DICT.get(config.OPENID_RENREN).get("key")
+        self.api_secret = config.APIKEY_DICT.get(config.OPENID_RENREN).get("secret")
+   
+    def __repr__(self):
+        return '<Renren alias=%s, access_token=%s, refresh_token=%s, \
+                api_host=%s, api_version=%s>' \
+                % (self.alias, self.access_token, self.refresh_token, 
+                self.api_host, self.api_version)
+    __str__ = __repr__
+
+    @classmethod                                                                   
+    def get_client(cls, user_id):                                                  
+        alias = UserAlias.get_by_user_and_type(user_id,                            
+                config.OPENID_TYPE_DICT[config.OPENID_RENREN])                       
+        if not alias:                                                              
+            return None                                                            
+                                                                                   
+        token = OAuth2Token.get(alias.id)                                          
+        if not token:                                                              
+            return None                                                            
+                                                                                   
+        return cls(alias.alias, token.access_token, token.refresh_token)
+
+    def _request(self, api, method="POST", extra_dict=None):
+        if extra_dict is None:
+            extra_dict = {}
+
+        params = {
+            "method": api,
+            "v": "1.0",
+            "access_token": self.access_token,
+            "format": "json",
+        }
+        params.update(extra_dict)
+        _, qs = RenrenLogin.sign(self.api_secret, **params)
+        uri = "%s?%s" % (self.api_host, qs)
+
+        log.info('getting %s...' % uri)
+        resp, content = httplib2_request(uri, method)
+        if resp.status == 200:
+            return content
+        else:
+            log.warn("get %s fail, status code=%s, msg=%s" \
+                    % (uri, resp.status, content))
+        return None
+
+    def get_timeline(self, page=1, count=100):
+        d = {}
+        d["count"] = count
+        d["page"] = page
+
+        contents = self._request("status.gets", "POST", d)
+        contents = json_decode(contents) if contents else []
+        ##debug
+        if contents:
+            print '---get renren status succ, result length is:', len(contents)
+        return [RenrenStatusData(c) for c in contents]
+
+    def get_feed(self, type_="10,20,30,40", page=1, count=50):
+        d = {}
+        d["count"] = count
+        d["page"] = page
+        d["type"] = type_
+
+        contents = self._request("feed.get", "POST", d)
+        contents = json_decode(contents) if contents else []
+        ##debug
+        if contents:
+            print '---get renren feed succ, result length is:', len(contents)
+        return [RenrenFeedData(c) for c in contents]
+
+    def get_blog(self, page=1, count=50):
+        d = {}
+        d["count"] = count
+        d["page"] = page
+        d["uid"] = self.alias
+
+        contents = self._request("blog.gets", "POST", d)
+        contents = json_decode(contents) if contents else {}
+        ##debug
+        if contents:
+            uid = contents.get("uid")
+            tmp_blogs = contents.get("blogs", [])
+            blogs = []
+            for x in tmp_blogs:
+                x["uid"] = uid
+                blogs.append(x)
+            print '---get renren blog succ, result length is:', len(blogs)
+            return [RenrenBlogData(c) for c in blogs]
+        else:
+            return []
+
+    def get_photo(self, aid, page=1, count=100):
+        d = {}
+        d["count"] = count
+        d["page"] = page
+        d["uid"] = self.alias
+        d["aid"] = aid
+
+        contents = self._request("photos.get", "POST", d)
+        contents = json_decode(contents) if contents else []
+        print '---get renren photos succ, result length is:', len(contents)
+        return [RenrenPhotoData(c) for c in contents]
+            
+    def get_album(self, page=1, count=1000):
+        d = {}
+        d["count"] = count
+        d["page"] = page
+        d["uid"] = self.alias
+
+        contents = self._request("photos.getAlbums", "POST", d)
+        contents = json_decode(contents) if contents else []
+        print '---get renren album succ, result length is:', len(contents)
+        return [RenrenAlbumData(c) for c in contents]
 
