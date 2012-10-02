@@ -783,7 +783,7 @@ class RenrenPhotoData(RenrenData):
     def get_middle_pic(self):
         return self.data.get("url_head", "")
 
-    def get_images(self, size="middle"):
+    def get_images(self, size="origin"):
         method = "get_%s_pic" % size
         r = []
         if hasattr(self, method):

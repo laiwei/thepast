@@ -2,6 +2,7 @@
 import os
 from datetime import datetime, timedelta
 import calendar
+import time
 from collections import defaultdict
 
 from flask import g, request, redirect, url_for, abort, render_template,\
@@ -47,7 +48,9 @@ def user(uid):
     elif not g.user:
         status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
         
+    print "---------before status_list:", status_list
     status_list  = statuses_timelize(status_list)
+    print "---------after status_list:", status_list
     if status_list:
         ##XXX:暂时去除了个人关键字的功能
         #tags_list = [x[0] for x in get_keywords(u.id, 30)]
@@ -168,7 +171,7 @@ def statuses_timelize(status_list):
     output = {}
     for hash_s, repeated in hashed.items():
         s = repeated.status_list[0]
-        year_month = "%s-%s" % (s.create_time.year, s.create_time.month)
+        year_month = "%s-%s" % (s.create_time.year, s.create_time.strftime("%m"))
         day = s.create_time.day
 
         if year_month not in output:

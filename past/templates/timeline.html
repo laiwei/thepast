@@ -89,6 +89,18 @@
                                 {{status_tmpl_helper.thepast_note_status(s)}}
                             {%endif%}
 
+                            {%if s.category == config.CATE_RENREN_STATUS%}
+                                {{status_tmpl_helper.thepast_renren_status(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_RENREN_BLOG%}
+                                {{status_tmpl_helper.thepast_renren_blog(s)}}
+                            {%endif%}
+
+                            {%if s.category == config.CATE_RENREN_PHOTO or s.category == config.CATE_RENREN_ALBUM%}
+                                {{status_tmpl_helper.thepast_renren_photo(s)}}
+                            {%endif%}
+
                         </div>
                     </div>
                 </li>

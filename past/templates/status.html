@@ -200,3 +200,45 @@
         From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
     {%endif%}
 {%- endmacro %}
+
+{% macro thepast_renren_status(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    {{s.text}}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}
+
+{% macro thepast_renren_blog(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    <a href="/post/{{s.id}}">{{s.title}}</a>
+    {%if pdf%}
+        {{s.text}}
+    {%endif%}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}
+
+{% macro thepast_renren_photo(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    {{s.title}}
+
+    {% set images = s.get_data().get_images() or [] %}
+    {% if images %}
+        {%for image in images%}
+            <div class="sep3"></div>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" border="0"/>
+        {%endfor%}
+    {% endif %}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}
+

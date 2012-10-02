@@ -73,6 +73,11 @@ class Status(object):
             return int(self.id)
         if self.category == config.CATE_THEPAST_NOTE:
             return int(self.id)
+        if self.category == config.CATE_RENREN_STATUS or \
+                self.category == config.CATE_RENREN_BLOG or \
+                self.category == config.CATE_RENREN_ALBUM or \
+                self.category == config.CATE_RENREN_PHOTO:
+            return int(self.id)
         s = u"%s%s%s" % (self.user_id, self._bare_text, self.create_time.day)
         d = hashlib.md5()
         d.update(s.encode("utf8"))

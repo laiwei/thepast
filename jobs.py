@@ -165,19 +165,22 @@ def sync(t, old=False):
                 total_count = Status.get_count_by_cate(t.category, t.user_id)
                 page = int(total_count / count) + 1
                 log.info("will get older renren blog, page=%s, count=%s" %(page, count))
-                status_list = client.get_blog(page, count)
+                blogs = client.get_blogs(page, count)
             else:
                 count = 20
                 page = 1
                 log.info("will get newest renren blog, page=%s, count=%s" %(page, count))
-                status_list = client.get_blog(page, count)
-            if status_list:
-                log.info("get renren blog succ, result length is:%s" % len(status_list))
-                for x in status_list:
-                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
-                return len(status_list)
+                blogs = client.get_blogs(page, count)
+            if blogs:
+                uid = blogs.get("uid")
+                blog_ids = filter(None, [v.get("id") for v in blogs.get("blogs", [])])
+                log.info("get renren blog ids succ, result length is:%s" % len(blog_ids))
+                for blog_id in blog_ids:
+                    blog = client.get_blog(blog_id, uid)
+                    Status.add_from_obj(t.user_id, blog, json_encode(blog.get_data()))
+                return len(blog_ids)
         elif t.category == config.CATE_RENREN_ALBUM:
-            status_list = client.get_album()
+            status_list = client.get_albums()
             if status_list:
                 log.info("get renren album succ, result length is:%s" % len(status_list))
                 for x in status_list:
@@ -196,7 +199,7 @@ def sync(t, old=False):
                 size = int(d.get_size())
                 count = 50
                 for i in xrange(1, size/count + 2):
-                    status_list = client.get_photo(aid, i, count)
+                    status_list = client.get_photos(aid, i, count)
                     if status_list:
                         log.info("get renren photo of album %s succ, result length is:%s" \
                                 % (aid, len(status_list)))

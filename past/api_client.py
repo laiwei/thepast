@@ -573,7 +573,7 @@ class Renren(object):
             print '---get renren feed succ, result length is:', len(contents)
         return [RenrenFeedData(c) for c in contents]
 
-    def get_blog(self, page=1, count=50):
+    def get_blogs(self, page=1, count=50):
         d = {}
         d["count"] = count
         d["page"] = page
@@ -581,20 +581,20 @@ class Renren(object):
 
         contents = self._request("blog.gets", "POST", d)
         contents = json_decode(contents) if contents else {}
-        ##debug
-        if contents:
-            uid = contents.get("uid")
-            tmp_blogs = contents.get("blogs", [])
-            blogs = []
-            for x in tmp_blogs:
-                x["uid"] = uid
-                blogs.append(x)
-            print '---get renren blog succ, result length is:', len(blogs)
-            return [RenrenBlogData(c) for c in blogs]
-        else:
-            return []
+        print '---get renren blog succ, result length is:', len(contents.get("blogs"))
+        return contents
 
-    def get_photo(self, aid, page=1, count=100):
+    def get_blog(self, blog_id, uid):
+        d = {}
+        d["uid"] = uid or self.alias
+        d["id"] = blog_id
+        d["comment"] = 50
+
+        contents = self._request("blog.get", "POST", d)
+        contents = json_decode(contents) if contents else {}
+        return RenrenBlogData(contents)
+
+    def get_photos(self, aid, page=1, count=100):
         d = {}
         d["count"] = count
         d["page"] = page
@@ -606,7 +606,7 @@ class Renren(object):
         print '---get renren photos succ, result length is:', len(contents)
         return [RenrenPhotoData(c) for c in contents]
             
-    def get_album(self, page=1, count=1000):
+    def get_albums(self, page=1, count=1000):
         d = {}
         d["count"] = count
         d["page"] = page
