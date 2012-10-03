@@ -14,7 +14,8 @@ import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import randbytes
 from past.utils import httplib2_request
-from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, QQWeiboUser, RenrenUser
+from past.model.data import SinaWeiboUser, DoubanUser, TwitterUser, \
+        QQWeiboUser, RenrenUser, InstagramUser
 from past.model.user import OAuth2Token
 
 class OAuthLoginError(Exception):
@@ -420,20 +421,6 @@ class RenrenLogin(OAuth2Login):
             user = RenrenUser(r[0])
         return user
 
-    ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
-    ##params为dict，是需要传递的参数, body 和 headers不加入签名
-    def access_resource(self, method, api, params, file_params=None):
-        uri = self.__class__.api_uri + api
-
-        if params:
-            params['oauth_token'] = self.token
-        else:
-            params = {'oauth2_token':self.token,}
-        if method == "GET":
-            return self.GET(uri, params)
-        if method == "POST":
-            return self.POST(uri, params, file_params)
-
     @classmethod
     def sign(cls, token_secret, **kw):
         
@@ -452,3 +439,29 @@ class RenrenLogin(OAuth2Login):
         qs += "&" + urllib.urlencode({"sig":hashed})
 
         return (d, qs)
+
+class InstagramLogin(OAuth2Login):
+    provider = config.OPENID_INSTAGRAM
+
+    authorize_uri = 'https://api.instagram.com/oauth/authorize/'
+    access_token_uri = 'https://api.instagram.com/oauth/access_token' 
+    user_info_uri = 'https://api.instagram.com/v1/users/%s/'
+
+    def __init__(self, apikey, apikey_secret, redirect_uri): 
+        scope="basic likes comments relationships"
+        super(InstagramLogin, self).__init__(apikey, apikey_secret, redirect_uri, scope)
+
+    def get_user_info(self, access_token, uid):
+        qs = {
+            "access_token": access_token,
+        }
+        qs = urllib.urlencode(qs)
+        uri = "%s?%s" % (self.user_info_uri % uid, qs)
+        resp, content = httplib2_request(uri, "GET")
+        if resp.status != 200:
+            raise OAuthLoginError('get_user_info, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content) if content else {}
+        user = InstagramUser(r.get("data"))
+
+        return user

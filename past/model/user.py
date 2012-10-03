@@ -330,7 +330,7 @@ class UserAlias(object):
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
             u = User.get(self.user_id)
             return config.OPENID_TYPE_NAME_DICT[self.type],\
-                    "%s/%s" %(config.TWITTER_SITE, u.name),\
+                    "%s/#!%s" %(config.TWITTER_SITE, u.name),\
                     config.OPENID_TWITTER
 
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
@@ -344,6 +344,12 @@ class UserAlias(object):
             ##FIXME: wordpress显示rss地址代替blog地址
             return config.OPENID_TYPE_NAME_DICT[self.type],\
                     self.alias, config.OPENID_WORDPRESS
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_RENREN]:
+            return config.OPENID_TYPE_NAME_DICT[self.type],\
+                    "%s/%s" %(config.RENREN_SITE, self.alias), config.OPENID_RENREN
+        if self.type == config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM]:
+            return config.OPENID_TYPE_NAME_DICT[self.type],\
+                    "%s/%s" %(config.INSTAGRAM_SITE, self.alias), config.OPENID_INSTAGRAM
 
 
 class OAuth2Token(object):

@@ -235,6 +235,36 @@ class RenrenUser(AbsUserData):
     def get_email(self):
         return ""
 
+## instagram user数据接口
+class InstagramUser(AbsUserData):
+
+    def __init__(self, data):
+        super(InstagramUser, self).__init__(data)
+
+    def get_user_id(self):
+        return self.data.get("id","")
+
+    def get_uid(self):
+        return self.data.get("username", "")
+
+    def get_nickname(self):
+        return self.data.get("full_name", "")
+
+    def get_intro(self):
+        return self.data.get("bio", "")
+
+    def get_signature(self):
+        return self.data.get("website", "")
+
+    def get_avatar(self):
+        return self.data.get("profile_picture", "")
+
+    def get_icon(self):
+        return self.data.get("profile_picture", "")
+
+    def get_email(self):
+        return ""
+
 ## 第三方数据接口
 class AbsData(object):
     
@@ -292,6 +322,9 @@ class AbsData(object):
     def get_summary(self):
         return self.get_content()
 
+    ##lbs信息
+    def get_location(self):
+        return ""
 
 class ThepastNoteData(AbsData):
     
@@ -696,7 +729,7 @@ class RenrenStatusData(RenrenData):
     def get_origin_uri(self):
         return "%s/%s#//status/status?id=%s" %(config.RENREN_SITE, self.data.get("uid"), self.data.get("uid"))
 
-    def get_place(self):
+    def get_location(self):
         return self.data.get("place")
 
 class RenrenFeedData(RenrenData):
@@ -795,3 +828,64 @@ class RenrenPhotoData(RenrenData):
                     r.extend(p)
         return r
 
+class InstagramStatusData(AbsData):
+    def __init__(self, data):
+        super(InstagramStatusData, self).__init__(
+                config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM], 
+                config.CATE_INSTAGRAM_STATUS, data)
+    
+    def get_origin_id(self):
+        return str(self.data.get("id", ""))
+
+    def get_create_time(self):
+        t = self.data.get("created_time")
+        if not t:
+            return None
+        t = float(t)
+        return datetime.datetime.fromtimestamp(t)
+
+    def get_title(self):
+        caption = self.data.get("caption")
+        if caption and isinstance(caption, dict):
+            return caption.get("text", "")
+
+    def get_content(self):
+        return ""
+
+    def get_user(self):
+        udata = self.data.get("user")
+        if udata and isinstance(udata, dict):
+            return InstagramUser(udata)
+    
+    def get_origin_pic(self):
+        images = self.data.get("images")
+        if images:
+            return images.get("standard_resolution",{}).get("url")
+
+    def get_thumbnail_pic(self):
+        images = self.data.get("images")
+        if images:
+            return images.get("thumbnail",{}).get("url")
+
+    def get_middle_pic(self):
+        images = self.data.get("images")
+        if images:
+            return images.get("low_resolution",{}).get("url")
+
+    def get_images(self, size="origin"):
+        method = "get_%s_pic" % size
+        r = []
+        if hasattr(self, method):
+            p = getattr(self, method)()
+            if p:
+                if not isinstance(p, list):
+                    r.append(p)
+                else:
+                    r.extend(p)
+        return r
+
+    def get_origin_uri(self):
+        return self.data.get("link", "")
+
+    def get_location(self):
+        return self.data.get("location")

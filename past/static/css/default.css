@@ -106,6 +106,7 @@ a:hover{color:#4d5256;text-decoration:underline;}
 #members{background:url(/static/img/members.png);padding:18px 0 0;}
 .member{font-size:13.5px;width:210px;height:48px;float:left;margin: 0 10px 18px 10px;border:1px solid #FFF;box-shadow:0px 0px 2px #CCC;line-height:24px;overflow:hidden;background-color:rgba(170, 170, 170, 0.07);}
 .avatar{width:48px;height:48px;float:left;}
+.avatar img{width:48px;height:48px;}
 .entry{margin-left:55px;}
 .name{margin:0 6px 2px 4px;}
 .name span{float:right;font-size:12px;color:#AAA;}

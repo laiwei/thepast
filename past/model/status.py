@@ -14,7 +14,7 @@ from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
         WordpressData, ThepastNoteData, RenrenStatusData, RenrenBlogData, \
-        RenrenAlbumData, RenrenPhotoData
+        RenrenAlbumData, RenrenPhotoData, InstagramStatusData
 from .kv import RawStatus
 from past import config
 from past import consts
@@ -76,7 +76,8 @@ class Status(object):
         if self.category == config.CATE_RENREN_STATUS or \
                 self.category == config.CATE_RENREN_BLOG or \
                 self.category == config.CATE_RENREN_ALBUM or \
-                self.category == config.CATE_RENREN_PHOTO:
+                self.category == config.CATE_RENREN_PHOTO or \
+                self.category == config.CATE_INSTAGRAM_STATUS:
             return int(self.id)
         s = u"%s%s%s" % (self.user_id, self._bare_text, self.create_time.day)
         d = hashlib.md5()
@@ -331,6 +332,8 @@ class Status(object):
             return RenrenAlbumData(self.raw)
         elif self.category == config.CATE_RENREN_PHOTO:
             return RenrenPhotoData(self.raw)
+        elif self.category == config.CATE_INSTAGRAM_STATUS:
+            return InstagramStatusData(self.raw)
         else:
             return None
 
@@ -361,6 +364,8 @@ class Status(object):
                 self.category == config.CATE_RENREN_ALBUM or \
                 self.category == config.CATE_RENREN_PHOTO:
             return (config.OPENID_RENREN, d.get_origin_uri())
+        elif self.category == config.CATE_INSTAGRAM_STATUS:
+            return (config.OPENID_INSTAGRAM, d.get_origin_uri())
         else:
             return None
 

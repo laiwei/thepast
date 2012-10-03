@@ -8,7 +8,8 @@
 
 
     <!-- 附件 -->
-    {%set atts = s.get_data() and s.get_data().get_attachments()%}
+    {%set data = s.get_data()%}
+    {%set atts = data and data.get_attachments()%}
     {%if atts%}
         {%for att in atts%}
         <div class="quote">
@@ -73,7 +74,8 @@
     {% endif %}
 
     <!-- 图片 -->
-    {% set images = s.get_data().get_images() or [] %}
+    {% set data = s.get_data()%}
+    {% set images = data and data.get_images() or [] %}
     {% if images %}
         {%for image in images%}
             <div class="sep3"></div>
@@ -98,7 +100,8 @@
         {{s.summary}}
     {%endif%}
 
-    {% set images = s.get_data().get_images(img_size) or [] %}
+    {% set data = s.get_data()%}
+    {% set images = data and data.get_images(img_size) or [] %}
     {% set re = s.get_retweeted_data() %}
     {% set re_images = re and re.get_images(img_size) or [] %}
     {% set images = images + re_images %}
@@ -158,7 +161,8 @@
         {%endif%}
     {% endif %}
 
-    {% set images = s.get_data().get_images() or [] %}
+    {% set data = s.get_data()%}
+    {% set images = data and data.get_images() or [] %}
     {%if re%}
         {%set images = images + (re.get_images() or [])%}
     {%endif%}
@@ -228,13 +232,35 @@
     {% set origin_uri = s.get_origin_uri() %}
     {{s.title}}
 
-    {% set images = s.get_data().get_images() or [] %}
+    {% set data = s.get_data()%}
+    {% set images = data and data.get_images() or [] %}
     {% if images %}
         {%for image in images%}
             <div class="sep3"></div>
             <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" border="0"/>
         {%endfor%}
     {% endif %}
+
+    {%if pdf%}
+        <div class="time">
+        From: {{origin_uri[0]}} {{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</div>
+    {%endif%}
+{%- endmacro %}
+
+{% macro thepast_default_status(s, pdf=False) -%}
+    {% set origin_uri = s.get_origin_uri() %}
+    {{s.title}}
+
+    {% set data = s.get_data()%}
+    {% set images = data and data.get_images() or [] %}
+    {% if images %}
+        {%for image in images%}
+            <div class="sep3"></div>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" border="0"/>
+        {%endfor%}
+    {% endif %}
+
+    {{s.text}}
 
     {%if pdf%}
         <div class="time">

@@ -14,7 +14,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, TaskQueue, \
         get_status_ids_today_in_history, get_status_ids_yesterday
 from past.oauth_login import DoubanLogin, SinaLogin, OAuthLoginError,\
-        TwitterOAuthLogin, QQOAuth1Login, RenrenLogin
+        TwitterOAuthLogin, QQOAuth1Login, RenrenLogin, InstagramLogin
 from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
 from past.cws.cut import get_keywords
 from past import consts
@@ -151,6 +151,8 @@ def connect(provider):
         login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
     elif provider == config.OPENID_RENREN:
         login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
+    elif provider == config.OPENID_INSTAGRAM:
+        login_service = InstagramLogin(d['key'], d['secret'], d['redirect_uri'])
     try:
         login_uri = login_service.get_login_uri()
     except OAuthLoginError, e:
@@ -175,13 +177,16 @@ def connect_callback(provider):
     if not openid_type:
         abort(404, "not support such provider")
 
-    if provider in [config.OPENID_DOUBAN, config.OPENID_SINA, config.OPENID_RENREN,]:
+    if provider in [config.OPENID_DOUBAN, config.OPENID_SINA, config.OPENID_RENREN,
+            config.OPENID_INSTAGRAM,]:
         if provider == config.OPENID_DOUBAN:
             login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
         elif provider == config.OPENID_SINA:
             login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
         elif provider == config.OPENID_RENREN:
             login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
+        elif provider == config.OPENID_INSTAGRAM:
+            login_service = InstagramLogin(d['key'], d['secret'], d['redirect_uri'])
 
         ## oauth2方式授权处理
         try:
@@ -193,8 +198,10 @@ def connect_callback(provider):
         if not ( token_dict and token_dict.get("access_token") ):
             abort(401, "no_access_token")
         try:
-            access_token = token_dict.get("access_token")
-            uid = token_dict.get("uid") or token_dict.get("user", {}).get("uid")
+            access_token = token_dict.get("access_token") 
+            #the last is instagram case:)
+            uid = token_dict.get("uid") or token_dict.get("user", {}).get("uid") \
+                    or token_dict.get("user", {}).get("id")
             user_info = login_service.get_user_info(access_token, uid)
             print "---------user_info", user_info
         except OAuthLoginError, e:
@@ -366,40 +373,40 @@ def _twitter_callback(request):
 
     api = login_service.api(token_dict.get("access_token"), 
             token_dict.get("access_token_secret"))
-    user_info = login_service.get_user_info(api)
+    thirdparty_user = login_service.get_user_info(api)
     
-    user = _save_user_and_token(token_dict, user_info, openid_type)
+    user = _save_user_and_token(token_dict, thirdparty_user, openid_type)
     return user
     
 ## 保存用户信息到数据库，并保存token
-def _save_user_and_token(token_dict, user_info, openid_type):
+def _save_user_and_token(token_dict, thirdparty_user, openid_type):
     first_connect = False
-    ua = UserAlias.get(openid_type, user_info.get_user_id())
+    ua = UserAlias.get(openid_type, thirdparty_user.get_user_id())
     if not ua:
         if not g.user:
             ua = UserAlias.create_new_user(openid_type,
-                    user_info.get_user_id(), user_info.get_nickname())
+                    thirdparty_user.get_user_id(), thirdparty_user.get_nickname())
         else:
             ua = UserAlias.bind_to_exists_user(g.user, 
-                    openid_type, user_info.get_user_id())
+                    openid_type, thirdparty_user.get_user_id())
         first_connect = True
     if not ua:
         return None
 
     ##设置个人资料（头像等等）
     u = User.get(ua.user_id)
-    u.set_avatar_url(user_info.get_avatar())
-    u.set_icon_url(user_info.get_icon())
+    u.set_avatar_url(thirdparty_user.get_avatar())
+    u.set_icon_url(thirdparty_user.get_icon())
 
     ##把各个第三方的uid保存到profile里面
     k = openid_type
     v = {
-        "uid": user_info.get_uid(), 
-        "intro": user_info.get_intro(),
-        "signature": user_info.get_signature(),
-        "avatar": user_info.get_avatar(),
-        "icon": user_info.get_icon(),
-        "email": user_info.get_email(),
+        "uid": thirdparty_user.get_uid(), 
+        "intro": thirdparty_user.get_intro(),
+        "signature": thirdparty_user.get_signature(),
+        "avatar": thirdparty_user.get_avatar(),
+        "icon": thirdparty_user.get_icon(),
+        "email": thirdparty_user.get_email(),
         "first_connect": "Y" if first_connect else "N",
     }
     u.set_profile_item(k, json_encode(v))
@@ -446,6 +453,10 @@ def _add_sync_task_and_push_queue(provider, user):
             if str(cate) not in task_ids:
                 t = SyncTask.add(cate, user.id)
                 t and TaskQueue.add(t.id, t.kind)
+    elif provider == config.OPENID_INSTAGRAM:
+        if str(config.CATE_INSTAGRAM_STATUS) not in task_ids:
+            t = SyncTask.add(config.CATE_INSTAGRAM_STATUS, user.id)
+            t and TaskQueue.add(t.id, t.kind)
 
 def post_status(user, provider=None, msg=""):
     if msg and isinstance(msg, unicode):                                           

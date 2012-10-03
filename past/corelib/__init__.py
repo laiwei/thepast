@@ -45,6 +45,8 @@ def category2provider(cate):
         return config.OPENID_THEPAST
     elif cate < 800:
         return config.OPENID_RENREN
+    elif cate < 900:
+        return config.OPENID_INSTAGRAM
     else:
         return None
 

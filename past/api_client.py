@@ -11,7 +11,8 @@ from past.utils import httplib2_request
 from past.model.data import (DoubanNoteData, DoubanStatusData,
     DoubanMiniBlogData, SinaWeiboStatusData, TwitterStatusData,
     QQWeiboStatusData, WordpressData, 
-    RenrenStatusData, RenrenFeedData, RenrenBlogData, RenrenPhotoData, RenrenAlbumData)
+    RenrenStatusData, RenrenFeedData, RenrenBlogData, RenrenPhotoData, 
+    RenrenAlbumData, InstagramStatusData)
 from past.model.user import User,UserAlias, OAuth2Token
 from past.oauth_login import QQOAuth1Login, DoubanLogin, OAuthLoginError, RenrenLogin
 
@@ -621,3 +622,94 @@ class Renren(object):
         if contents:
             return [RenrenAlbumData(c) for c in contents]
 
+class Instagram(object):
+    ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
+    def __init__(self, alias, access_token, refresh_token=None,
+            api_host = "https://api.instagram.com", api_version="v1"):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.alias = alias
+        self.api_host = api_host
+        self.api_version = str(api_version)
+
+        self.apikey = config.APIKEY_DICT.get(config.OPENID_INSTAGRAM).get("key")
+        self.api_secret = config.APIKEY_DICT.get(config.OPENID_INSTAGRAM).get("secret")
+   
+    def __repr__(self):
+        return '<Instagram alias=%s, access_token=%s, refresh_token=%s, \
+                api_host=%s, api_version=%s>' \
+                % (self.alias, self.access_token, self.refresh_token, 
+                self.api_host, self.api_version)
+    __str__ = __repr__
+
+    @classmethod                                                                   
+    def get_client(cls, user_id):                                                  
+        alias = UserAlias.get_by_user_and_type(user_id,                            
+                config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM])                       
+        if not alias:                                                              
+            return None                                                            
+                                                                                   
+        token = OAuth2Token.get(alias.id)                                          
+        if not token:                                                              
+            return None                                                            
+                                                                                   
+        return cls(alias.alias, token.access_token, token.refresh_token)
+
+    def _request(self, api, method="GET", extra_dict=None):
+        uri = urlparse.urljoin(self.api_host, api)
+        if extra_dict is None:
+            extra_dict = {}
+
+        params = {
+            "access_token": self.access_token,
+        }
+        params.update(extra_dict)
+        qs = urllib.urlencode(params)
+        uri = "%s?%s" % (uri, qs)
+
+        log.info('getting %s...' % uri)
+        resp, content = httplib2_request(uri, method)
+        if resp.status == 200:
+            return content
+        else:
+            log.warn("get %s fail, status code=%s, msg=%s" \
+                    % (uri, resp.status, content))
+        return None
+
+    def get_timeline(self, uid=None, min_id=None, max_id=None, count=100):
+        d = {}
+        d["count"] = count
+        if min_id:
+            d["min_id"] = min_id
+        if max_id:
+            d["max_id"] = max_id
+        uid = uid or self.alias or "self"
+
+        contents = self._request("/v1/users/%s/media/recent" %uid, "GET", d)
+        contents = json_decode(contents) if contents else {}
+        ##debug
+        if contents:
+            code = str(contents.get("meta", {}).get("code", ""))
+            if code == "200":
+                data = contents.get("data", [])
+                print '---get instagram feed succ, result length is:', len(data)
+                return [InstagramStatusData(c) for c in data]
+
+    def get_home_timeline(self, uid=None, min_id=None, max_id=None, count=100):
+        d = {}
+        d["count"] = count
+        if min_id:
+            d["min_id"] = min_id
+        if max_id:
+            d["max_id"] = max_id
+        uid = uid or self.alias or "self"
+
+        contents = self._request("/v1/users/%s/feed" %uid, "GET", d)
+        contents = json_decode(contents) if contents else {}
+        ##debug
+        if contents:
+            code = str(contents.get("meta", {}).get("code", ""))
+            if code == "200":
+                data = contents.get("data", [])
+                print '---get instagram home_timeline succ, result length is:', len(data)
+                return [InstagramStatusData(c) for c in data]

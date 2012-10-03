@@ -101,6 +101,10 @@
                                 {{status_tmpl_helper.thepast_renren_photo(s)}}
                             {%endif%}
 
+                            {%if s.category == config.CATE_INSTAGRAM_STATUS%}
+                                {{status_tmpl_helper.thepast_default_status(s)}}
+                            {%endif%}
+
                         </div>
                     </div>
                 </li>
