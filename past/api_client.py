@@ -558,7 +558,7 @@ class Renren(object):
         ##debug
         if contents:
             print '---get renren status succ, result length is:', len(contents)
-        return [RenrenStatusData(c) for c in contents]
+            return [RenrenStatusData(c) for c in contents]
 
     def get_feed(self, type_="10,20,30,40", page=1, count=50):
         d = {}
@@ -571,7 +571,7 @@ class Renren(object):
         ##debug
         if contents:
             print '---get renren feed succ, result length is:', len(contents)
-        return [RenrenFeedData(c) for c in contents]
+            return [RenrenFeedData(c) for c in contents]
 
     def get_blogs(self, page=1, count=50):
         d = {}
@@ -581,8 +581,9 @@ class Renren(object):
 
         contents = self._request("blog.gets", "POST", d)
         contents = json_decode(contents) if contents else {}
-        print '---get renren blog succ, result length is:', len(contents.get("blogs"))
-        return contents
+        print '---get renren blog succ'
+        if contents:
+            return contents
 
     def get_blog(self, blog_id, uid):
         d = {}
@@ -592,7 +593,8 @@ class Renren(object):
 
         contents = self._request("blog.get", "POST", d)
         contents = json_decode(contents) if contents else {}
-        return RenrenBlogData(contents)
+        if contents:
+            return RenrenBlogData(contents)
 
     def get_photos(self, aid, page=1, count=100):
         d = {}
@@ -604,7 +606,8 @@ class Renren(object):
         contents = self._request("photos.get", "POST", d)
         contents = json_decode(contents) if contents else []
         print '---get renren photos succ, result length is:', len(contents)
-        return [RenrenPhotoData(c) for c in contents]
+        if contents:
+            return [RenrenPhotoData(c) for c in contents]
             
     def get_albums(self, page=1, count=1000):
         d = {}
@@ -615,5 +618,6 @@ class Renren(object):
         contents = self._request("photos.getAlbums", "POST", d)
         contents = json_decode(contents) if contents else []
         print '---get renren album succ, result length is:', len(contents)
-        return [RenrenAlbumData(c) for c in contents]
+        if contents:
+            return [RenrenAlbumData(c) for c in contents]
 
