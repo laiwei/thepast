@@ -8,7 +8,8 @@ from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import datetime2timestamp
-from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo, Wordpress, Renren
+from past.api_client import (Douban, SinaWeibo, Twitter, QQWeibo, 
+        Wordpress, Renren, Instagram)
 from past.corelib import category2provider
 from past.model.data import (DoubanNoteData, DoubanMiniBlogData)
 from past.model.status import Status, SyncTask
@@ -40,6 +41,9 @@ def sync(t, old=False):
         elif provider == config.OPENID_RENREN:
             alias = UserAlias.get_by_user_and_type(t.user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_RENREN])
+        elif provider == config.OPENID_INSTAGRAM:
+            alias = UserAlias.get_by_user_and_type(t.user_id,
+                    config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM])
         if not alias:
             log.warn("no alias...")
             return 0
@@ -60,6 +64,8 @@ def sync(t, old=False):
             client = QQWeibo(alias.alias)
         elif provider == config.OPENID_RENREN:
             client = Renren(alias.alias, token.access_token, token.refresh_token)
+        elif provider == config.OPENID_INSTAGRAM:
+            client = Instagram(alias.alias, token.access_token, token.refresh_token)
         if not client:
             log.warn("get client fail, break...")
             return 0
@@ -98,7 +104,8 @@ def sync(t, old=False):
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 
         elif t.category == config.CATE_SINA_STATUS:
-            origin_min_id = Status.get_min_origin_id(t.category, t.user_id) #means max_id
+            origin_min_id = Status.get_min_origin_id(t.category, t.user_id) #means the earliest id
+            origin_max_id = Status.get_max_origin_id(t.category, t.user_id) #meas the latest id
             if old:
                 log.info("will get sinaweibo order than %s..." % origin_min_id)
                 status_list = client.get_timeline(until_id=origin_min_id)
@@ -107,8 +114,8 @@ def sync(t, old=False):
                     log.info("again will get sinaweibo order than %s..." % (int(origin_min_id)-1))
                     status_list = client.get_timeline(until_id=int(origin_min_id)-1)
             else:
-                log.info("will get sinaweibo newer than %s..." % origin_min_id)
-                status_list = client.get_timeline(since_id=origin_min_id, count=20)
+                log.info("will get sinaweibo newer than %s..." % origin_max_id)
+                status_list = client.get_timeline(since_id=origin_max_id, count=50)
             if status_list:
                 log.info("get sinaweibo succ, len is %s" % len(status_list))
                 for x in status_list:
@@ -116,12 +123,13 @@ def sync(t, old=False):
                 return len(status_list)
         elif t.category == config.CATE_TWITTER_STATUS:
             origin_min_id = Status.get_min_origin_id(t.category, t.user_id)
+            origin_max_id = Status.get_max_origin_id(t.category, t.user_id)
             if old:
                 log.info("will get tweets order than %s..." % origin_min_id)
                 status_list = client.get_timeline(max_id=origin_min_id)
             else:
-                log.info("will get tweets newer than %s..." % origin_min_id)
-                status_list = client.get_timeline(since_id=origin_min_id, count=20)
+                log.info("will get tweets newer than %s..." % origin_max_id)
+                status_list = client.get_timeline(since_id=origin_max_id, count=50)
             if status_list:
                 log.info("get tweets succ, len is %s" % len(status_list))
                 for x in status_list:
@@ -206,6 +214,21 @@ def sync(t, old=False):
                                 % (aid, len(status_list)))
                         for x in status_list:
                             Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+
+        elif t.category == config.CATE_INSTAGRAM_STATUS:
+            origin_min_id = Status.get_min_origin_id(t.category, t.user_id) #means the earliest id
+            origin_max_id = Status.get_max_origin_id(t.category, t.user_id) #means the latest id
+            if old:
+                log.info("will get instagram earlier than %s..." % origin_min_id)
+                status_list = client.get_timeline(max_id=origin_min_id)
+            else:
+                log.info("will get instagram later than %s..." % origin_max_id)
+                status_list = client.get_timeline(min_id=origin_max_id, count=50)
+            if status_list:
+                log.info("get instagram succ, len is %s" % len(status_list))
+                for x in status_list:
+                    Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
+                return len(status_list)
     except:
         import traceback; print traceback.format_exc()
     return 0
