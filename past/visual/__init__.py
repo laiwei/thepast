@@ -65,14 +65,15 @@ def timeline_json(uid, start):
 
     if not status_list:
         return json_encode({})
-
+    print "--------len", len(status_list), status_list
     date = []
     for s in status_list:
         headline = s.summary or ''
         text = ''
-        images = s.get_data().get_images() or []
+        data = s.get_data()
+        images = data and data.get_images() or []
         
-        if not (headline or text):
+        if not (headline or text or images):
             continue
 
         t = s.create_time
@@ -92,16 +93,15 @@ def timeline_json(uid, start):
         if s.category in [config.CATE_QQWEIBO_STATUS]:
             text = s.get_retweeted_data() or ''
         
-        if s.category in [config.CATE_WORDPRESS_POST]:
+        if s.category in [config.CATE_WORDPRESS_POST, config.CATE_THEPAST_NOTE,]:
             uri = s.get_origin_uri()
             headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
             text = s.text or ''
 
-        if s.category in [config.CATE_THEPAST_NOTE]:
+        if s.category in [config.CATE_INSTAGRAM_STATUS,]:
             uri = s.get_origin_uri()
             headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
-            text = s.text or ''
-        
+
         tmp = {
             'startDate': t.strftime("%Y,%m,%d,%H,%M,%S"),
             'headline': headline,

@@ -33,7 +33,7 @@
                 {% endif%}
                 <tr height="40px"><td align="right"><span class="fade">电子邮件：</span></td>
                     <td>
-                        <input type="text" class="sl" name="email" value="{{g.user.get_email()}}"></input> 
+                        <input type="text" class="sl" name="email" value="{{g.user.get_email() or ''}}"></input> 
                         <div class="sep3"></div>
                         <span class="fade smaller">定期发送更新好的PDF版本和历史上的今天提醒<br/>(建议把help@thepast.me添加到你的邮件联系人中)</span>
                     </td>

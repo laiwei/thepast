@@ -348,8 +348,11 @@ class UserAlias(object):
             return config.OPENID_TYPE_NAME_DICT[self.type],\
                     "%s/%s" %(config.RENREN_SITE, self.alias), config.OPENID_RENREN
         if self.type == config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM]:
+            user = User.get_user_by_alias(self.type, self.alias)
+            profile = user and user.get_thirdparty_profile(self.type)
+            uid = profile and profile.get("uid", "")
             return config.OPENID_TYPE_NAME_DICT[self.type],\
-                    "%s/%s" %(config.INSTAGRAM_SITE, self.alias), config.OPENID_INSTAGRAM
+                    config.INSTAGRAM_USER_PAGE %uid, config.OPENID_INSTAGRAM
 
 
 class OAuth2Token(object):
