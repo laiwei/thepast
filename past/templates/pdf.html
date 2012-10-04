@@ -5,6 +5,7 @@
 {% block content_block %}
     <div id="sidebar"></div>
     <div id="rightbar">
+        {{blocks.rightbar_googlead_block()}}
         {{blocks.rightbar_intros_block(intros)}}
         <div class="sep10"></div>
         {{blocks.rightbar_feedback_block()}}
