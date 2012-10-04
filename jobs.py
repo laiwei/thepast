@@ -110,7 +110,7 @@ def sync(t, old=False):
                 log.info("will get sinaweibo order than %s..." % origin_min_id)
                 status_list = client.get_timeline(until_id=origin_min_id)
                 ## 如果根据max_id拿不到数据，那么根据page再fetch一次或者until_id - 1
-                if status_list and len(status_list) < 20:
+                if status_list and len(status_list) < 20 and origin_min_id is not None:
                     log.info("again will get sinaweibo order than %s..." % (int(origin_min_id)-1))
                     status_list = client.get_timeline(until_id=int(origin_min_id)-1)
             else:

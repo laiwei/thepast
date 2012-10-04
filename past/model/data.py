@@ -342,7 +342,7 @@ class ThepastNoteData(AbsData):
         return self.data and self.data.create_time
 
     def get_title(self):
-        return self.data and self.data.title
+        return self.data and self.data.title or ""
 
     def get_content(self):
         if self.data:
@@ -379,10 +379,10 @@ class DoubanNoteData(DoubanData):
         return self.data.get("published",{}).get("$t")
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t")
+        return self.data.get("title", {}).get("$t") or ""
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t")
+        return self.data.get("content", {}).get("$t") or ""
 
 # 广播
 class DoubanMiniBlogData(DoubanData):
@@ -400,10 +400,10 @@ class DoubanMiniBlogData(DoubanData):
         return self.data.get("published",{}).get("$t")
 
     def get_title(self):
-        return self.data.get("title", {}).get("$t")
+        return self.data.get("title", {}).get("$t") or ""
 
     def get_content(self):
-        return self.data.get("content", {}).get("$t")
+        return self.data.get("content", {}).get("$t") or ""
     
     def _get_links(self):
         links = {}
@@ -494,7 +494,7 @@ class _Attachment(object):
     def get_description(self):
         return self.data.get("description")
     def get_title(self):
-        return self.data.get("title")
+        return self.data.get("title", "")
     def get_href(self):
         return self.data.get("expaned_href") or self.data.get("href")
     def get_medias(self):
@@ -848,6 +848,7 @@ class InstagramStatusData(AbsData):
         caption = self.data.get("caption")
         if caption and isinstance(caption, dict):
             return caption.get("text", "")
+        return ""
 
     def get_content(self):
         return ""
