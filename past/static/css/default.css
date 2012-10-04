@@ -139,11 +139,11 @@ a:hover{color:#4d5256;text-decoration:underline;}
 
 .mini_navi{
     float:left;
-    margin-left:15px;
+    margin-left:0px;
     -moz-border-radius: 5px; 
     -webkit-border-radius: 5px; 
-    padding: 15px 10px 15px 10px; 
-    font-size: 15px; 
+    padding: 15px 5px 15px 5px; 
+    font-size: 14px; 
     line-height: 20px;
     text-align: center;
 

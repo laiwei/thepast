@@ -528,9 +528,13 @@ class SinaWeiboStatusData(SinaWeiboData):
         return self.data.get("idstr", "")
 
     def get_create_time(self):
-        t = self.data.get("created_at", "")
-        return datetime.datetime.strptime(t, "%a %b %d %H:%M:%S +0800 %Y")
-
+        try:
+            t = self.data.get("created_at", "")
+            return datetime.datetime.strptime(t, "%a %b %d %H:%M:%S +0800 %Y")
+        except Exception, e:
+            print e
+            return None
+    
     def get_title(self):
         return ""
 
@@ -668,8 +672,21 @@ class WordpressData(AbsData):
         return m.hexdigest()[:16]
 
     def get_create_time(self):
-        t = self.data.get("published", "")
-        return t and datetime.datetime.strptime(t, "%a, %d %b %Y %H:%M:%S +0000")
+        e = self.data
+        published = None
+        try:
+            published = e.published_parsed
+        except AttributeError:
+            try:
+                published = e.updated_parsed
+            except AttributeError:
+                try:
+                    published = e.created_parsed
+                except AttributeError:
+                    published = None
+        if published:
+            return datetime.datetime.fromtimestamp(time.mktime(published))
+        
     
     def get_title(self):
         return self.data.get("title", "")

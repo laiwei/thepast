@@ -60,5 +60,7 @@ if __name__ == "__main__":
     for uid in uids:
         print "----- remove user:", uid
         remove_user(uid)
+        print "----- remove status of user:", uid
+        remove_status(uid)
 
 
