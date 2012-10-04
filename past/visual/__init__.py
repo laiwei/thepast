@@ -65,13 +65,16 @@ def timeline_json(uid, start):
 
     if not status_list:
         return json_encode({})
-    print "--------len", len(status_list), status_list
     date = []
     for s in status_list:
-        headline = s.summary or ''
-        text = ''
+        headline = s.title or s.summary or ""
+        text = s.text or ""
         data = s.get_data()
         images = data and data.get_images() or []
+
+        uri = s.get_origin_uri()
+        if uri:
+            headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], headline)
         
         if not (headline or text or images):
             continue
@@ -85,7 +88,7 @@ def timeline_json(uid, start):
             text = re_tweet and re_tweet.get_content() or ''
 
         if s.category in [config.CATE_DOUBAN_STATUS]:
-            atts = s.get_data() and s.get_data().get_attachments()
+            atts = data and data.get_attachments()
             if atts:
                 for att in atts:
                     text += att.get_title() + "\n" + att.get_description()
@@ -93,14 +96,14 @@ def timeline_json(uid, start):
         if s.category in [config.CATE_QQWEIBO_STATUS]:
             text = s.get_retweeted_data() or ''
         
-        if s.category in [config.CATE_WORDPRESS_POST, config.CATE_THEPAST_NOTE,]:
+        if s.category in [config.CATE_WORDPRESS_POST, config.CATE_THEPAST_NOTE, config.CATE_RENREN_BLOG,]:
             uri = s.get_origin_uri()
             headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
             text = s.text or ''
 
-        if s.category in [config.CATE_INSTAGRAM_STATUS,]:
-            uri = s.get_origin_uri()
-            headline = '<a href="%s" target="_blank">%s</a>' % (uri and uri[1], s.title)
+        if s.category in [config.CATE_RENREN_STATUS, config.CATE_RENREN_PHOTO, config.CATE_RENREN_ALBUM]:
+            headline = s.title
+            text = s.text or ''
 
         tmp = {
             'startDate': t.strftime("%Y,%m,%d,%H,%M,%S"),

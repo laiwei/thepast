@@ -91,6 +91,14 @@ def render(user, status_list, with_head=True):
             r = m.wordpress_status(s, pdf=True)
         elif s.category == config.CATE_THEPAST_NOTE:
             r = m.thepast_note_status(s, pdf=True)
+        elif s.category == config.CATE_RENREN_STATUS:
+            r = m.thepast_renren_status(s, pdf=True)
+        elif s.category == config.CATE_RENREN_BLOG:
+            r = m.thepast_renren_blog(s, pdf=True)
+        elif s.category == config.CATE_RENREN_PHOTO or s.category == config.CATE_RENREN_ALBUM:
+            r = m.thepast_renren_photo(s, pdf=True)
+        elif s.category == config.CATE_INSTAGRAM_STATUS:
+            r = m.thepast_default_status(s, pdf=True)
         else:
             r = ''
         if not r:
