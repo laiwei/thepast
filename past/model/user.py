@@ -21,12 +21,6 @@ class User(object):
                 % (self.id, self.uid, self.session_id)
     __str__ = __repr__
 
-    #@property
-    #def raw(self):
-    #    r = Kv.get("/profile/%s" % self.id)
-    #    _raw = r.val if r else ""
-    #    return json_decode(_raw) if _raw else ""
-
     @classmethod
     def _clear_cache(cls, user_id):
         if user_id:
@@ -191,7 +185,7 @@ class User(object):
             r = json_decode(p) if p else {}
             return r
 
-    def set_thirdparty_profile(self, openid_type, k, v):
+    def set_thirdparty_profile_item(self, openid_type, k, v):
         p = self.get_thirdparty_profile(openid_type)
         p[k] = v
         self.set_profile_item(openid_type, p)

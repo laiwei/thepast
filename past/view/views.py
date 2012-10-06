@@ -161,9 +161,9 @@ def share():
         providers = [x for x in providers if x in user_binded_providers]
         for p in user_binded_providers:
             if p in providers:
-                g.user.set_thirdparty_profile(p, "share", "Y")
+                g.user.set_thirdparty_profile_item(p, "share", "Y")
             else:
-                g.user.set_thirdparty_profile(p, "share", "N")
+                g.user.set_thirdparty_profile_item(p, "share", "N")
 
         if not text:
             flash(u"至少要说点什么东西的吧...", "error")
