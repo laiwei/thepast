@@ -12,23 +12,26 @@ class OAuthError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return "user:%s, openid_type:%s, %s, %s" % \
+        return "OAuthError: user:%s, openid_type:%s, %s, %s" % \
             (self.user_id, self.openid_type, self.msg_type, self.msg)
     __repr__ = __str__
 
     def set_the_profile(self):
-        u = User.get(self.user_id)
-        if u:
-            u.set_thirdparty_profile_item(self.openid_type, self.msg_type, datetime.datetime.now())
+        if self.user_id:
+            u = User.get(self.user_id)
+            if u:
+                u.set_thirdparty_profile_item(self.openid_type, self.msg_type, datetime.datetime.now())
 
     def clear_the_profile(self):
-        u = User.get(self.user_id)
-        if u:
-            u.set_thirdparty_profile_item(self.openid_type, self.msg_type, "")
+        if self.user_id:
+            u = User.get(self.user_id)
+            if u:
+                u.set_thirdparty_profile_item(self.openid_type, self.msg_type, "")
 
     def is_error_exists(self):
-        u = User.get(self.user_id)
-        return u and u.get_thirdparty_profile(self.openid_type)
+        if self.user_id:
+            u = User.get(self.user_id)
+            return u and u.get_thirdparty_profile(self.openid_type)
 
 class OAuthTokenExpiredError(OAuthError):
     TYPE = "expired"

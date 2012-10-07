@@ -65,8 +65,10 @@ class Renren(OAuth2):
         log.info('getting %s...' % uri)
         resp, content = httplib2_request(uri, method)
         if resp.status == 200:
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
-                    config.OPENID_TYPE_DICT[config.OPENID_RENREN], content)
+            user_id = self.user_alias and self.user_alias.user_id or None
+            excp = OAuthTokenExpiredError(user_id=None,
+                    openid_type=config.OPENID_TYPE_DICT[config.OPENID_RENREN], 
+                    msg=content)
             jdata = json_decode(content) if content else None
             if jdata and isinstance(jdata, dict):
                 error_code = jdata.get("error_code")
@@ -76,7 +78,7 @@ class Renren(OAuth2):
                         ## 无效的token
                         excp.set_the_profile()
                         raise excp
-                    elif str(error_code) == "106":
+                    elif str(error_code) == "106" and self.user_alias:
                         ## FIXME: 过期的token, 是不是106?
                         try:
                             new_tokens = super(Renren, self).refresh_tokens()

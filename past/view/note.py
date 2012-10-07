@@ -8,7 +8,6 @@ from past import app
 
 from past.utils.escape import json_encode
 from past.utils import randbytes
-from past.api_client import Wordpress
 from past.store import mc
 from past.model.user import User
 from past.model.note import Note

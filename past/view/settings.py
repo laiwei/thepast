@@ -10,7 +10,7 @@ from past.model.status import SyncTask, TaskQueue
 from past.utils import is_valid_email
 from past.utils.escape import json_encode
 from past.utils import randbytes
-from past.api_client import Wordpress
+from past.api.wordpress import Wordpress
 from past.store import mc
 from past import consts
 

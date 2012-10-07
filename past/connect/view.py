@@ -2,53 +2,66 @@
 
 from flask import (session, redirect, request, abort, g, url_for, flash)
 from past import config
+from past.utils.logger import logging
 from past.corelib import set_user_cookie 
 
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, TaskQueue
 
-from past.oauth_login import (DoubanLogin, SinaLogin, OAuthLoginError,
-        TwitterOAuthLogin, QQOAuth1Login, RenrenLogin, InstagramLogin)
-from past.utils.escape import json_encode
+from past.api.douban import Douban
+from past.api.sina import SinaWeibo
+from past.api.qqweibo import QQWeibo
+from past.api.renren import Renren
+from past.api.instagram import Instagram
+from past.api.twitter import TwitterOAuth1
+from past.api.wordpress import Wordpress
+from past.api.error import OAuthError
 
+from past.utils.escape import json_encode
 from past.connect import blue_print
+
+log = logging.getLogger(__file__)
 
 @blue_print.route("/",  defaults={"provider": config.OPENID_DOUBAN})
 @blue_print.route("/<provider>")
 def connect(provider):
-    if provider == "renren":
-        abort(400, "人人的api尚未审核通过，预计假期后可开放，请先绑定其他平台吧，比如豆瓣:)")
+    #if provider == "renren":
+    #    abort(400, "人人的api尚未审核通过，预计假期后可开放，请先绑定其他平台吧，比如豆瓣:)")
     #return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
-    d = config.APIKEY_DICT.get(provider)
-    login_service = None
+
+    client = None
     if provider == config.OPENID_DOUBAN:
-        login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+        client = Douban()
     elif provider == config.OPENID_SINA:
-        login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
-    elif provider == config.OPENID_QQ:
-        login_service = QQOAuth1Login(d['key'], d['secret'], d['redirect_uri'])
+        client = SinaWeibo()
     elif provider == config.OPENID_TWITTER:
-        login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
+        client = TwitterOAuth1()
+    elif provider == config.OPENID_QQ:
+        client = QQWeibo()
     elif provider == config.OPENID_RENREN:
-        login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
+        client = Renren()
     elif provider == config.OPENID_INSTAGRAM:
-        login_service = InstagramLogin(d['key'], d['secret'], d['redirect_uri'])
+        client = Instagram()
+    if not client:
+        abort(400, "不支持该第三方登录")
+
     try:
-        login_uri = login_service.get_login_uri()
-    except OAuthLoginError, e:
-        return "auth error:%s" % e
+        login_uri = client.login()
+    except OAuthError, e:
+        log.warning(e)
+        abort(400, "抱歉，跳转到第三方失败，请重新尝试一下:)")
 
     ## when use oauth1, MUST save request_token and secret to SESSION
     if provider == config.OPENID_TWITTER or provider == config.OPENID_QQ:
-        login_service.save_request_token_to_session(session)
+        client.save_request_token_to_session(session)
 
     return redirect(login_uri)
 
 @blue_print.route("/<provider>/callback")
 def connect_callback(provider):
     code = request.args.get("code")
-    d = config.APIKEY_DICT.get(provider)
-    login_service = None
+
+    client = None
     user = None
 
     openid_type = config.OPENID_TYPE_DICT.get(provider)
@@ -58,32 +71,36 @@ def connect_callback(provider):
     if provider in [config.OPENID_DOUBAN, config.OPENID_SINA, config.OPENID_RENREN,
             config.OPENID_INSTAGRAM,]:
         if provider == config.OPENID_DOUBAN:
-            login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+            client = Douban()
         elif provider == config.OPENID_SINA:
-            login_service = SinaLogin(d['key'], d['secret'], d['redirect_uri'])
+            client = SinaWeibo()
         elif provider == config.OPENID_RENREN:
-            login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
+            client = Renren()
         elif provider == config.OPENID_INSTAGRAM:
-            login_service = InstagramLogin(d['key'], d['secret'], d['redirect_uri'])
+            client = Instagram()
 
         ## oauth2方式授权处理
         try:
-            token_dict = login_service.get_access_token(code)
-            print "-------token_dict", token_dict
-        except OAuthLoginError, e:
-            abort(401, e.msg)
+            token_dict = client.get_access_token(code)
+            print "---token_dict", token_dict
+        except OAuthError, e:
+            log.warning(e)
+            abort(400, "从第三方获取access_token失败了，请重新尝试一下，抱歉:)")
 
-        if not ( token_dict and token_dict.get("access_token") ):
-            abort(401, "no_access_token")
+        if not (token_dict and token_dict.get("access_token")):
+            abort(400, "no_access_token")
         try:
-            access_token = token_dict.get("access_token") 
+            access_token = token_dict.get("access_token", "") 
+            refresh_token = token_dict.get("refresh_token", "") 
             #the last is instagram case:)
             uid = token_dict.get("uid") or token_dict.get("user", {}).get("uid") \
                     or token_dict.get("user", {}).get("id")
-            user_info = login_service.get_user_info(access_token, uid)
-            print "---------user_info", user_info
-        except OAuthLoginError, e:
-            abort(401, e.msg)
+            client.set_token(access_token, refresh_token)
+            user_info = client.get_user_info(uid)
+            print "---user_info", user_info
+        except OAuthError, e:
+            log.warning(e)
+            abort(400, e.msg)
 
         user = _save_user_and_token(token_dict, user_info, openid_type)
 
@@ -107,21 +124,20 @@ def connect_callback(provider):
         return redirect(url_for("home"))
 
 def _qqweibo_callback(request):
-    d = config.APIKEY_DICT.get(config.OPENID_QQ)
     openid_type = config.OPENID_TYPE_DICT[config.OPENID_QQ]
-    login_service = QQOAuth1Login(d['key'], d['secret'], d['redirect_uri'])
+    client = QQWeibo()
     
     ## from qqweibo
     token = request.args.get("oauth_token")
     verifier = request.args.get("oauth_verifier")
 
     ## from session
-    token_secret_pair = login_service.get_request_token_from_session(session)
+    token_secret_pair = client.get_request_token_from_session(session)
     if token == token_secret_pair['key']:
-        login_service.set_token(token, token_secret_pair['secret'])
+        client.set_token(token, token_secret_pair['secret'])
     ## get access_token from qq
-    token, token_secret  = login_service.get_access_token(verifier)
-    user = login_service.get_user_info()
+    token, token_secret  = client.get_access_token(verifier)
+    user = client.get_user_info()
 
     token_dict = {}
     token_dict['access_token'] = token
@@ -132,30 +148,27 @@ def _qqweibo_callback(request):
     return user
 
 def _twitter_callback(request):
-    d = config.APIKEY_DICT.get(config.OPENID_TWITTER)
     openid_type = config.OPENID_TYPE_DICT[config.OPENID_TWITTER]
-    login_service = TwitterOAuthLogin(d['key'], d['secret'], d['redirect_uri'])
+    client = TwitterOAuth1()
 
     ## from twitter
     code = request.args.get("oauth_code") ## FIXME no use
     verifier = request.args.get("oauth_verifier")
     
     ## from session
-    request_token = login_service.get_request_token_from_session(session)
+    request_token = client.get_request_token_from_session(session)
     
     ## set the authorized request_token to OAuthHandle
-    login_service.auth.set_request_token(request_token.get("key"), 
+    client.auth.set_request_token(request_token.get("key"), 
             request_token.get("secret"))
 
     ## get access_token
     try:
-        token_dict = login_service.get_access_token(verifier)
-    except OAuthLoginError, e:
+        token_dict = client.get_access_token(verifier)
+    except OAuthError, e:
         abort(401, e.msg)
 
-    api = login_service.api(token_dict.get("access_token"), 
-            token_dict.get("access_token_secret"))
-    thirdparty_user = login_service.get_user_info(api)
+    thirdparty_user = client.get_user_info()
     
     user = _save_user_and_token(token_dict, thirdparty_user, openid_type)
     return user

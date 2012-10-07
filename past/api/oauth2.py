@@ -31,6 +31,8 @@ class OAuth2(object):
         if alias:
             self.user_alias = UserAlias.get(
                     config.OPENID_TYPE_DICT[provider], alias)
+        else:
+            self.user_alias = None
         self.access_token = access_token
         self.refresh_token = refresh_token
 
@@ -95,6 +97,10 @@ class OAuth2(object):
 
         jdata = json_decode(content) if content else None
         return jdata
+
+    def set_token(self, access_token, refresh_token):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
 
     def get_user_info(self, uid):
         raise NotImplementedError

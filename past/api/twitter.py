@@ -34,6 +34,8 @@ class TwitterOAuth1(object):
         if alias:
             self.user_alias = UserAlias.get(
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], alias)
+        else:
+            self.user_alias = None
 
         self.auth = tweepy.OAuthHandler(self.consumer_key, self.consumer_secret, self.callback)
         if self.token and self.token_secret and self.auth:
@@ -89,27 +91,29 @@ class TwitterOAuth1(object):
         return TwitterUser(user)
 
     def get_timeline(self, since_id=None, max_id=None, count=200):
+        user_id = self.user_alias and self.user_alias.user_id or None
         try:
             contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], "")
             excp.clear_the_profile()
             return [TwitterStatusData(c) for c in contents]
         except TweepError, e:
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
                     "%s:%s" %(e.reason, e.response))
             excp.set_the_profile()
             raise excp
 
     def post_status(self, text):
+        user_id = self.user_alias and self.user_alias.user_id or None
         try:
             self.api().update_status(status=text)
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], "")
             excp.clear_the_profile()
         except TweepError, e:
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
                     "%s:%s" %(e.reason, e.response))
             excp.set_the_profile()

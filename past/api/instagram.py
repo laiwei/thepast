@@ -24,7 +24,7 @@ class Instagram(OAuth2):
 
     def __init__(self, alias=None, access_token=None, refresh_token=None, api_version="v1"):
         self.api_version = api_version
-        d = config.APIKEY_DICT[config.OPENID_DOUBAN]
+        d = config.APIKEY_DICT[config.OPENID_INSTAGRAM]
         super(Instagram, self).__init__(provider = config.OPENID_INSTAGRAM, 
                 apikey = d["key"], 
                 apikey_secret = d["secret"], 
@@ -68,7 +68,7 @@ class Instagram(OAuth2):
                     % (uri, resp.status, content))
 
     def get_user_info(self, uid=None):
-        uid = uid or self.user_alias.alias
+        uid = uid or self.user_alias.alias or "self"
         jdata = self._request("/v1/users/%s" % uid, "GET")
         if jdata and isinstance(jdata, dict):
             return InstagramUser(jdata.get("data"))

@@ -46,7 +46,8 @@ class Douban(OAuth2):
         return cls(alias.alias, token.access_token, token.refresh_token)
 
     def check_result(self, uri, resp, content):
-        excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+        user_id = self.user_alias and self.user_alias.user_id or None
+        excp = OAuthTokenExpiredError(user_id,
                 config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], content)
         jdata = json_decode(content) if content else None
         if str(resp.status) == "200":
@@ -60,7 +61,7 @@ class Douban(OAuth2):
             if str(error_code) == "103" or str(error_code) == "123":
                 excp.set_the_profile()
                 raise excp
-            elif str(error_code) == "106":
+            elif str(error_code) == "106" and self.user_alias:
                 try:
                     new_tokens = super(Douban, self).refresh_tokens()
                     if new_tokens and isinstance(new_tokens, dict):
@@ -103,6 +104,7 @@ class Douban(OAuth2):
 
 
     def get_user_info(self, uid="@me"):
+        uid = uid or "@me"
         api = "/people/%s" % uid
         jdata = self.get(api)
         if jdata and isinstance(jdata, dict):

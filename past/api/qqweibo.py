@@ -46,6 +46,8 @@ class QQWeibo(object):
         if alias:
             self.user_alias = UserAlias.get(
                     config.OPENID_TYPE_DICT[config.OPENID_QQ], alias)
+        else:
+            self.user_alias = None
 
     def __repr__(self):
         return "<QQWeibo consumer_key=%s, consumer_secret=%s, token=%s, token_secret=%s>" \
@@ -128,8 +130,6 @@ class QQWeibo(object):
                                                                                    
         return cls(alias=alias.alias, token=token.access_token, token_secret=token.refresh_token)
     
-
-    #TODO:这个应当移动到api_client相应的地方
     def get_user_info(self):
         jdata = self.access_resource2("GET", "/user/info", {"format":"json"})
         if jdata and isinstance(jdata, dict):
@@ -242,7 +242,8 @@ class QQWeibo(object):
         if jdata and isinstance(jdata, dict):
             ret_code = jdata.get("ret")
             msg = jdata.get("msg")
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            user_id = self.user_alias and self.user_alias.user_id or None
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_QQ], msg)
             if str(ret_code) == "0":
                 excp.clear_the_profile()

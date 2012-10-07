@@ -8,15 +8,20 @@ from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging
 from past.utils import datetime2timestamp
-from past.api_client import (Douban, SinaWeibo, Twitter, QQWeibo, 
-        Wordpress, Renren, Instagram)
+
+from past.api.douban import Douban
+from past.api.sina import SinaWeibo
+from past.api.qqweibo import QQWeibo
+from past.api.renren import Renren
+from past.api.instagram import Instagram
+from past.api.twitter import TwitterOAuth1
+from past.api.wordpress import Wordpress
+
 from past.corelib import category2provider
-from past.model.data import (DoubanNoteData, DoubanMiniBlogData)
 from past.model.status import Status, SyncTask
 from past.model.user import User, UserAlias, OAuth2Token
 
 log = logging.getLogger(__file__)
-
 
 def sync(t, old=False):
     if not t:
@@ -26,24 +31,9 @@ def sync(t, old=False):
     try:
         alias = None
         provider = category2provider(t.category)
-        if provider == config.OPENID_DOUBAN:
-            alias = UserAlias.get_by_user_and_type(t.user_id, 
-                    config.OPENID_TYPE_DICT[config.OPENID_DOUBAN])
-        elif provider == config.OPENID_SINA:
-            alias = UserAlias.get_by_user_and_type(t.user_id, 
-                    config.OPENID_TYPE_DICT[config.OPENID_SINA])
-        elif provider == config.OPENID_TWITTER:
-            alias = UserAlias.get_by_user_and_type(t.user_id, 
-                    config.OPENID_TYPE_DICT[config.OPENID_TWITTER])
-        elif provider == config.OPENID_QQ:
-            alias = UserAlias.get_by_user_and_type(t.user_id,
-                    config.OPENID_TYPE_DICT[config.OPENID_QQ])
-        elif provider == config.OPENID_RENREN:
-            alias = UserAlias.get_by_user_and_type(t.user_id,
-                    config.OPENID_TYPE_DICT[config.OPENID_RENREN])
-        elif provider == config.OPENID_INSTAGRAM:
-            alias = UserAlias.get_by_user_and_type(t.user_id,
-                    config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM])
+
+        alias = UserAlias.get_by_user_and_type(t.user_id,
+                config.OPENID_TYPE_DICT[provider])
         if not alias:
             log.warn("no alias...")
             return 0
@@ -55,17 +45,17 @@ def sync(t, old=False):
         
         client = None
         if provider == config.OPENID_DOUBAN:
-            client = Douban(alias.alias, token.access_token, token.refresh_token)
+            client = Douban.get_client(alias.user_id)
         elif provider == config.OPENID_SINA:
-            client = SinaWeibo(alias.alias, token.access_token)
+            client = SinaWeibo.get_client(alias.user_id)
         elif provider == config.OPENID_TWITTER:
-            client = Twitter(alias.alias)
+            client = TwitterOAuth1.get_client(alias.user_id)
         elif provider == config.OPENID_QQ:
-            client = QQWeibo(alias.alias)
+            client = QQWeibo.get_client(alias.user_id)
         elif provider == config.OPENID_RENREN:
-            client = Renren(alias.alias, token.access_token, token.refresh_token)
+            client = Renren.get_client(alias.user_id)
         elif provider == config.OPENID_INSTAGRAM:
-            client = Instagram(alias.alias, token.access_token, token.refresh_token)
+            client = Instagram.get_client(alias.user_id)
         if not client:
             log.warn("get client fail, break...")
             return 0
@@ -229,8 +219,8 @@ def sync(t, old=False):
                 for x in status_list:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 return len(status_list)
-    except:
-        import traceback; print traceback.format_exc()
+    except Exception, e:
+        print "---sync_exception_catched:", e
     return 0
 
 def sync_wordpress(t, refresh=False):
@@ -256,8 +246,8 @@ def sync_wordpress(t, refresh=False):
                 for x in rs:
                     Status.add_from_obj(t.user_id, x, json_encode(x.get_data()))
                 return 
-        except:
-            import traceback; print traceback.format_exc()
+        except Exception, e:
+            print "---sync_exception_catched:", e
 
 def sync_helper(cate,old=False):
     log.info("%s syncing old %s... cate=%s" % (datetime.datetime.now(), old, cate))

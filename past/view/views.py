@@ -9,17 +9,26 @@ from past.store import db_conn
 from past.corelib import auth_user_from_session, \
         logout_user, category2provider
 from past.utils.escape import json_encode
+from past.utils.logger import logging
+
 from past.model.user import User, UserAlias, OAuth2Token
 from past.model.status import SyncTask, Status, \
         get_status_ids_today_in_history, get_status_ids_yesterday
          
-from past.api_client import Douban, SinaWeibo, Twitter, QQWeibo
+from past.api.error import OAuthError
+from past.api.douban import Douban
+from past.api.sina import SinaWeibo
+from past.api.qqweibo import QQWeibo
+from past.api.twitter import TwitterOAuth1
+
 from past.cws.cut import get_keywords
 from past import consts
 
 from past import app
 
 from .utils import require_login, check_access_user
+
+log = logging.getLogger(__file__)
 
 @app.before_request
 def before_request():
@@ -231,14 +240,18 @@ def sync(cates):
 def post_status(user, provider=None, msg=""):
     if msg and isinstance(msg, unicode):                                           
         msg = msg.encode("utf8") 
-
+    oauth_error = []
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
         print "++++++++++post douban status"
         client = Douban.get_client(user.id)
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 广播备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            client.post_status(msg)
+            try:
+                client.post_status(msg)
+            except OAuthError, e:
+                log.warning("%s" % e)
+                oauth_error.append(provider)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
         print "++++++++++post sina status"
@@ -246,15 +259,23 @@ def post_status(user, provider=None, msg=""):
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            client.post_status(msg)
+            try:
+                client.post_status(msg)
+            except OAuthError, e:
+                log.warning("%s" % e)
+                oauth_error.append(provider)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
         print "++++++++post twitter status"
-        client = Twitter.get_client(user.id)
+        client = TwitterOAuth1.get_client(user.id)
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, twitter备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            client.post_status(msg)
+            try:
+                client.post_status(msg)
+            except OAuthError, e:
+                log.warning("%s" % e)
+                oauth_error.append(provider)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
         print "++++++++post qq weibo status"
@@ -262,4 +283,8 @@ def post_status(user, provider=None, msg=""):
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            client.post_status(msg)
+            try:
+                client.post_status(msg)
+            except OAuthError, e:
+                log.warning("%s" % e)
+                oauth_error.append(provider)

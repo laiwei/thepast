@@ -23,7 +23,7 @@ class SinaWeibo(OAuth2):
     api_host = "https://api.weibo.com"
 
     def __init__(self, alias=None, access_token=None, refresh_token=None, 
-            api_version=2):
+            api_version="2"):
 
         self.api_version = api_version
         d = config.APIKEY_DICT[config.OPENID_SINA]
@@ -56,7 +56,8 @@ class SinaWeibo(OAuth2):
             error_code = jdata.get("error_code")
             error = jdata.get("error")
             request_api = jdata.get("request")
-            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+            user_id = self.user_alias and self.user_alias.user_id or None
+            excp = OAuthTokenExpiredError(user_id,
                     config.OPENID_TYPE_DICT[config.OPENID_SINA], 
                     "%s:%s:%s" %(error_code, error, request_api))
             if error_code and isinstance(error_code, int):

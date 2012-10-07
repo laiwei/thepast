@@ -55,5 +55,4 @@ if __name__ == "__main__":
             time.sleep(5)
         time.sleep(5)
     except Exception, e:
-        import traceback
-        print '%s %s' % (datetime.datetime.now(), traceback.format_exc())
+        print e
