@@ -10,7 +10,7 @@ import binascii
 import tweepy
 from tweepy.error import TweepError
 
-import config
+from past import config
 from past.utils.escape import json_encode, json_decode
 from past.utils import randbytes
 from past.utils import httplib2_request
