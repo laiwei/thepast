@@ -4,15 +4,13 @@
 
 {% block title_block %} {{status.title}} {% endblock %}
 
-{% block content_block %}
-    <div id="sidebar"></div>
-    <div id="rightbar">
-        {{blocks.rightbar_googlead_block()}}
+{% block rightbar_block %}
+        {{super()}}
         {{blocks.rightbar_intros_block(intros)}}
         {{blocks.rightbar_feedback_block()}}
-    </div>
+{% endblock %}
 
-    <div id="middlebar">
+{% block middlebar_block %}
         <!--提醒-->
         {{ blocks.notification_block() }}
         
@@ -36,5 +34,4 @@
 {%endif%}
             </div></div>
         </div>
-    </div>
 {% endblock %}
