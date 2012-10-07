@@ -51,8 +51,8 @@ class OAuthError(Exception):
 class OAuthTokenExpiredError(OAuthError):
     TYPE = "expired"
     def __init__(self, user_id, openid_type, msg):
-        super(OAuthTokenExpiredError, self).__init(
-                OAuthTokenExpiredError.TYPE, user_id, openid_type, msg)
+        super(OAuthTokenExpiredError, self).__init__(
+            OAuthTokenExpiredError.TYPE, user_id, openid_type, msg)
 
 #TODO: save photo of status
 
@@ -64,7 +64,7 @@ class Douban(object):
         self.refresh_token = refresh_token
         self.api_host = api_host
         self.alias = alias
-        self.alias_obj = UserAlias.get(
+        self.user_alias = UserAlias.get(
                 config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], alias)
    
     def __repr__(self):
@@ -87,22 +87,31 @@ class Douban(object):
         return cls(alias.alias, token.access_token, token.refresh_token)
 
     def check_result(self, uri, resp, content):
-        if resp.status == 200:
-            jdata = json_decode(content) if content else []
+        excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], content)
+        jdata = json_decode(content) if content else None
+        if str(resp.status) == "200":
+            excp.clear_the_profile()
             return jdata
         else:
             log.warn("get %s fail, status code=%s, msg=%s. go to refresh token" \
-                    % (uri, resp.status, content))
-            d = config.APIKEY_DICT.get(config.OPENID_DOUBAN)
-            login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
-            try:
-                login_service.update_tokens(self.refresh_token)
-            except OAuthLoginError, e:
-                log.warn("refresh token fail: %s" % e)
-                excp = OAuthTokenExpiredError(self.alias_obj.user_id, 
-                        config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], content)
-                excp.set_the_profile()
-                raise excp
+                % (uri, resp.status, content))
+            if jdata:
+                error_code = jdata.get("code") 
+                if str(error_code) == "103" or str(error_code) == "123":
+                    excp.set_the_profile()
+                    raise excp
+                elif str(error_code) == "106":
+                    d = config.APIKEY_DICT.get(config.OPENID_DOUBAN)
+                    login_service = DoubanLogin(d['key'], d['secret'], d['redirect_uri'])
+                    try:
+                        login_service.update_tokens(self.refresh_token, self.user_alias.id)
+                        excp.clear_the_profile()
+                    except OAuthLoginError, e:
+                        log.warn("refresh token fail: %s" % e)
+                        excp.set_the_profile()
+                        raise excp
+            return None
 
     def get(self, url, extra_dict=None):
         uri = urlparse.urljoin(self.api_host, url)
@@ -223,7 +232,7 @@ class SinaWeibo(object):
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.alias = alias
-        self.alias_obj = UserAlias.get(
+        self.user_alias = UserAlias.get(
                 config.OPENID_TYPE_DICT[config.OPENID_SINA], alias)
         self.api_host = api_host
         self.api_version = str(api_version)
@@ -257,15 +266,21 @@ class SinaWeibo(object):
         if jdata and isinstance(jdata, dict):
             error_code = jdata.get("error_code")
             error = jdata.get("error")
-            if error_code and isinstance(error_code, int) and int(error_code) > 10000:
-                log.warn("get %s fail, error_code=%s, error_msg=%s" \
-                    % (uri, error_code, error))
-                excp = OAuthTokenExpiredError(self.alias_obj.user_id, 
-                        config.OPENID_TYPE_DICT[config.OPENID_SINA], 
-                        "%s:%s" %(error_code, error))
-                excp.set_the_profile()
-                raise excp
-        return jdata
+            request_api = jdata.get("request")
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_SINA], 
+                    "%s:%s:%s" %(error_code, error, request_api))
+            if error_code and isinstance(error_code, int):
+                error_code = int(error_code)
+                if error_code >= 21301 and error_code <= 21399:
+                    excp.set_the_profile()
+                    raise excp
+                else:
+                    log.warn("get %s fail, error_code=%s, error_msg=%s" \
+                        % (uri, error_code, error))
+            else:
+                excp.clear_the_profile()
+                return jdata
 
     def get(self, url, extra_dict=None):
         uri = urlparse.urljoin(self.api_host, self.api_version)
@@ -344,11 +359,11 @@ class SinaWeibo(object):
 
 class Twitter(object):
     def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
-        self.alias_obj = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_TWITTER], alias)
+        self.user_alias = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_TWITTER], alias)
         self.apikey = apikey if apikey is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("key")
         self.apikey_secret = apikey_secret if apikey_secret is not None else config.APIKEY_DICT[config.OPENID_TWITTER].get("secret")
         
-        token = OAuth2Token.get(self.alias_obj.id)
+        token = OAuth2Token.get(self.user_alias.id)
         self.access_token = access_token if access_token is not None else token.access_token
         self.access_token_secret = access_token_secret if access_token_secret is not None else token.refresh_token
 
@@ -370,9 +385,12 @@ class Twitter(object):
     def get_timeline(self, since_id=None, max_id=None, count=200):
         try:
             contents = self.api().user_timeline(since_id=since_id, max_id=max_id, count=count)
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_TWITTER], "")
+            excp.clear_the_profile()
             return [TwitterStatusData(c) for c in contents]
         except TweepError, e:
-            excp = OAuthTokenExpiredError(self.alias_obj.user_id, 
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
                     "%s:%s" %(e.reason, e.response))
             excp.set_the_profile()
@@ -381,8 +399,11 @@ class Twitter(object):
     def post_status(self, text):
         try:
             self.api().update_status(status=text)
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_TWITTER], "")
+            excp.clear_the_profile()
         except TweepError, e:
-            excp = OAuthTokenExpiredError(self.alias_obj.user_id, 
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
                     config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
                     "%s:%s" %(e.reason, e.response))
             excp.set_the_profile()
@@ -391,13 +412,13 @@ class Twitter(object):
 class QQWeibo(object):
     ## alias 指的是用户在第三方网站的uid，比如douban的laiwei
     def __init__(self, alias, apikey=None, apikey_secret=None, access_token=None, access_token_secret=None):
-        self.alias_obj = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_QQ], alias)
+        self.user_alias = UserAlias.get(config.OPENID_TYPE_DICT[config.OPENID_QQ], alias)
         
         self.apikey = apikey if apikey is not None else config.APIKEY_DICT[config.OPENID_QQ].get("key")
         self.apikey_secret = apikey_secret if apikey_secret is not None else config.APIKEY_DICT[config.OPENID_QQ].get("secret")
 
         ##TODO:这里的OAuth2Token也变相的存储了OAuth1的token和secret，需要后续改一改
-        token = OAuth2Token.get(self.alias_obj.id)
+        token = OAuth2Token.get(self.user_alias.id)
         self.access_token = access_token if access_token is not None else token.access_token
         self.access_token_secret = access_token_secret if access_token_secret is not None else token.refresh_token
 
@@ -442,28 +463,31 @@ class QQWeibo(object):
         r = self.auth.access_resource(method, api, params, file_params)
         if not r:
             return None
+
         try:
             jdata = json_decode(r)
         except:
             ##XXX:因为腾讯的json数据很2，导致有时候decode的时候会失败，一般都是因为双引号没有转义的问题
             import re
             r_ = re.sub('=\\"[^ >]*"( |>)', '', r)
-            jdata = json_decode(r_)
+            try:
+                jdata = json_decode(r_)
+            except Exception, e:
+                log.warning("json_decode qqweibo data fail, %s" % e)
+                return None
         if jdata and isinstance(jdata, dict):
             ret_code = jdata.get("ret")
             msg = jdata.get("msg")
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_QQ], msg)
             if str(ret_code) == "0":
+                excp.clear_the_profile()
                 return jdata.get("data")
             elif str(ret_code) == "3":
-                excp = OAuthTokenExpiredError(self.alias_obj.user_id, 
-                        config.OPENID_TYPE_DICT[config.OPENID_QQ], msg)
                 excp.set_the_profile()
                 raise excp
             else:
                 log.warning("access qqweibo resource %s fail, ret_code=%s, msg=%s" %(api, ret_code, msg))
-                return None
-        else:
-            return None
 
     def post_status(self, text):
         from flask import request
@@ -525,6 +549,8 @@ class Renren(object):
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.alias = alias
+        self.user_alias = UserAlias.get(
+                config.OPENID_TYPE_DICT[config.OPENID_RENREN], alias)
         self.api_host = api_host
         self.api_version = str(api_version)
 
@@ -568,11 +594,30 @@ class Renren(object):
         log.info('getting %s...' % uri)
         resp, content = httplib2_request(uri, method)
         if resp.status == 200:
-            return content
-        else:
-            log.warn("get %s fail, status code=%s, msg=%s" \
-                    % (uri, resp.status, content))
-        return None
+            excp = OAuthTokenExpiredError(self.user_alias.user_id, 
+                    config.OPENID_TYPE_DICT[config.OPENID_RENREN], content)
+            jdata = json_decode(content) if content else None
+            if jdata:
+                if isinstance(jdata, dict):
+                    error_code = jdata.get("error_code")
+                    error_msg = jdata.get("error_msg")
+                    if error_code:
+                        if str(error_code) == "105":
+                            ## 无效的token
+                            excp.set_the_profile()
+                            raise excp
+                        elif str(error_code) == "106":
+                            ## FIXME: 过期的token
+                            d = config.APIKEY_DICT.get(config.OPENID_RENREN)
+                            login_service = RenrenLogin(d['key'], d['secret'], d['redirect_uri'])
+                            try:
+                                login_service.update_tokens(self.refresh_token, self.user_alias.id)
+                                excp.clear_the_profile()
+                            except OAuthLoginError, e:
+                                log.warn("refresh token fail: %s" % e)
+                                excp.set_the_profile()
+                                raise excp
+            return jdata
 
     def get_timeline(self, page=1, count=100):
         d = {}
@@ -580,9 +625,8 @@ class Renren(object):
         d["page"] = page
 
         contents = self._request("status.gets", "POST", d)
-        contents = json_decode(contents) if contents else []
         ##debug
-        if contents:
+        if contents and isinstance(contents, list):
             print '---get renren status succ, result length is:', len(contents)
             return [RenrenStatusData(c) for c in contents]
 
@@ -593,9 +637,8 @@ class Renren(object):
         d["type"] = type_
 
         contents = self._request("feed.get", "POST", d)
-        contents = json_decode(contents) if contents else []
         ##debug
-        if contents:
+        if contents and isinstance(contents, list):
             print '---get renren feed succ, result length is:', len(contents)
             return [RenrenFeedData(c) for c in contents]
 
@@ -606,7 +649,6 @@ class Renren(object):
         d["uid"] = self.alias
 
         contents = self._request("blog.gets", "POST", d)
-        contents = json_decode(contents) if contents else {}
         print '---get renren blog succ'
         if contents:
             return contents
@@ -618,8 +660,7 @@ class Renren(object):
         d["comment"] = 50
 
         contents = self._request("blog.get", "POST", d)
-        contents = json_decode(contents) if contents else {}
-        if contents:
+        if contents and isinstance(contents, dict):
             return RenrenBlogData(contents)
 
     def get_photos(self, aid, page=1, count=100):
@@ -630,9 +671,8 @@ class Renren(object):
         d["aid"] = aid
 
         contents = self._request("photos.get", "POST", d)
-        contents = json_decode(contents) if contents else []
-        print '---get renren photos succ, result length is:', len(contents)
-        if contents:
+        if contents and isinstance(contents, list):
+            print '---get renren photos succ, result length is:', len(contents)
             return [RenrenPhotoData(c) for c in contents]
             
     def get_albums(self, page=1, count=1000):
@@ -642,9 +682,8 @@ class Renren(object):
         d["uid"] = self.alias
 
         contents = self._request("photos.getAlbums", "POST", d)
-        contents = json_decode(contents) if contents else []
-        print '---get renren album succ, result length is:', len(contents)
-        if contents:
+        if contents and isinstance(contents, list):
+            print '---get renren album succ, result length is:', len(contents)
             return [RenrenAlbumData(c) for c in contents]
 
 class Instagram(object):

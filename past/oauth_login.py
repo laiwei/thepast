@@ -154,7 +154,7 @@ class DoubanLogin(OAuth2Login):
 
         return user_info
 
-    def update_tokens(self, refresh_token):
+    def update_tokens(self, refresh_token, alias_id):
         qs = {}
         qs["client_id"] = self.apikey
         qs["client_secret"] = self.apikey_secret
@@ -169,7 +169,7 @@ class DoubanLogin(OAuth2Login):
                     %(resp.status, resp.reason, content))
         r = json_decode(content)
         
-        return OAuth2Token.add(r.get("douban_user_id"), r.get("access_token"), r.get("refresh_token"))
+        return OAuth2Token.add(alias_id, r.get("access_token"), r.get("refresh_token"))
         
 class SinaLogin(OAuth2Login):
     provider = config.OPENID_SINA
@@ -414,12 +414,36 @@ class RenrenLogin(OAuth2Login):
         resp, content = httplib2_request(uri, "POST")
         print "-------renren user_info result", content
         if resp.status != 200:
-            raise OAuthLoginError('get_access_token, status=%s:reason=%s:content=%s' \
+            raise OAuthLoginError('get_user_info, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
         r = json_decode(content)
         if r and len(r) >= 1:
             user = RenrenUser(r[0])
         return user
+
+    def update_tokens(self, refresh_token, alias_id):
+        qs = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": self.apikey,
+            "client_secret": self.apikey_secret,
+        }
+        qs = urllib.urlencode(qs)
+        uri = "%s?%s" % (RenrenLogin.access_token_uri, qs)
+        resp, content = httplib2_request(uri, "POST")
+        print "-------renren refresh_token result", content
+        if resp.status != 200:
+            raise OAuthLoginError('refres_token, status=%s:reason=%s:content=%s' \
+                    %(resp.status, resp.reason, content))
+        r = json_decode(content)
+        if r and isinstance(r, dict):
+            access_token = r.get("access_token", "")
+            refresh_token = r.get("refresh_token", "")
+            if access_token:
+                return OAuth2Token.add(alias_id, access_token, refresh_token)
+
+        raise OAuthLoginError('refres_token, status=%s:reason=%s:content=%s' \
+                %(resp.status, resp.reason, content))
 
     @classmethod
     def sign(cls, token_secret, **kw):
