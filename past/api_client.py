@@ -5,7 +5,7 @@ import urlparse
 import urllib
 import tweepy
 from tweepy import TweepError
-import config
+from past import config
 from past.store import mc
 from past.utils.escape import json_encode, json_decode
 from past.utils.logger import logging

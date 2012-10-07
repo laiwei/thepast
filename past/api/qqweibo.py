@@ -15,7 +15,7 @@ from past.model.user import User, UserAlias, OAuth2Token
 from past.model.data import QQWeiboUser
 from past.model.data import QQWeiboStatusData
 
-from .error import OAuthLoginError, OAuthTokenExpiredError
+from .error import OAuthError, OAuthLoginError, OAuthTokenExpiredError
 
 log = logging.getLogger(__file__)
 
@@ -82,7 +82,7 @@ class QQWeibo(object):
             self.set_token(qs.get('oauth_token')[0], qs.get('oauth_token_secret')[0])
 
             return (self.token, self.token_secret)
-        except OAuthLoginError, e:
+        except OAuthError, e:
             print e
         except AttributeError, e:
             print e

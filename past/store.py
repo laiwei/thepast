@@ -9,7 +9,7 @@ import redis
 import memcache
 
 from past.utils.escape import json_decode, json_encode
-import config 
+from past import config 
 
 def init_db():
     cmd = """mysql -h%s -P%s -u%s -p%s < %s""" \

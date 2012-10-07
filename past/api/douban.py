@@ -12,7 +12,7 @@ from past.model.data import DoubanUser
 from past.model.data import DoubanNoteData, DoubanStatusData, DoubanMiniBlogData
 
 from .oauth2 import OAuth2
-from .error import OAuthLoginError, OAuthTokenExpiredError
+from .error import OAuthError, OAuthLoginError, OAuthTokenExpiredError
 
 log = logging.getLogger(__file__)
 
@@ -31,9 +31,6 @@ class Douban(OAuth2):
                 alias=alias, 
                 access_token=access_token, 
                 refresh_token=refresh_token)
-        if alias:
-            self.user_alias = UserAlias.get(
-                    config.OPENID_TYPE_DICT[config.OPENID_DOUBAN], alias)
 
     @classmethod
     def get_client(cls, user_id):
@@ -71,7 +68,7 @@ class Douban(OAuth2):
                                 new_tokens.get("access_token"), 
                                 new_tokens.get("refresh_token"))
                         excp.clear_the_profile()
-                except OAuthLoginError, e:
+                except OAuthError, e:
                     log.warn("refresh token fail: %s" % e)
                     excp.set_the_profile()
                     raise e

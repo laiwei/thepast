@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+from past import config
+from past.model.user import UserAlias
 from past.utils.escape import json_decode
 from past.utils import httplib2_request
 
@@ -26,6 +28,9 @@ class OAuth2(object):
         self.display = display
 
         self.alias = alias
+        if alias:
+            self.user_alias = UserAlias.get(
+                    config.OPENID_TYPE_DICT[provider], alias)
         self.access_token = access_token
         self.refresh_token = refresh_token
 
@@ -53,7 +58,6 @@ class OAuth2(object):
 
         return uri
 
-    @classmethod
     def get_access_token(self, authorization_code):
         qs = {
             "client_id": self.apikey,
@@ -64,7 +68,7 @@ class OAuth2(object):
         }
         qs = urllib.urlencode(qs)
         resp, content = httplib2_request(self.access_token_uri, "POST", body=qs)
-        excp = OAuthLoginError(None, None, 'get_access_token, status=%s,reason=%s,content=%s' \
+        excp = OAuthLoginError(msg='get_access_token, status=%s,reason=%s,content=%s' \
                 %(resp.status, resp.reason, content))
         if resp.status != 200:
             raise excp

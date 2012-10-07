@@ -33,9 +33,6 @@ class Instagram(OAuth2):
                 alias=alias, 
                 access_token=access_token, 
                 refresh_token=refresh_token)
-        if alias:
-            self.user_alias = UserAlias.get(
-                    config.OPENID_TYPE_DICT[config.OPENID_INSTAGRAM], alias)
 
     @classmethod
     def get_client(cls, user_id):
