@@ -133,7 +133,7 @@ class QQWeibo(object):
     def get_user_info(self):
         jdata = self.access_resource2("GET", "/user/info", {"format":"json"})
         if jdata and isinstance(jdata, dict):
-            return QQWeiboUser(jdata.get('data'))
+            return QQWeiboUser(jdata)
 
     ##使用access_token访问受保护资源，该方法中会自动传递oauth_token参数
     ##params为dict，是需要传递的参数, body 和 headers不加入签名
@@ -144,7 +144,7 @@ class QQWeibo(object):
             params['oauth_token'] = self.token
         else:
             params = {'oauth2_token':self.token,}
-        print "+++++++ accesss qq resource:", uri, params
+        log.info("accesss qq resource: %s, %s" %(uri, params))
         if method == "GET":
             return self.GET(uri, params)
         if method == "POST":
@@ -172,7 +172,7 @@ class QQWeibo(object):
             resp, content = httplib2_request(uri, method, body, headers=headers)
             
         if resp.status != 200:
-            raise OAuthLoginError('get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
+            raise OAuthLoginError(msg='get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
         return content
         
@@ -246,7 +246,8 @@ class QQWeibo(object):
                     config.OPENID_TYPE_DICT[config.OPENID_QQ], msg)
             if str(ret_code) == "0":
                 excp.clear_the_profile()
-                return jdata.get("data")
+                data = jdata.get("data")
+                return data
             elif str(ret_code) == "3":
                 excp.set_the_profile()
                 raise excp
@@ -272,9 +273,9 @@ class QQWeibo(object):
         qs['pageflag'] = pageflag
         qs['pagetime'] = pagetime if pagetime is not None else 0
 
-        data = self.access_resource2("GET", "/statuses/broadcast_timeline", qs)
-        if data and isinstance(data, dict):
-            info = data.get("info") or []
+        jdata = self.access_resource2("GET", "/statuses/broadcast_timeline", qs)
+        if jdata and isinstance(jdata, dict):
+            info = jdata.get("info") or []
             print '---status from qqweibo, len is: %s' % len(info)
             return [QQWeiboStatusData(c) for c in info]
 
