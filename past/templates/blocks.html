@@ -66,7 +66,7 @@
     {% with msgs = get_flashed_messages(with_categories=true) %}
         {% if msgs or fillup_email%}
 <div class="box" id="notification">
-    <div class="highlighted_cell">
+    <div class="inner">
             {%if fillup_email%}
                 <li class="tip">请在<a href="/settings">设置页面</a>补充一下你的邮箱，PDF文件和往事提醒，会发送到你的邮箱。</li>
             {%endif%}
@@ -125,7 +125,7 @@
 
 {% macro rightbar_feedback_block() -%}
 <div class="box">
-    <div class="highlighted_cell"> <span class="bigger">反馈和帮助</span> </div>
+    <div class="cell"> <span class="bigger">反馈和帮助</span> </div>
 
     <div class="cell">
         <li><a href="/share?first_connect=1">推荐给友邻们</a></li>
@@ -169,7 +169,7 @@
 
 {% macro rightbar_note_block() -%}
 <div class="box">
-    <div class="highlighted_cell"> <span class="bigger">日记</span> </div>
+    <div class="cell"> <span class="bigger">日记</span> </div>
 
     <div class="cell">
         &gt; <a href="/note/create">写日记 </a> &nbsp;&nbsp; &gt; <a href="/notes">日记列表 </a>
@@ -185,7 +185,7 @@
 
 {% macro rightbar_googlead_block() -%}
 <div class="box">
-    <div class="highlighted_cell"> <span class="bigger">赞助：因为你的支持，所以我坚持...</span> </div>
+    <div class="cell"> <span class="bigger">赞助：因为你的支持，所以我坚持...</span> </div>
 
     <div class="cell">
         <p>&gt; <a target="_blank" href="https://www.gittip.com/laiwei/">Tip me on github :)</a></p>
@@ -210,3 +210,12 @@
 <div class="sep10"></div>
 {%- endmacro %}
 
+{% macro rightbar_tip_block() -%}
+<div class="box">
+    <div class="inner">
+        <p class="tip">sth</p>
+    </div>
+
+</div>
+<div class="sep10"></div>
+{%- endmacro %}

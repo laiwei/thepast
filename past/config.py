@@ -53,6 +53,7 @@ OPENID_TYPE_DICT = {
     OPENID_RENREN: "R",
     OPENID_INSTAGRAM: "I",
 }
+OPENID_TYPE_DICT_REVERSE = dict((v,k) for k, v in OPENID_TYPE_DICT.iteritems())
 
 OPENID_TYPE_NAME_DICT = {
     "D" : u"豆瓣",

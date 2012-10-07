@@ -46,6 +46,16 @@ def before_request():
         for k, v in config.OPENID_TYPE_DICT.items():
             tmp[v] = k
         g.unbinded = [[x, tmp[x], config.OPENID_TYPE_NAME_DICT[x]] for x in unbinded]
+
+        expired_providers = []
+        for t in [ua.type for ua in g.user.get_alias()]:
+            p = g.user.get_thirdparty_profile(t)
+            if p and p.get("expired"):
+                _ = [t, config.OPENID_TYPE_DICT_REVERSE.get(t), config.OPENID_TYPE_NAME_DICT.get(t, "")]
+                expired_providers.append(_)
+        if expired_providers:
+            msg = " ".join([x[-1] for x in expired_providers])
+            flash(u"你的 %s 授权已经过期了，会影响数据同步，你可以重新授权 :)", "tip")
     else:
         g.unbinded = None
 
@@ -178,9 +188,17 @@ def share():
             flash(u"至少要说点什么东西的吧...", "error")
             return render_template("share.html", **locals())
         
+        failed_providers = []
         for p in providers:
-            post_status(g.user, p, text)
-        flash(u"同步成功啦...", "tip")
+            try:
+                post_status(g.user, p, text)
+            except OAuthError, e:
+                log.warning("%s" % e)
+                failed_providers.append(config.OPENID_TYPE_NAME_DICT.get(p, ""))
+        if failed_providers:
+            flash(u"同步到%s失败了，请检查是否授权已过期，尝试重新进行第三方授权..." % " ".join(failed_providers), "error")
+        else:
+            flash(u"同步成功啦...", "tip")
         return redirect("/share")
 
     if request.method == "GET":
@@ -240,18 +258,13 @@ def sync(cates):
 def post_status(user, provider=None, msg=""):
     if msg and isinstance(msg, unicode):                                           
         msg = msg.encode("utf8") 
-    oauth_error = []
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_DOUBAN]:
         print "++++++++++post douban status"
         client = Douban.get_client(user.id)
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 广播备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            try:
-                client.post_status(msg)
-            except OAuthError, e:
-                log.warning("%s" % e)
-                oauth_error.append(provider)
+            client.post_status(msg)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_SINA]:
         print "++++++++++post sina status"
@@ -259,11 +272,7 @@ def post_status(user, provider=None, msg=""):
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            try:
-                client.post_status(msg)
-            except OAuthError, e:
-                log.warning("%s" % e)
-                oauth_error.append(provider)
+            client.post_status(msg)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_TWITTER]:
         print "++++++++post twitter status"
@@ -271,11 +280,7 @@ def post_status(user, provider=None, msg=""):
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, twitter备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            try:
-                client.post_status(msg)
-            except OAuthError, e:
-                log.warning("%s" % e)
-                oauth_error.append(provider)
+            client.post_status(msg)
 
     if not provider or provider == config.OPENID_TYPE_DICT[config.OPENID_QQ]:
         print "++++++++post qq weibo status"
@@ -283,8 +288,4 @@ def post_status(user, provider=None, msg=""):
         if client:
             if not msg:
                 msg = "#thepast.me# 你好，旧时光| 我在用thepast, 微博备份，往事提醒，你也来试试吧 >> http://thepast.me "
-            try:
-                client.post_status(msg)
-            except OAuthError, e:
-                log.warning("%s" % e)
-                oauth_error.append(provider)
+            client.post_status(msg)

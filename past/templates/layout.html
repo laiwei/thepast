@@ -54,6 +54,19 @@
     {% block main_block %}
         <div id="content"> 
             {%block content_block %}
+                <div id="sidebar">
+                  {%block sidebar_block%}{%endblock%}
+                </div>
+
+                <div id="rightbar">
+                  {%block rightbar_block%}
+                    {{blocks.rightbar_googlead_block()}}
+                  {%endblock%}
+                </div>
+
+                <div id="middlebar">
+                  {%block middlebar_block%}{%endblock%}
+                </div>
             {%endblock%}
         </div>
     {% endblock %}
