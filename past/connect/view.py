@@ -25,8 +25,8 @@ log = logging.getLogger(__file__)
 @blue_print.route("/",  defaults={"provider": config.OPENID_DOUBAN})
 @blue_print.route("/<provider>")
 def connect(provider):
-    #if provider == "renren":
-    #    abort(400, "人人的api尚未审核通过，预计假期后可开放，请先绑定其他平台吧，比如豆瓣:)")
+    if provider == "renren":
+        abort(400, "人人的api尚未审核通过，请先绑定其他平台吧，比如豆瓣:)")
     #return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
 
     client = None
