@@ -777,6 +777,12 @@ class RenrenBlogData(RenrenData):
     
     def get_origin_uri(self):
         return config.RENREN_BLOG %(self.get_user(), self.get_origin_id())
+    
+    def get_summary(self):
+        c = self.get_content()
+        if c and isinstance(c, basestring):
+            return c[:140]
+        return ""
 
 class RenrenAlbumData(RenrenData):
     def __init__(self, data):

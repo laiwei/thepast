@@ -217,9 +217,11 @@
 
 {% macro thepast_renren_blog(s, pdf=False) -%}
     {% set origin_uri = s.get_origin_uri() %}
-    <a href="/post/{{s.id}}">{{s.title}}</a>
+    <a href="http://thepast.me/post/{{s.id}}">{{s.title}}</a>
     {%if pdf%}
         {{s.text}}
+    {%else%}
+        {{s.summary}}
     {%endif%}
 
     {%if pdf%}

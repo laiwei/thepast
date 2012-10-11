@@ -18,7 +18,68 @@ from past.model.user import User
 from past.store import db_conn
 from past import config
 
-def send_today_in_history(user_id, now=None):
+def send_today_in_history(user_id, now=None, include_yestorday=False):
+    if not now:
+        now = datetime.datetime.now()
+
+    u = User.get(user_id)
+    if not u:
+        return
+
+    setting = u.get_profile_item("email_remind_today_in_history")
+    if setting == 'N':
+        print '---user %s does not like to receive remind mail' % u.id
+        return
+
+    email = u.get_email()
+    if not email:
+        print '---- user %s no email' % u.id
+        return
+    
+    history_ids = get_status_ids_today_in_history(u.id, now)
+    status_of_today_in_history = Status.gets(history_ids)
+
+    intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
+    
+    d = {}
+    for s in Status.gets(history_ids):
+        t = s.create_time.strftime("%Y-%m-%d")
+        if d.has_key(t):
+            d[t].append(s)
+        else:
+            d[t] = [s]
+    status_of_today_in_history = d
+    from past.consts import YESTERDAY
+
+
+    if not status_of_today_in_history:
+        print '--- user %s has no status in history' % u.id
+        return
+
+    from jinja2 import Environment, PackageLoader
+    env = Environment(loader=PackageLoader('past', 'templates'))
+    env.filters['wrap_long_line'] = wrap_long_line
+    env.filters['nl2br'] = filters.nl2br
+    env.filters['clear_html_element'] = clear_html_element
+    t = env.get_template('mail.html')
+    m = t.module
+
+
+    if now:
+        y = (now - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    else:
+        y = YESTERDAY
+    html = m.status_in_past(None, status_of_today_in_history, y, config, intros)
+    html = html.encode("utf8")
+
+    subject = '''来自thepast.me的提醒 %s''' % now.strftime("%Y-%m-%d")
+    text = ''
+    
+    print '--- send reminding to %s %s' %(user_id, email)
+    send_mail(["%s" % email], "today of the past<help@thepast.me>", subject, text, html, files=[], server="localhost")
+
+def send_yesterday(user_id, now=None):
     if not now:
         now = datetime.datetime.now()
 
@@ -39,27 +100,13 @@ def send_today_in_history(user_id, now=None):
     yesterday_ids = get_status_ids_yesterday(u.id, now) 
     status_of_yesterday = Status.gets(yesterday_ids)
 
-    history_ids = get_status_ids_today_in_history(u.id, now)
-    status_of_today_in_history = Status.gets(history_ids)
-
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
-    
-    history_ids = get_status_ids_today_in_history(u.id, now)
 
-    d = {}
-    for s in Status.gets(history_ids):
-        t = s.create_time.strftime("%Y-%m-%d")
-        if d.has_key(t):
-            d[t].append(s)
-        else:
-            d[t] = [s]
-    status_of_today_in_history = d
     from past.consts import YESTERDAY
 
-
-    if not (status_of_yesterday or status_of_today_in_history):
-        print '--- user %s has no status in history' % u.id
+    if not status_of_yesterday:
+        print '--- user %s has no status in yesterday' % u.id
         return
 
     from jinja2 import Environment, PackageLoader
@@ -75,14 +122,14 @@ def send_today_in_history(user_id, now=None):
         y = (now - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     else:
         y = YESTERDAY
-    html = m.status_in_past(status_of_yesterday, status_of_today_in_history, y, config, intros)
+    html = m.status_in_past(status_of_yesterday, None, y, config, intros)
     html = html.encode("utf8")
 
     subject = '''来自thepast.me的提醒 %s''' % now.strftime("%Y-%m-%d")
     text = ''
     
     print '--- send reminding to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "Today of The Past<help@thepast.me>", subject, text, html, files=[], server="localhost")
+    send_mail(["%s" % email], "today of the past<help@thepast.me>", subject, text, html, files=[], server="localhost")
 
 def send_pdf(user_id):
     u = User.get(user_id)
@@ -123,6 +170,6 @@ if __name__ == '__main__':
             t = 0
             time.sleep(5)
         send_today_in_history(uid)
-        time.sleep(5)
+        time.sleep(1)
         t += 1
 
