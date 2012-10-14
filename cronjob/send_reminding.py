@@ -197,7 +197,7 @@ def send_reconnect(user_id):
     reconnect_urls = []
     for x in expires_site.keys():
         names.append(config.OPENID_TYPE_NAME_DICT.get(x, ""))
-        reconnect_urls.append("http://theapst.me/connect/%s" % config.OPENID_TYPE_DICT_REVERSE.get(x))
+        reconnect_urls.append("http://thepast.me/connect/%s" % config.OPENID_TYPE_DICT_REVERSE.get(x))
 
     subject = '''thepast.me授权过期提醒'''
     text = '''Hi，亲爱的%s，
