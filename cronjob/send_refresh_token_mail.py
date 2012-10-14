@@ -6,32 +6,24 @@ sys.path.append("../")
 activate_this = '../env/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 
-import datetime
 import time
-from collections import defaultdict
-
-from past.utils.sendmail import send_mail
 from past.store import db_conn
+from send_reminding import send_reconnect
 
 if __name__ == "__main__":
-
-    t = datetime.datetime.now() - datetime.timedelta(days=90)
-    t = t.strftime("%Y-%m-%d %H:%M:%S")
-    cursor = db_conn.execute("""select alias_id from oauth2_token where time < %s""", t)
-    rows = cursor.fetchall()
+    cursor = db_conn.execute("select max(id) from user")
+    row = cursor.fetchone()
     cursor and cursor.close()
-
-    user_and_alias = defaultdict(list)
-
-    for row in rows:
-        alias_id = row[0]
-        c = db_conn.execute("""select `type`, user_id, alias from user_alias where id=%s""", alias_id)
-        r = c.fetchone()
-        c and c.close()
-
-        if r:
-            user_and_alias[r[1]].append([r[0], r[2]])
-    with open("expire.user", "w") as f:
-        for k,v in user_and_alias.items():
-            f.write("%s : %s\n" %(k,v))
+    max_uid = row and row[0]
+    max_uid = int(max_uid)
+    t = 0
+    for uid in xrange(4,max_uid + 1):
+    #for uid in xrange(4, 5):
+        if t >= 100:
+            t = 0
+            time.sleep(5)
+        send_reconnect(uid)
+        time.sleep(1)
+        t += 1
+        sys.stdout.flush()
 

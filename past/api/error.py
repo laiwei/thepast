@@ -4,7 +4,6 @@ from tweepy.error import TweepError
 from past.model.user import User
 
 class OAuthError(Exception):
-    KEY_PREFIX = "OE"
     def __init__(self, msg_type, user_id, openid_type, msg):
         self.msg_type = msg_type
         self.user_id = user_id
@@ -16,22 +15,29 @@ class OAuthError(Exception):
             (self.user_id, self.openid_type, self.msg_type, self.msg)
     __repr__ = __str__
 
-    def set_the_profile(self):
+    def set_the_profile(self, flush=False):
         if self.user_id:
             u = User.get(self.user_id)
             if u:
-                u.set_thirdparty_profile_item(self.openid_type, self.msg_type, datetime.datetime.now())
+                if flush:
+                    u.set_thirdparty_profile_item(self.openid_type, self.msg_type, datetime.datetime.now())
+                else:
+                    p = u.get_thirdparty_profile(self.openid_type)
+                    t = p and p.get(self.msg_type)
+                    u.set_thirdparty_profile_item(self.openid_type, self.msg_type, t or datetime.datetime.now())
 
     def clear_the_profile(self):
         if self.user_id:
             u = User.get(self.user_id)
             if u:
                 u.set_thirdparty_profile_item(self.openid_type, self.msg_type, "")
-
-    def is_error_exists(self):
+    
+    def is_exception_exists(self):
         if self.user_id:
             u = User.get(self.user_id)
-            return u and u.get_thirdparty_profile(self.openid_type)
+            p = u and u.get_thirdparty_profile(self.openid_type)
+            return p and p.get(self.msg_type)
+
 
 class OAuthTokenExpiredError(OAuthError):
     TYPE = "expired"

@@ -17,6 +17,7 @@ from past.model.status import get_status_ids_today_in_history, \
 from past.model.user import User
 from past.store import db_conn
 from past import config
+from past.api.error import OAuthTokenExpiredError
 
 def send_today_in_history(user_id, now=None, include_yestorday=False):
     if not now:
@@ -58,8 +59,7 @@ def send_today_in_history(user_id, now=None, include_yestorday=False):
     status_of_today_in_history = d
     from past.consts import YESTERDAY
 
-
-    if not status_of_today_in_history:
+    if not (status_of_today_in_history or (include_yestorday and status_of_yesterday)):
         print '--- user %s has no status in history' % u.id
         return
 
@@ -76,7 +76,7 @@ def send_today_in_history(user_id, now=None, include_yestorday=False):
         y = (now - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     else:
         y = YESTERDAY
-    html = m.status_in_past(None, status_of_today_in_history, y, config, intros)
+    html = m.status_in_past(status_of_yesterday, status_of_today_in_history, y, config, intros)
     html = html.encode("utf8")
 
     subject = '''thepast.me|整理自己的故事 %s''' % now.strftime("%Y-%m-%d")
@@ -162,7 +162,64 @@ http://thepast.me | 个人杂志计划
 thanks''' % user_id
     
     print '--- send pdf file to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "help@thepast.me", subject, text, '', files=[])
+    send_mail(["%s" % email], "thepast<help@thepast.me>", subject, text, "")
+
+def send_reconnect(user_id):
+    u = User.get(user_id)
+
+    if not u:
+        return
+
+    setting = u.get_profile_item("email_remind_today_in_history")
+    if setting == 'N':
+        print '---user %s does not like to receive remind mail' % u.id
+        return
+
+    excps = [OAuthTokenExpiredError(user_id, x) for x in config.OPENID_TYPE_DICT.values()]
+    expires_site = {}
+    for e in excps:
+        t = e.is_exception_exists()
+        if t:
+            expires_site[e.openid_type] = t
+
+    if not expires_site:
+        print '--- user %s has no expired connection' % u.id
+        return
+    else:
+        print '--- user %s expired connection: %s' %(u.id, expires_site)
+
+    email = u.get_email()
+    if not email:
+        print '---- user %s no email' % u.id
+        return
+
+    names = []
+    reconnect_urls = []
+    for x in expires_site.keys():
+        names.append(config.OPENID_TYPE_NAME_DICT.get(x, ""))
+        reconnect_urls.append("http://theapst.me/connect/%s" % config.OPENID_TYPE_DICT_REVERSE.get(x))
+
+    subject = '''thepast.me授权过期提醒'''
+    text = '''Hi，亲爱的%s，
+    
+感谢你使用thepast.me来整理自己的互联网印迹.
+    
+你在 %s 对thepast的授权过期了，影响到您的个人历史数据同步，
+
+请依次访问下面的链接，重新授权：）
+
+%s
+
+
+
+如果你不愿意接收此类邮件，那么请到 http://thepast.me/settings 设置：）
+---
+http://thepast.me 
+thanks''' % (u.name.encode("utf8"), ", ".join(names).encode("utf8"), "\n".join(reconnect_urls))
+
+    print '--- send reconnections to %s %s' %(user_id, email)
+    send_mail(["%s" % email], "thepast<help@thepast.me>", subject, text, "")
+
 
 if __name__ == '__main__':
     cursor = db_conn.execute("select max(id) from user")

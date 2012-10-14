@@ -79,7 +79,7 @@
             {% set days = status_of_today_in_history.keys()|sort(reverse=True)%}
             {% for d in days %}
                 {% set statuses = status_of_today_in_history[d] %}
-                <div class="cell" style="padding: 5px; font-size: 15px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
+                <div class="cell" style="padding: 10px; font-size: 15px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
                     {{d}}, 找到了{{statuses|length}}条记忆
                 </div>
                 {%for s in statuses %}
