@@ -38,6 +38,12 @@ def send_today_in_history(user_id, now=None, include_yestorday=False):
     
     history_ids = get_status_ids_today_in_history(u.id, now)
     status_of_today_in_history = Status.gets(history_ids)
+    
+    if include_yestorday:
+        yesterday_ids = get_status_ids_yesterday(u.id, now) 
+        status_of_yesterday = Status.gets(yesterday_ids)
+    else:
+        status_of_yesterday = None
 
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
