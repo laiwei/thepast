@@ -7,7 +7,8 @@ from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE, formatdate
 from email import Encoders
 import os
- 
+
+from past import config
 
 _TO_UNICODE_TYPES = (unicode, type(None))
 def to_unicode(value):
@@ -17,8 +18,15 @@ def to_unicode(value):
     return value.decode("utf-8")
 
     
-def send_mail(to, fro, subject, text, html, files=[],server="localhost"):
+def send_mail(to, fro, subject, text, html, files=None, 
+            server=config.SMTP_SERVER, 
+            user=config.SMTP_USER, password=config.SMTP_PASSWORD):
+    if to and not isinstance(to, list):
+        to = [to,]
     assert type(to)==list
+
+    if files is None:
+        files = []
     assert type(files)==list
  
     # Create message container - the correct MIME type is multipart/alternative.
@@ -42,12 +50,15 @@ def send_mail(to, fro, subject, text, html, files=[],server="localhost"):
         msg.attach(part)
  
     smtp = smtplib.SMTP(server)
+    if user and password:
+        smtp.login(user, password)
     smtp.sendmail(fro, to, msg.as_string() )
     smtp.close()
 
 if __name__ == "__main__":
     send_mail(['laiwei_ustc <laiwei.ustc@gmail.com>'],
-        'Today of The Past<help@thepast.me>',
+        'today of the past<help@thepast.me>',
         'thepast.me | 历史上的今天',
         'http://thepast.me个人杂志计划', 'html内容',
         ['/home/work/proj/thepast/past/static/img/avatar.png'])
+

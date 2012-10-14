@@ -55,10 +55,13 @@
     <tr>
         <td style="padding:0 25px 5px">
         <div class="box" style="background-color: #fff; border: 1px solid #fff;">
-            <div class="inner" style="padding: 10px; font-size: 12px; line-height: 16px;">
-            <p>thepast帮你整理自己的互联网印迹，每天会尝试提醒你过去发生的一些事情，期望能带给你不一样的心情。</p>
-            <p><a style="color:#8C7E7E;text-decoration:none;" href="http://thepast.me/past">你可以在这里查看在线版本</a>，&nbsp;
-            另外，你可以去<a style="color:#8C7E7E;text-decoration:none;" href="http://thepast.me/pdf">这里</a>下载timeline的PDF版本.</p>
+            <div class="cell" style="padding: 10px; font-size: 20px" align="center">
+                <a href="http://thepast.me/past">thepast.me</a>｜整理自己的故事
+            </div>
+            <div class="inner" style="padding: 5px; font-size: 11px; line-height: 16px; font-color:#999;">
+                <p>thepast帮你整理自己的互联网印迹，每天会尝试提醒你过去发生的一些事情，期望能带给你不一样的心情。
+                <a style="text-decoration:none;" href="http://thepast.me/past">[在线版本]</a>&nbsp;
+                <a style="text-decoration:none;" href="http://thepast.me/pdf">[下载PDF版本]</a></p>
             </div>
         </div>
         </td>
@@ -69,27 +72,26 @@
     <td style="padding:0 25px 20px">
 
         <div class="box" style="background-color: #fff; border: 1px solid #fff;">
-            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
-                <h2>过往的今天</h2>
+            <div class="inner" align="center" style="padding: 10px; font-size: 18px; line-height: 16px;">
+                过往的今天
             </div>
 
             {% set days = status_of_today_in_history.keys()|sort(reverse=True)%}
             {% for d in days %}
                 {% set statuses = status_of_today_in_history[d] %}
-                <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
-                    <h3>›{{d}}, 找到了{{statuses|length}}条记忆</h3>
+                <div class="cell" style="padding: 5px; font-size: 15px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
+                    {{d}}, 找到了{{statuses|length}}条记忆
                 </div>
                 {%for s in statuses %}
                 <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;"> 
-                    <strong>{{s.create_time.strftime("%H:%M:%S")}} 
+                    {{s.create_time.strftime("%H:%M:%S")}} 
                     <!-- 来源 -->
                     {%set from_ = s.get_origin_uri()%}
                     {%if from_%}
-                        <a style="color:#8C7E7E;text-decoration:none;" target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;来自{{from_[0]}}</a>
+                        <a style="color:#8C7E7E;text-decoration:none;" target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;from {{from_[0]}}</a>
                     {%endif%}
-                    </strong>
 
-                    <br/><br/>
+                    <br/>
                     {%if s.category == config.CATE_DOUBAN_STATUS%}
                         {{status_tmpl_helper.douban_status(s)}}
                     {%endif%}
@@ -142,23 +144,22 @@
     <tr>
     <td style="padding:0 25px 25px">
         <div class="box" style="background-color: #fff; border: 1px solid #fff;">
-            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
-                <h2>昨天的印迹</h2>
+            <div class="inner" align="center" style="padding: 10px; font-size: 18px; line-height: 16px;">
+                昨天的印迹
             </div>
 
-            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
-                <h3>›{{YESTERDAY}}，找到{{status_of_yesterday|length}}条记录</h3>
+            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 15px; border-bottom: 1px solid #e2e2e2;">
+                {{YESTERDAY}}，找到{{status_of_yesterday|length}}条回忆
             </div>
         {% for s in status_of_yesterday %}
-            <div class="cell" style="padding: 10px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
-                    <strong>{{s.create_time.strftime("%H:%M:%S")}} 
+            <div class="cell" style="padding: 5px; font-size: 12px; line-height: 16px; border-bottom: 1px solid #e2e2e2;">
+                    {{s.create_time.strftime("%H:%M:%S")}} 
                     <!-- 来源 -->
                     {%set from_ = s.get_origin_uri()%}
                     {%if from_%}
-                        <a style="color:#8C7E7E;text-decoration:none;" target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;来自{{from_[0]}}</a>
+                        <a style="color:#8C7E7E;text-decoration:none;" target="_blank" href="{{from_[1]}}">&nbsp;&nbsp;from {{from_[0]}}</a>
                     {%endif%}
-                    </strong>
-                    <br/> <br/>
+                    <br/>
 
                     {%if s.category == config.CATE_DOUBAN_STATUS%}
                         {{status_tmpl_helper.douban_status(s)}}

@@ -6,6 +6,11 @@ DB_USER = "root"
 DB_PASSWD = "123456"
 DB_NAME = "thepast"
 
+#-- smtp config --
+SMTP_SERVER = "localhost"
+SMTP_USER = ""
+SMTP_PASSWORD = ""
+
 #-- redis config --
 #XXX
 REDIS_HOST = "localhost"

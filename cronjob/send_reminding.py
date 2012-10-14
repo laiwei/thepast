@@ -73,11 +73,11 @@ def send_today_in_history(user_id, now=None, include_yestorday=False):
     html = m.status_in_past(None, status_of_today_in_history, y, config, intros)
     html = html.encode("utf8")
 
-    subject = '''来自thepast.me的提醒 %s''' % now.strftime("%Y-%m-%d")
+    subject = '''thepast.me|整理自己的故事 %s''' % now.strftime("%Y-%m-%d")
     text = ''
     
     print '--- send reminding to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "today of the past<help@thepast.me>", subject, text, html, files=[], server="localhost")
+    send_mail(["%s" % email], "thepast<help@thepast.me>", subject, text, html)
 
 def send_yesterday(user_id, now=None):
     if not now:
@@ -125,11 +125,11 @@ def send_yesterday(user_id, now=None):
     html = m.status_in_past(status_of_yesterday, None, y, config, intros)
     html = html.encode("utf8")
 
-    subject = '''来自thepast.me的提醒 %s''' % now.strftime("%Y-%m-%d")
+    subject = '''thepast.me|整理自己的故事 %s''' % now.strftime("%Y-%m-%d")
     text = ''
     
     print '--- send reminding to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "today of the past<help@thepast.me>", subject, text, html, files=[], server="localhost")
+    send_mail(["%s" % email], "thepast<help@thepast.me>", subject, text, html)
 
 def send_pdf(user_id):
     u = User.get(user_id)
@@ -156,7 +156,7 @@ http://thepast.me | 个人杂志计划
 thanks''' % user_id
     
     print '--- send pdf file to %s %s' %(user_id, email)
-    send_mail(["%s" % email], "help@thepast.me", subject, text, '', files=[], server="localhost")
+    send_mail(["%s" % email], "help@thepast.me", subject, text, '', files=[])
 
 if __name__ == '__main__':
     cursor = db_conn.execute("select max(id) from user")
