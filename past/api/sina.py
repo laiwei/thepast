@@ -49,8 +49,8 @@ class SinaWeibo(OAuth2):
         return cls(alias.alias, token.access_token, token.refresh_token)
 
     def check_result(self, uri, resp, content):
-        if resp.status != 200:
-            return None
+        #{"error":"expired_token","error_code":21327,"request":"/2/statuses/update.json"}
+        log.debug("---sina check result, status: %s, resp: %s, content: %s" %(resp.status, resp, content))
         jdata = json_decode(content) if content else None
         if jdata and isinstance(jdata, dict):
             error_code = jdata.get("error_code")
@@ -101,6 +101,7 @@ class SinaWeibo(OAuth2):
         log.info("posting %s" %url)
         resp, content = httplib2_request(uri, "POST", body=body, headers=headers)
         content_json = self.check_result(uri, resp, content)
+        log.info("post to sina return:%s" % content_json)
         return content_json
 
     def get_user_info(self, uid=None):

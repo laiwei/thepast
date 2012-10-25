@@ -55,7 +55,7 @@ def before_request():
                 expired_providers.append(_)
         if expired_providers:
             msg = " ".join([x[-1] for x in expired_providers])
-            flash(u"你的 %s 授权已经过期了，会影响数据同步，你可以重新授权 :)", "tip")
+            flash(u"你的 %s 授权已经过期了，会影响数据同步，你可以重新授权 :)" % msg, "tip")
     else:
         g.unbinded = None
 

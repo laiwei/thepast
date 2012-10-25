@@ -26,7 +26,7 @@ log = logging.getLogger(__file__)
 @blue_print.route("/<provider>")
 def connect(provider):
     if provider == "renren":
-        abort(400, "人人的api尚未审核通过，请先绑定其他平台吧，比如豆瓣:)")
+        abort(400, u"人人的api因为备案问题尚未审核通过，请先绑定其他平台吧，比如豆瓣:)")
     #return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
 
     client = None
@@ -85,7 +85,7 @@ def connect_callback(provider):
             print "---token_dict", token_dict
         except OAuthError, e:
             log.warning(e)
-            abort(400, "从第三方获取access_token失败了，请重新尝试一下，抱歉:)")
+            abort(400, u"从第三方获取access_token失败了，请重新尝试一下，抱歉:)")
 
         if not (token_dict and token_dict.get("access_token")):
             abort(400, "no_access_token")

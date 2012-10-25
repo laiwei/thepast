@@ -171,6 +171,7 @@ class QQWeibo(object):
                 headers = None
             resp, content = httplib2_request(uri, method, body, headers=headers)
             
+        log.debug("---qq check result, status: %s, resp: %s, content: %s" %(resp.status, resp, content))
         if resp.status != 200:
             raise OAuthLoginError(msg='get_unauthorized_request_token fail, status=%s:reason=%s:content=%s' \
                     %(resp.status, resp.reason, content))
