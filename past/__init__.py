@@ -9,8 +9,10 @@ app.config.from_object("past.config")
 ##-- register blueprint --
 from past.visual import blue_print as visual_bp
 from past.connect import blue_print as connect_bp
+from past.dev import blue_print as dev_bp
 app.register_blueprint(visual_bp, url_prefix="/visual")
 app.register_blueprint(connect_bp, url_prefix="/connect")
+app.register_blueprint(dev_bp, url_prefix="/dev")
 
 import view
 

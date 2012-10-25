@@ -2,7 +2,6 @@
 
 from flask import (session, redirect, request, abort, g, url_for, flash)
 from past import config
-from past.utils.logger import logging
 from past.corelib import set_user_cookie 
 
 from past.model.user import User, UserAlias, OAuth2Token
@@ -20,6 +19,7 @@ from past.api.error import OAuthError
 from past.utils.escape import json_encode
 from past.connect import blue_print
 
+from past.utils.logger import logging
 log = logging.getLogger(__file__)
 
 @blue_print.route("/",  defaults={"provider": config.OPENID_DOUBAN})
