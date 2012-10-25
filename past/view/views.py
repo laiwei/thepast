@@ -33,7 +33,7 @@ log = logging.getLogger(__file__)
 @app.before_request
 def before_request():
     g.user = auth_user_from_session(session)
-    #g.user = User.get(2)
+    g.user = User.get(8)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:

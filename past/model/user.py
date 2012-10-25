@@ -471,3 +471,4 @@ class PdfSettings(object):
         cursor = db_conn.execute('''delete from pdf_settings where user_id=%s''', user_id)
         db_conn.commit()
         cls._clear_cache(user_id)
+
