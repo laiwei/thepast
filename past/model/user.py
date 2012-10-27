@@ -206,6 +206,11 @@ class User(object):
         from past.utils.pdf import is_user_pdf_file_exists
         return is_user_pdf_file_exists(self.id)
 
+    def get_dev_tokens(self):
+        from past.model.user_tokens import UserTokens
+        ids = UserTokens.get_ids_by_user_id(self.id)
+        return [UserTokens.get(x) for x in ids] or []
+
 class UserAlias(object):
 
     def __init__(self, id_, type_, alias, user_id):
