@@ -218,88 +218,182 @@
 <div class="sep10"></div>
 {%- endmacro %}
 
-{% macro story_unit_block(repeated_status) -%}
+{% macro story_unit_block(g, repeated_status, sync_list=None) -%}
     <!-- 图片 -->
     {% set s = repeated_status.status_list[0]%}
     {% set data = s.get_data()%}
     {% set atts = data and data.get_attachments() or []%}
     {% set images = data and data.get_images() or [] %}
 
-    {% set user = data and data.get_user() or ""%}
-    {% set thepast_user = data and data.get_thepast_user() or ""%}
-    {% set user_nickname = user if user|isstr else user.get_nickname()%}
-    {% if data and data.site == "R" and thepast_user%}
-        {% set user_nickname = thepast_user.name %}
-    {% endif%}
+    {% set thepast_user = s.get_thepast_user()%}
+    {% set thirdparty_profile = thepast_user and thepast_user.get_thirdparty_profile(s.site)%}
+    {% if s.site == 'R'%}
+        {% set user_nickname = thepast_user and thepast_user.name %}
+    {% else%}
+        {% set user_nickname = thepast_user and (thirdparty_profile.get("name") 
+            or thirdparty_profile.get("uid") or thepast_user.name) %}
+    {%endif%}
+    {% set avatar = thepast_user 
+        and (thirdparty_profile.get("avatar") or thepast_user.get_avatar_url())%}
 
     {% set re_ = s.get_retweeted_data()%}
     {% set re_atts = re_ and re_.get_attachments() or []%}
     {% set re_images = re_ and re_.get_images() or [] %}
-    {% set re_user = re and re_.get_user() or ""%}
+    {% set re_user = re_ and re_.get_user() or ""%}
     {% set re_user_nickname = re_user if re_user|isstr else re_user.get_nickname()%}
-
-
-    {% set avatar = user.get_avatar() if not user|isstr else ""%}
-    {% if not avatar and thepast_user%}
-        {% set avatar = thepast_user.get_avatar_url()%}
-    {% endif%}
 
     <div class="unit">
       
       <!-- Story -->
-      <div class="storyUnit">
-        {%if avatar%}
+      <div class="storyUnit" id="story-{{s.id}}">
         <div class="imageUnit">
+        {%if avatar%}
           <a href="{{avatar}}"><img src="{{avatar}}" width="32" height="32" alt="{{user_nickname}}"></a>
+        {%endif%}
           <div class="imageUnit-content">
-            <h5><a href="#">{{user_nickname}}</a>
+            <a href="/user/{{thepast_user.id}}" >{{user_nickname}}</a>&nbsp;
+            <span>{{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
+          </div>
+          <div class="pull-right">
             {%for s_ in repeated_status.status_list%}
                 {%set from_ = s_.get_origin_uri()%}
                 {%if from_%}
-                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
-                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                    <span class="from {{from_[0]}} oauth"><a target="_blank" href="{{from_[1]}}"></a></span>
                 {%endif%}
-            {%endfor%}</h5>
+            {%endfor%}
           </div>
         </div>
-        {%endif%}
       
-        <p>{{s.summary|safe}}</p>
+        <span class="summary">{{s.summary|safe}}</span>
         
         {%for att in atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
         <p>{{att.get_description()|safe}}</p>
         {%endfor%}
 
-        <p>
-        {%if re_user_nickname%}
-            //@{{re_user_nickname}}:
+        {%if re_user_nickname and re_.get_content()%}
+        <span>
+            //@{{re_user_nickname}}: {{re_.get_content()|safe}}
+        </span>
         {% endif %}
 
-        {%if re_%}
-        {{re_.get_content()|safe}}
-        {%endif%}
-        </p>
 
         {%for att in re_atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
         <p>{{att.get_description()|safe}}</p>
         {%endfor%}
       
-    {% if images %}
+        {% if images %}
         <div class="photoUnit">
         {%for image in images%}
-            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
+            <img class="post-image" src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
         {%endfor%}
         </div>
-    {% endif %}
+        {% endif %}
       <!-- / Story -->
       
       <!-- Units -->
       <ol class="storyActions">
-        <li><a href="#">回顾</a></li>
+        <li><a href="#" onclick="javascript:fn_repost_modal({{s.id}})">旧事重提</a></li>
       </ol>
       <!-- / Units -->
       
     </div>
+
+    <div id="modal_reshare_{{s.id}}" class="modal hide fade" 
+        tabindex="-1" aria-labelledby="modal-label-reshare" aria-hidden="false">
+        <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+             <h3 id="modal-label-reshare">旧事重提</h3>
+        </div>
+        <div class="modal-body">
+            <textarea rows=4 style="width:100%;"></textarea>
+            <ul class="thumbnails"> </ul>
+            {%if sync_list%}
+            {%for s in sync_list%}
+            <label class="checkbox inline">
+                <input type="checkbox" name="provider" value="{{s[0]}}" 
+                    {%if s[1] == "Y"%}checked{%endif%}>
+                {{g.config.OPENID_TYPE_NAME_DICT[s[0]]}}
+            </label>
+            {%endfor%}
+            {%endif%}
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+            <button class="btn btn-primary" data-dismiss="modal" onclick="javascript:fn_repost_status({{s.id}})">确定</button>
+        </div>
+    </div>
+
+
+    <script>
+        function fn_repost_status(sid){
+            var obj = jQuery("#story-" + sid);
+            var content = jQuery("#modal_reshare_" +sid+ " textarea").val();
+            var images = new Array();
+            jQuery("#modal_reshare_" +sid+ " img").each(function(i, img){
+                images.push(jQuery(img).attr("src"));
+            });
+            var providers = new Array();
+            jQuery("#modal_reshare_" +sid+ " input[name='provider']:checked").each(function(i, ck){
+                providers.push(jQuery(ck).val());
+            });
+
+            console.log(sid + content + images + providers);
+            jQuery.ajax({
+                type: "POST",
+                async: false,
+                dataType: "json",
+                url: "/reshare_ajax",
+                data: {
+                    "text": content,
+                    "images": images.join("|"),
+                    "providers": providers.join("|")
+                },
+                success: function(data){
+                    if (data.ok == '1'){
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            });
+        }
+
+        function fn_repost_modal(sid){
+            var obj = jQuery("#story-" + sid);
+
+            var summary = "#thepast.me# " + jQuery(obj.find(".summary")[0]).html();
+            jQuery("#modal_reshare_" +sid+ " textarea").val(summary);
+
+            var images = new Array();
+            obj.find(".post-image").each(function(i, img){
+                images.push(jQuery(img).attr("src"));
+            });
+            console.log(images);
+
+            var thumbs = jQuery("#modal_reshare_" +sid+ " .thumbnails");
+            thumbs.html("");
+            for (var i in images){
+                var img = images[i];
+                var thumb_id = "thumb-" + sid + "-" + i;
+                var thumb_html = '<li class="span4" id="'+ thumb_id +'">'
+                + '<i class="icon-remove"></i>'
+                + '<a href="#" class="thumbnail">' 
+                + '<img src="' + img +  '"></img> </a>'
+                + '</li>';
+                thumbs.append(jQuery(thumb_html));
+                jQuery("#" + thumb_id + " i").click(function(){
+                    jQuery("#" + thumb_id).remove();
+                });
+            }
+
+            
+            jQuery("#modal_reshare_" + sid).modal({
+                "keyboard": true,
+                "show": true,
+                "backdrop": "static"
+            });
+        }
+    </script>
 {%- endmacro %}
+

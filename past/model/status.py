@@ -9,7 +9,7 @@ from past.utils.escape import json_encode, json_decode, clear_html_element
 from past.utils.logger import logging
 from past.store import mc, db_conn
 from past.corelib.cache import cache, pcache, HALF_HOUR
-from .user import UserAlias
+from .user import UserAlias, User
 from .note import Note
 from .data import DoubanMiniBlogData, DoubanNoteData, DoubanStatusData, \
         SinaWeiboStatusData, QQWeiboStatusData, TwitterStatusData,\
@@ -374,6 +374,9 @@ class Status(object):
         if hasattr(d, "get_retweeted_data"):
             return d.get_retweeted_data()
         return None
+
+    def get_thepast_user(self):
+        return User.get(self.user_id)
 
 
 ## Sycktask: 用户添加的同步任务

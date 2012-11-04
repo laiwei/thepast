@@ -57,8 +57,21 @@ def user(uid):
         tags_list = []
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
+
+    user_binded_providers = [ua.type for ua in g.user.get_alias() if ua.type in config.CAN_SHARED_OPENID_TYPE]
+
+    sync_list = []
+    for t in user_binded_providers:
+        p = g.user.get_thirdparty_profile(t)
+        sync_list.append([t, "Y"])
+        if p and p.get("share") == "Y":
+            sync_list.append([t, "Y"])
+        else:
+            sync_list.append([t, "N"])
+
     return render_template("timeline.html", user=u, unbinded=[], 
-            tags_list=tags_list, intros=intros, status_list=status_list, config=config)
+            tags_list=tags_list, intros=intros, 
+            status_list=status_list, config=config, sync_list=sync_list)
 
 @app.route("/pdf")
 @require_login()

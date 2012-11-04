@@ -16,7 +16,6 @@
   width: 436px;
   margin-bottom: 15px;
   position: relative;
-  z-index: 2;
 }
 .timeline > .right {
   float: right;
@@ -60,7 +59,6 @@
   left: 436px;
   width: 29px;
   height: 100%;
-  z-index: 1;
 }
 .timeline .spine > a,
 .timeline .spine a:visited {
@@ -107,6 +105,7 @@
 }
 .photoUnit {
   margin: 0 -10px -5px -10px;
+  margin: 5px 0px;
 }
 .controls {
   background: #F2F2F2;
@@ -155,7 +154,7 @@
   background: #EDEFF4;
   list-style: none;
   padding: 5px 10px;
-  margin: 0;
+  margin: 10px 0 0 0;
   font-size: 11px;
 }
 .storyActions > li {

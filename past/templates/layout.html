@@ -55,13 +55,12 @@
             {%endblock%}
 
             {%block navbar_menu%}
-                <ul class="nav" style="padding:5px;">
-                    <li class="active"><a href="/i">首页</a></li>
+                <ul class="nav" id="nav-topbar" style="padding:5px;">
+                    <li id="menu_user_page" class="active"><a href="/i">首页</a></li>
                     <li><a href="/past">过往</a></li>
-                    <li><a href="/share">同步控</a></li>
                     <li><a href="/notes">日记本</a></li>
                     <li><a href="/visual">时间线</a></li>
-                    <li><a href="/bind/wordpress">Blog</a></li>
+                    <li><a href="/bind/wordpress">绑定wordpress</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">设置<b class="caret"></b></a>
                         <ul class="dropdown-menu">
@@ -71,6 +70,25 @@
                         </ul>
                     </li>
                 </ul>
+                <script>
+
+                jQuery(function(){
+                    jQuery("#nav-topbar").find("li").each(function(){
+                        var a = jQuery(this).find("a:first")[0];
+                        if (jQuery(a).attr("href") === location.pathname){
+                            jQuery(this).addClass("active");
+                        }else{
+                            jQuery(this).removeClass("active");
+                        }
+                    });
+                    var patrn=/^\/user\/[0-9]+$/;
+                    var user_page = jQuery("#menu_user_page");
+                    if (patrn.exec(location.pathname)){
+                          user_page.addClass("active");
+                    }
+                })
+
+                </script>
             {%endblock%}
 
             </div><!--/.nav-collapse -->

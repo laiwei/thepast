@@ -314,13 +314,6 @@ class AbsData(object):
     def get_user(self):
         return None
 
-    ##根据status data中的uid，拿到thepast User
-    def get_thepast_user(self):
-        uid = self.get_user()
-        if uid and isinstance(uid, basestring):
-            from past.model.user import User
-            return User.get_user_by_alias(self.site, uid)
-
     ##原微博的uri，可以点过去查看（有可能获取不到或者很麻烦，比如sina就很变态）
     ###XXX
     def get_origin_uri(self):

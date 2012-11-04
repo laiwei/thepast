@@ -32,8 +32,9 @@ log = logging.getLogger(__file__)
 
 @app.before_request
 def before_request():
+    g.config = config
     g.user = auth_user_from_session(session)
-    g.user = User.get(8)
+    g.user = User.get(2)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -152,6 +153,7 @@ def logout():
 def about():
     return redirect("https://github.com/laiwei/thepast#readme")
 
+#XXX:no use
 @app.route("/share", methods=["GET", "POST"])
 @require_login()
 def share():
@@ -210,6 +212,39 @@ def share():
                 break
         first_connect = request.args.get("first_connect") or f == 'Y'
         return render_template("share.html", config=config, **locals())
+
+@app.route("/reshare_ajax", methods=["POST",])
+@require_login()
+def reshare():
+    text = request.form.get("text", "")
+    providers = request.form.get("providers", "").split("|")
+    images = request.form.get("images", "").split("|") or []
+
+    ret = {
+        "ok": 1,
+        "msg": "",
+    }
+    
+    providers_ = []
+    for p in config.CAN_SHARED_OPENID_TYPE:
+        if p in providers:
+            g.user.set_thirdparty_profile_item(p, "share", "Y")
+            providers_.append(p)
+        else:
+            g.user.set_thirdparty_profile_item(p, "share", "N")
+
+    failed_providers = []
+    for p in providers_:
+        try:
+            post_status(g.user, p, text + ",".join(images))
+        except OAuthError, e:
+            log.warning("%s" % e)
+            failed_providers.append(config.OPENID_TYPE_NAME_DICT.get(p, ""))
+    if failed_providers:
+        ret['ok'] = 0
+        ret['msg'] = "分享到" + ",".join(failed_providers) + "失败了，可能是授权过期了，重新授权就ok：）"
+    return json_encode(ret)
+
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 @require_login()

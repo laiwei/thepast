@@ -71,7 +71,9 @@ OPENID_TYPE_NAME_DICT = {
     "I" : u"Instagram",
 }
 
-WELCOME_MSG_DICT = {
+CAN_SHARED_OPENID_TYPE = [ "D", "S", "T", "Q", "R", "I", ]
+
+wELCOME_MSG_DICT = {
     "D": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份广播，往事提醒  http://thepast.me ",
     "S": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份微博，往事提醒  http://thepast.me ",
     "T": u"#thepast.me# 今天的点滴，就是明天的旧时光， thepast.me， 备份twitter，往事提醒  http://thepast.me ",

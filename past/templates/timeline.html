@@ -39,14 +39,14 @@
             <div class="unit">
                 <ol class="actions">
                     <li class="active"><a href="#" rel="Status"><i class="icon icon-status"></i>Status</a></li>
-                    <li><a href="#"><i class="icon icon-photo"></i>Photo</a></li>
                 </ol>
               
                 <!-- Units -->
                 <div class="actionUnits">
                     <div class="formUnit" id="Status">
                         <i class="active"></i>
-                        <textarea name="" placeholder="Post sth, get the remindings next year?" id="" cols="45" rows="3"></textarea>
+                        <textarea name="" placeholder="Post sth, get the remindings next year?" 
+                            id="" rows="3" style="width:350px;"></textarea>
 
                         <ol class="controls clearfix">
                             <li class="post">
@@ -67,7 +67,7 @@
                 <li class="right">
             {%endif%}
             <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" title="xxxx">&nbsp;</a></i>
-            {{blocks.story_unit_block(repeated_status)}}
+            {{blocks.story_unit_block(g, repeated_status, sync_list)}}
             {%set left = not left%}
             </li>
         {%endfor%}
