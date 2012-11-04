@@ -3,23 +3,23 @@
 {% import "blocks.html" as blocks %}
 
 {% block css %}
+    {{super()}}
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/markdown.css?v=1.20">
 {% endblock %}
-
-{% block title_block %} {{title}} {% endblock %}
 
 {% block rightbar_block %}
         {{super()}}
         {{blocks.rightbar_note_block()}}
         {{blocks.rightbar_markdown_block()}}
         {{blocks.rightbar_feedback_block()}}
-{%endblock%}
+{% endblock %}
 
 {% block middlebar_block %}
+        <div class="sep5"></div>
         <div class="box">
             <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a>
                 {%if g.user%}
-                    <span class="fr"><a href="/note/create">写日记</a></span>
+                    <span class="fr"><a href="/note/create">&gt; 写日记</a></span>
                 {%endif%}
             </div>
         </div>
@@ -32,11 +32,11 @@
             <div class="cell">
                 <div class="markdown"><h1>{{title}}</h1></div>
                 <div class="sep3"></div>
-                <span class="fade">{{create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
+                <span>{{create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
                 {%if g.user and g.user.id == note.user_id%}
-                <span class="fr"><a href="/note/edit/{{note.id}}">编辑</a></span>
+                <span class="pull-right"><a href="/note/edit/{{note.id}}">编辑</a></span>
                 {%else%}
-                <span class="fr">作者：<a href="/user/{{user.id}}">{{user.name}}</a></span>
+                <span class="pull-right">作者：<a href="/user/{{user.id}}">{{user.name}}</a></span>
                 {%endif%}
             </div>
             <div class="cell">
@@ -48,15 +48,13 @@
                     {%endif%}
                 </div>
             </div>
-
+            
             <div class="inner">
-                <label class="fade">格式：</label>
                 {%if not fmt or fmt==consts.NOTE_FMT_PLAIN%}
-                    <span class="fade">文本</span></label>
+                    <span class="label label-reverse">格式：文本</span></label>
                 {%elif fmt==consts.NOTE_FMT_MARKDOWN %}
-                    <span class="fade">Markdown</span></label>
+                    <span class="label label-reverse">格式：Markdown</span></label>
                 {%endif%}
             </div>
-
         </div>
 {% endblock %}

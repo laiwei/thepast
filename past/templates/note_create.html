@@ -3,6 +3,7 @@
 {% import "blocks.html" as blocks %}
 
 {% block css %}
+    {{super()}}
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/markdown.css?v=1.20">
 {% endblock %}
 
@@ -15,7 +16,7 @@
 
 {% block middlebar_block %}
         <div class="box">
-            <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a> &gt; 添加</div>
+            <div class="inner"><a href="/i">首页</a> &gt; <a href="/notes">日记</a> &gt; 编辑</div>
         </div>
         <div class="sep10"></div>
         <!--提醒-->
@@ -26,34 +27,46 @@
         <form action="/note/create" method="post">
             <div class="inner">
                 <label for="note_title">题目：</label><br/>
-                <input type="text" id="note_title" name="title" value="{{title}}"></input>
+                <input type="text" id="note_title" name="title" style="width:50%;" value="{{title}}"></input>
             </div>
             <div class="inner">
                 <label for="note_content">正文：</label><br/>
-                <textarea id="note_content" name="content">{{content}}</textarea>
+                <textarea id="note_content" name="content" rows=15 style="width:90%;">{{content}}</textarea>
             </div>
             <div class="inner">
-                <label class="fade">格式：</label>
-                <label><input class="note_fmt" type="radio" name="fmt" value="P" {%if not fmt or fmt=="P"%}checked{%endif%}></input>
-                    <span class="fade">文本</span></label>&nbsp;&nbsp;&nbsp;
-                <label><input class="note_fmt" type="radio" name="fmt" value="M" {%if fmt=="M"%}checked{%endif%}></input>
-                    <span class="fade">Markdown</span></label>
+                格式：
+                <div class="sep3"></div>
+                <label class="checkbox inline">
+                    <input class="note_fmt" type="radio" name="fmt" value="P" {%if not fmt or fmt=="P"%}checked{%endif%}></input>
+                    文本
+                </label>
+                <label class="checkbox inline">
+                    <input class="note_fmt" type="radio" name="fmt" value="M" {%if fmt=="M"%}checked{%endif%}></input>
+                    Markdown
+                </label>
+
                 <div class="sep5"></div>
-                <label class="fade">隐私：</label>
-                <label><input class="note_privacy" type="radio" name="privacy" 
-                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" {%if not privacy or privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
-                    <span class="fade">公开</span></label>&nbsp;&nbsp;&nbsp;
-                <label><input class="note_privacy" type="radio" name="privacy" 
-                    value="{{consts.STATUS_PRIVACY_THEPAST}}" {%if privacy==consts.STATUS_PRIVACY_THEPAST%}checked{%endif%}></input>
-                    <span class="fade">登录用户可见</span></label>&nbsp;&nbsp;&nbsp;
-                <label><input class="note_privacy" type="radio" name="privacy" 
-                    value="{{consts.STATUS_PRIVACY_PRIVATE}}" {%if privacy==consts.STATUS_PRIVACY_PRIVATE%}checked{%endif%}></input>
-                    <span class="fade">仅自己可见</span></label>
+                隐私：
+                <div class="sep3"></div>
+                <label class="checkbox inline">
+                    <input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" 
+                    {%if not privacy or privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
+                    公开</label>
+                <label class="checkbox inline">
+                    <input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_THEPAST}}" 
+                    {%if privacy==consts.STATUS_PRIVACY_THEPAST%}checked{%endif%}></input>
+                    登录用户可见</label>
+                <label class="checkbox inline">
+                    <input class="note_privacy" type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PRIVATE}}" 
+                    {%if privacy==consts.STATUS_PRIVACY_PRIVATE%}checked{%endif%}></input>
+                    仅自己可见</label>
             </div>
             <div class="cell">
-                <a href="#preview" id="preview_button" name="preview" class="btn_flat">预览</a><span style="margin-right:30px;"></span>
-                <input type="submit" name="submit"  class="btn" value="发表"></input>
-                <!--<input type="submit" name="cancel"  class="btn_flat" value="取消" style="float:right;margin-right:70px;"></input>-->
+                <a href="#preview" id="preview_button" name="preview" class="btn">预览</a><span style="margin-right:30px;"></span>
+                <input type="submit" name="submit"  class="btn btn-primary" value="发表"></input>
             </div>
             <!--预览-->
             <div class="inner">

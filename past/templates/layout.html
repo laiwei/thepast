@@ -101,11 +101,6 @@
 {% block main_block %}
     <div id="content" class="row-fluid"> 
         {%block content_block %}
-            <div id="sidebar" class="hide">
-            {%block sidebar_block%}
-            {%endblock%}
-            </div>
-
             <div id="middlebar" class="span9">
             {%block middlebar_block%}
             {%endblock%}
@@ -113,6 +108,7 @@
 
             <div id="rightbar" class="span3">
             {%block rightbar_block%}
+                <div class="sep5"></div>
                 {{blocks.rightbar_googlead_block()}}
             {%endblock%}
             </div>

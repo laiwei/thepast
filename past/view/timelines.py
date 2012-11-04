@@ -18,7 +18,7 @@ from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_fi
 from past.utils.escape import json_encode
 from past.cws.cut import get_keywords
 from past import consts
-from .utils import require_login, check_access_user
+from .utils import require_login, check_access_user, statuses_timelize, get_sync_list
 
 @app.route("/i")
 @require_login()
@@ -49,25 +49,11 @@ def user(uid):
         status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
         
     status_list  = statuses_timelize(status_list)
-    if status_list:
-        ##XXX:暂时去除了个人关键字的功能
-        #tags_list = [x[0] for x in get_keywords(u.id, 30)]
-        tags_list = []
-    else:
-        tags_list = []
+    tags_list = []
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
 
-    user_binded_providers = [ua.type for ua in g.user.get_alias() if ua.type in config.CAN_SHARED_OPENID_TYPE]
-
-    sync_list = []
-    for t in user_binded_providers:
-        p = g.user.get_thirdparty_profile(t)
-        sync_list.append([t, "Y"])
-        if p and p.get("share") == "Y":
-            sync_list.append([t, "Y"])
-        else:
-            sync_list.append([t, "N"])
+    sync_list = get_sync_list(g.user)
 
     return render_template("timeline.html", user=u, unbinded=[], 
             tags_list=tags_list, intros=intros, 
@@ -168,20 +154,3 @@ def pdf_down(filename):
     resp.headers['X-Accel-Redirect'] = redir
     return resp
 
-## 把status_list构造为month，day的层级结构
-def statuses_timelize(status_list):
-
-    hashed = {}
-    for s in status_list:
-        hash_s = hash(s)
-        if hash_s not in hashed:
-            hashed[hash_s] = RepeatedStatus(s)
-        else:
-            hashed[hash_s].status_list.append(s)
-    
-    return sorted(hashed.values(), key=lambda x:x.create_time, reverse=True)
-
-class RepeatedStatus(object):
-    def __init__(self, status):
-        self.create_time = status.create_time
-        self.status_list = [status]

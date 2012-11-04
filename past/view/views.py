@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import datetime
 
+from collections import defaultdict
 from flask import g, session, request, \
     redirect, url_for, abort, render_template, flash
 
@@ -26,7 +27,7 @@ from past import consts
 
 from past import app
 
-from .utils import require_login, check_access_user
+from .utils import require_login, check_access_user, statuses_timelize, get_sync_list
 
 log = logging.getLogger(__file__)
 
@@ -34,7 +35,7 @@ log = logging.getLogger(__file__)
 def before_request():
     g.config = config
     g.user = auth_user_from_session(session)
-    g.user = User.get(2)
+    g.user = User.get(3)
     if g.user:
         g.user_alias = UserAlias.gets_by_user_id(g.user.id)
     else:
@@ -88,22 +89,24 @@ def home():
 def past():
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
-
-    now = datetime.datetime.now()
-    yesterday_ids = get_status_ids_yesterday(g.user.id, now)
-    status_of_yesterday = Status.gets(yesterday_ids)
+    
+    try:
+        now = datetime.datetime.strptime(request.args.get("now"), "%Y-%m-%d")
+    except:
+        now = datetime.datetime.now()
 
     history_ids = get_status_ids_today_in_history(g.user.id, now) 
-    d = {}
-    for s in Status.gets(history_ids):
-        t = s.create_time.strftime("%Y-%m-%d")
-        if d.has_key(t):
-            d[t].append(s)
-        else:
-            d[t] = [s]
-    status_of_today_in_history = d
-    from past.consts import YESTERDAY
+    status_list = Status.gets(history_ids)
+    status_list  = statuses_timelize(status_list)
 
+    sync_list = get_sync_list(g.user)
+
+    d = defaultdict(list)
+    for x in status_list:
+        t = x.create_time.strftime("%Y年%m月%d日")
+        d[t].append(x)
+    history_status = d
+    
     return render_template("past.html", **locals())
 
 @app.route("/post/<id>")
@@ -152,66 +155,6 @@ def logout():
 @app.route("/about")
 def about():
     return redirect("https://github.com/laiwei/thepast#readme")
-
-#XXX:no use
-@app.route("/share", methods=["GET", "POST"])
-@require_login()
-def share():
-    support_providers = [ 
-        config.OPENID_TYPE_DICT[config.OPENID_DOUBAN],
-        config.OPENID_TYPE_DICT[config.OPENID_SINA], 
-        config.OPENID_TYPE_DICT[config.OPENID_TWITTER], 
-        config.OPENID_TYPE_DICT[config.OPENID_QQ], ]
-    user_binded_providers = [ua.type for ua in g.user.get_alias() if ua.type in support_providers]
-
-    sync_list = []
-    for t in user_binded_providers:
-        p = g.user.get_thirdparty_profile(t)
-        if p and p.get("share") == "Y":
-            sync_list.append([t, "Y"])
-        else:
-            sync_list.append([t, "N"])
-    
-    if request.method == "POST":
-        text = request.form.get("text", "")
-        providers = request.form.getlist("provider")
-
-        if not providers:
-            flash(u"同步到哪里去呢...", "error")
-            return render_template("share.html", **locals())
-        providers = [x for x in providers if x in user_binded_providers]
-        for p in user_binded_providers:
-            if p in providers:
-                g.user.set_thirdparty_profile_item(p, "share", "Y")
-            else:
-                g.user.set_thirdparty_profile_item(p, "share", "N")
-
-        if not text:
-            flash(u"至少要说点什么东西的吧...", "error")
-            return render_template("share.html", **locals())
-        
-        failed_providers = []
-        for p in providers:
-            try:
-                post_status(g.user, p, text)
-            except OAuthError, e:
-                log.warning("%s" % e)
-                failed_providers.append(config.OPENID_TYPE_NAME_DICT.get(p, ""))
-        if failed_providers:
-            flash(u"同步到%s失败了，请检查是否授权已过期，尝试重新进行第三方授权..." % " ".join(failed_providers), "error")
-        else:
-            flash(u"同步成功啦...", "tip")
-        return redirect("/share")
-
-    if request.method == "GET":
-        text = request.args.get("text", "")
-        f = "N"
-        for x in user_binded_providers:
-            if g.user.get_thirdparty_profile(x).get("first_connect") == "Y":
-                f = "Y"
-                break
-        first_connect = request.args.get("first_connect") or f == 'Y'
-        return render_template("share.html", config=config, **locals())
 
 @app.route("/reshare_ajax", methods=["POST",])
 @require_login()

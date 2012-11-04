@@ -18,26 +18,26 @@
             <div class="cell"><a href="/i">首页</a> &gt; 设置</div>
             <form method="post">
             <div class="inner"><table>
-                <tr height="30px"><td width="100px" align="right"><span class="fade">user_id：</span></td>
+                <tr height="30px"><td width="100px" align="right"><span class="">user_id：</span></td>
                     <td width="180px" align="left">{{g.user.id}}</td>
                 </tr>
-                <tr height="30px"><td align="right"><span class="fade">注册时间：</span></td>
+                <tr height="30px"><td align="right"><span class="">注册时间：</span></td>
                     <td align="left">{{g.user.create_time}}</td>
                 </tr>
                 {% if wordpress_alias %}
                 <tr height="30px">
-                    <td width="200px" align="right"><span class="fade">你的wordpress feed地址：</span></td>
+                    <td width="200px" align="right"><span class="">你的wordpress feed地址：</span></td>
                     <td width="280px" align="left"> {{wordpress_alias.alias}} </td>
                 </tr>
                 {% endif%}
-                <tr height="40px"><td align="right"><span class="fade">电子邮件：</span></td>
+                <tr height="40px"><td align="right"><span class="">电子邮件：</span></td>
                     <td>
                         <input type="text" class="sl" name="email" value="{{g.user.get_email() or ''}}"></input> 
                         <div class="sep3"></div>
-                        <span class="fade smaller">定期发送更新好的PDF版本和历史上的今天提醒<br/>(建议把help@thepast.me添加到你的邮件联系人中)</span>
+                        <span class="smaller">定期发送更新好的PDF版本和历史上的今天提醒<br/>(建议把help@thepast.me添加到你的邮件联系人中)</span>
                     </td>
                 </tr>
-                <tr height="30px"><td align="right"><span class="fade"></span></td>
+                <tr height="30px"><td align="right"><span class=""></span></td>
                     <td> <input type="submit" value="保存设置"></input> </td>
                 </tr>
             
@@ -48,7 +48,7 @@
         <div class="sep20"></div>
         <div class="box">
             <div class="cell">邮件提醒</div>
-            <div class="cell"><span class="fade">thepast会通过email提醒一些与你有关的事情</span></div>
+            <div class="cell"><span class="">thepast会通过email提醒一些与你有关的事情</span></div>
             <div class="inner"><table>
                 <form action="/settings/email_remind" method="post">
                 <tr height="30px">
@@ -57,7 +57,7 @@
                     <td width="100px" align="left">不接受</td>
                 </tr>
                 <tr height="30px">
-                    <td><span class="fade">历史上的今天</span></td>
+                    <td><span class="">历史上的今天</span></td>
                     {%set s = g.user.get_profile_item("email_remind_today_in_history")%}
                     <td> <input type="radio" name="today_in_history" {%if s!="N" %}checked{%endif%} value="Y"></input>  </td>
                     <td> <input type="radio" name="today_in_history" {%if s=="N" %}checked{%endif%} value="N"></input>  </td>
@@ -74,7 +74,7 @@
         <div class="sep20"></div>
         <div class="box">
             <div class="cell">隐私设置</div>
-            <div class="cell"><span class="fade">thepast的信息流默认所有用户可见，你可以方便的分享给其他用户，作为自己的about页面是个很不错的选择</span></div>
+            <div class="cell"><span class="">thepast的信息流默认所有用户可见，你可以方便的分享给其他用户，作为自己的about页面是个很不错的选择</span></div>
             <div class="inner"><table>
                 <form action="/settings/privacy" method="post">
                 <tr height="30px">
@@ -103,7 +103,7 @@
         <div class="sep20"></div>
         <div class="box" id="token">
             <div class="cell">token管理</div>
-            <div class="cell"><span class="fade">有下面这些token的设备，可以通过api访问你的个人数据：）</span></div>
+            <div class="cell"><span class="">有下面这些token的设备，可以通过api访问你的个人数据：）</span></div>
             <div class="inner"><table>
                 <tr height="30px">
                     <td>设备</td> <td>token</td> <td>管理</td>

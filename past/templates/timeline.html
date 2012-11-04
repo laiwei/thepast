@@ -5,8 +5,6 @@
 
 {% block css %}
     {{super()}}
-    <!--<link href="/static/fbtimeline/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />-->
-    <!--<link href="/static/fbtimeline/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />-->
     <link href="/static/fbtimeline/stylesheets/timeline.css" media="screen" rel="stylesheet" type="text/css" />
     <link href="/static/fbtimeline/stylesheets/fb-buttons.css" media="screen" rel="stylesheet" type="text/css" />
 {% endblock %}
@@ -33,6 +31,8 @@
 <div id="timeline-container" class="pull-left">
     <ol class="timeline clearfix">
         <li class="spine"></li>
+        
+        {%if g.cate == g.config.CATE_THEPAST_NOTE%}
         <li class="left">
             <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" 
                 title="Post some thing, get it remindings next year.">&nbsp;</a></i>
@@ -58,8 +58,18 @@
                 <!-- / Units -->
             </div>
         </li>
-
         {%set left = False%}
+        {%else%}
+            {%if not status_list%}
+            <div class="alert alert-info">
+                <p>你还没在thepast上写过日记呢。</p>
+                <p>今天记录一下 明年再来看。</p>
+                <p><a href="/note/create">&gt;写日记</a></p>
+            </div>
+            {%endif%}
+            {%set left = True%}
+        {%endif%}
+
         {%for repeated_status in status_list%}
             {%if left%}
                 <li class="left">
@@ -67,12 +77,22 @@
                 <li class="right">
             {%endif%}
             <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" title="xxxx">&nbsp;</a></i>
-            {{blocks.story_unit_block(g, repeated_status, sync_list)}}
+            {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
             {%set left = not left%}
             </li>
         {%endfor%}
 
     </ol>
+    <ul class="pager">
+        {%if g.start>0%}
+        <li class="previous">
+            <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}&cate={{g.cate}}">&larr; Newer</a>
+        </li>
+        {%endif%}
+        <li class="next">
+            <a href="?start={{g.start+g.count}}&cate={{g.cate}}">Older &rarr;</a>
+        </li>
+    </ul>
 </div> <!--end of row-fluid-->
 
 <script src="{{ url_for('static', filename='js/jquery.magnifier.js') }}" type="text/javascript"></script>
