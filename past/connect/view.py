@@ -197,6 +197,7 @@ def _save_user_and_token(token_dict, thirdparty_user, openid_type):
     k = openid_type
     v = {
         "uid": thirdparty_user.get_uid(), 
+        "name": thirdparty_user.get_nickname(), 
         "intro": thirdparty_user.get_intro(),
         "signature": thirdparty_user.get_signature(),
         "avatar": thirdparty_user.get_avatar(),

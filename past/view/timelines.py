@@ -165,22 +165,8 @@ def statuses_timelize(status_list):
             hashed[hash_s] = RepeatedStatus(s)
         else:
             hashed[hash_s].status_list.append(s)
-
-    output = {}
-    for hash_s, repeated in hashed.items():
-        s = repeated.status_list[0]
-        year_month = "%s-%s" % (s.create_time.year, s.create_time.strftime("%m"))
-        day = s.create_time.day
-
-        if year_month not in output:
-            output[year_month] = {day:[repeated]}
-        else:
-            if day not in output[year_month]:
-                output[year_month][day] = [repeated]
-            else:
-                output[year_month][day].append(repeated)
-
-    return output
+    
+    return sorted(hashed.values(), key=lambda x:x.create_time, reverse=True)
 
 class RepeatedStatus(object):
     def __init__(self, status):

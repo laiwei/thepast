@@ -25,3 +25,4 @@ app.jinja_env.filters['linkify'] = filters.linkify
 app.jinja_env.filters['html_parse'] = filters.html_parse
 app.jinja_env.filters['wrap_long_line'] = wrap_long_line
 app.jinja_env.filters['markdownize'] = markdownize
+app.jinja_env.filters['isstr'] = lambda x: isinstance(x, basestring)

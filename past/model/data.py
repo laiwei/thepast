@@ -314,6 +314,13 @@ class AbsData(object):
     def get_user(self):
         return None
 
+    ##根据status data中的uid，拿到thepast User
+    def get_thepast_user(self):
+        uid = self.get_user()
+        if uid and isinstance(uid, basestring):
+            from past.model.user import User
+            return User.get_user_by_alias(self.site, uid)
+
     ##原微博的uri，可以点过去查看（有可能获取不到或者很麻烦，比如sina就很变态）
     ###XXX
     def get_origin_uri(self):
@@ -326,6 +333,10 @@ class AbsData(object):
     ##lbs信息
     def get_location(self):
         return ""
+
+    ##附件信息(暂时只有豆瓣的有)
+    def get_attachments(self):
+        return None
 
 class ThepastNoteData(AbsData):
     
@@ -348,6 +359,7 @@ class ThepastNoteData(AbsData):
     def get_content(self):
         if self.data:
             return self.data.render_content()
+        return ""
 
     def get_origin_uri(self):
         if self.data:
@@ -733,11 +745,16 @@ class RenrenStatusData(RenrenData):
     
     def get_retweeted_data(self):
         d = {}
-        d["status_id"] = self.data.get("root_status_id")
-        d["message"] = "%s %s" %(self.data.get("forward_message"), self.data.get("root_message"))
-        d["uid"] = self.data.get("root_uid")
-        d["username"] = self.data.get("root_username")
-        d["time"] = self.data.get("time")
+        d["status_id"] = self.data.get("root_status_id", "")
+        forward_message = self.data.get("forward_message", "")
+        root_message = self.data.get("root_message", "")
+        if forward_message or root_message:
+            d["message"] = "%s %s" %(forward_message, root_message)
+        else:
+            d["message"] = ""
+        d["uid"] = self.data.get("root_uid", "")
+        d["username"] = self.data.get("root_username", "")
+        d["time"] = self.data.get("time", "")
         
         return RenrenStatusData(d)
 

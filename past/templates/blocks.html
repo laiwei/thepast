@@ -2,7 +2,6 @@
 
 <!-- 个人信息框 -->
 {%if user%}
-<div id="navi_login">
     <div class="member">
         <div class="avatar">
             <a href="/user/{{user.id}}"><img src="{{user.get_icon_url()}}" target="_blank" alt="{{user.name}}"></a>
@@ -16,7 +15,7 @@
                 <span><i>N.{{user.id}}</i></span>
             </div>
 
-            <p>
+            <span>
                 {%set uas = user.get_alias()%}
                 {%for ua in uas%}
                     {%set h = ua.get_homepage_url()%}
@@ -36,10 +35,9 @@
                         </span>
                     {%endfor%}
                 {%endif%}
-            </p>
+            </span>
         </div>
     </div>
-</div>
 {%endif%}
 <!-- End 个人信息框 -->
 
@@ -218,4 +216,90 @@
 
 </div>
 <div class="sep10"></div>
+{%- endmacro %}
+
+{% macro story_unit_block(repeated_status) -%}
+    <!-- 图片 -->
+    {% set s = repeated_status.status_list[0]%}
+    {% set data = s.get_data()%}
+    {% set atts = data and data.get_attachments() or []%}
+    {% set images = data and data.get_images() or [] %}
+
+    {% set user = data and data.get_user() or ""%}
+    {% set thepast_user = data and data.get_thepast_user() or ""%}
+    {% set user_nickname = user if user|isstr else user.get_nickname()%}
+    {% if data and data.site == "R" and thepast_user%}
+        {% set user_nickname = thepast_user.name %}
+    {% endif%}
+
+    {% set re_ = s.get_retweeted_data()%}
+    {% set re_atts = re_ and re_.get_attachments() or []%}
+    {% set re_images = re_ and re_.get_images() or [] %}
+    {% set re_user = re and re_.get_user() or ""%}
+    {% set re_user_nickname = re_user if re_user|isstr else re_user.get_nickname()%}
+
+
+    {% set avatar = user.get_avatar() if not user|isstr else ""%}
+    {% if not avatar and thepast_user%}
+        {% set avatar = thepast_user.get_avatar_url()%}
+    {% endif%}
+
+    <div class="unit">
+      
+      <!-- Story -->
+      <div class="storyUnit">
+        {%if avatar%}
+        <div class="imageUnit">
+          <a href="{{avatar}}"><img src="{{avatar}}" width="32" height="32" alt="{{user_nickname}}"></a>
+          <div class="imageUnit-content">
+            <h5><a href="#">{{user_nickname}}</a>
+            {%for s_ in repeated_status.status_list%}
+                {%set from_ = s_.get_origin_uri()%}
+                {%if from_%}
+                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
+                {%endif%}
+            {%endfor%}</h5>
+          </div>
+        </div>
+        {%endif%}
+      
+        <p>{{s.summary|safe}}</p>
+        
+        {%for att in atts%}
+        <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+        <p>{{att.get_description()|safe}}</p>
+        {%endfor%}
+
+        <p>
+        {%if re_user_nickname%}
+            //@{{re_user_nickname}}:
+        {% endif %}
+
+        {%if re_%}
+        {{re_.get_content()|safe}}
+        {%endif%}
+        </p>
+
+        {%for att in re_atts%}
+        <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+        <p>{{att.get_description()|safe}}</p>
+        {%endfor%}
+      
+    {% if images %}
+        <div class="photoUnit">
+        {%for image in images%}
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
+        {%endfor%}
+        </div>
+    {% endif %}
+      <!-- / Story -->
+      
+      <!-- Units -->
+      <ol class="storyActions">
+        <li><a href="#">回顾</a></li>
+      </ol>
+      <!-- / Units -->
+      
+    </div>
 {%- endmacro %}

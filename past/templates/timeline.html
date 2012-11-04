@@ -3,136 +3,90 @@
 {% import "status.html" as status_tmpl_helper %}
 {% import "blocks.html" as blocks %}
 
+{% block css %}
+    {{super()}}
+    <!--<link href="/static/fbtimeline/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />-->
+    <!--<link href="/static/fbtimeline/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />-->
+    <link href="/static/fbtimeline/stylesheets/timeline.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="/static/fbtimeline/stylesheets/fb-buttons.css" media="screen" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block js%}
+    {{super()}}
+    <script src="/static/fbtimeline/javascripts/all.js" type="text/javascript"></script> 
+{% endblock %}
+
 {% block title_block %} {{user.name}}{%endblock%}
 
-{% block rightbar_block %}
-
-    {{super()}}
-    {{blocks.rightbar_note_block()}}
-    {{blocks.rightbar_feedback_block()}}
-    <div class="sep10"></div>
+{%block content_block%}
+    <div class="span12">
+        {{self.middlebar_block()}}
+        <div class="pull-right" style="width:282px; margin:20px auto;">
+            {{blocks.rightbar_note_block()}}
+            {{blocks.rightbar_feedback_block()}}
+        </div>
+    </div>
 
 {%endblock%}
 
 {% block middlebar_block %}
-    <div class="timelines">
-        {{ blocks.notification_block(g.user) }}
+<div id="timeline-container" class="pull-left">
+    <ol class="timeline clearfix">
+        <li class="spine"></li>
+        <li class="left">
+            <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" 
+                title="Post some thing, get it remindings next year.">&nbsp;</a></i>
+            <div class="unit">
+                <ol class="actions">
+                    <li class="active"><a href="#" rel="Status"><i class="icon icon-status"></i>Status</a></li>
+                    <li><a href="#"><i class="icon icon-photo"></i>Photo</a></li>
+                </ol>
+              
+                <!-- Units -->
+                <div class="actionUnits">
+                    <div class="formUnit" id="Status">
+                        <i class="active"></i>
+                        <textarea name="" placeholder="Post sth, get the remindings next year?" id="" cols="45" rows="3"></textarea>
 
-        {% if not status_list and g.start == 0 %}
-            <div class="box">
-            <div class="inner">
-            <div class="sep10"></div>
-            <span class="bigger">正在努力从第三方网站同步你的timeline，请稍等(最多5分钟^^)刷新页面查看...</span>
-            <div class="sep10"></div>
-            <span>或者可以先去看看<a href="/user">别人的页面</a></span>
-            <div class="sep10"></div>
-            <span>你也可以在thepast上<a href="/note/create">记日记</a></span>
-            </div>
-            </div>
-        {% endif %}
-
-        {%set sorted_months = status_list.keys()|sort(reverse=True)%}
-        {%for m in sorted_months%}
-        <!-- 一月循环开始 -->
-        <div class="month">
-            <!-- 调用时间：XX年XX月 -->
-            <h2 class="title">{{m.replace("-","年")}}月</h2>
-            
-            {%set days_statuses = status_list[m]%}
-            {%set sorted_days = days_statuses.keys()|sort(reverse=True)%}
-            {%for d in sorted_days%}
-            <!-- 日循环开始 -->
-            <ul class="articles">
-                <!-- 调用日期： XX日 -->
-                <div class="day"> › {{d}}日</div>
-                
-            {%for repeated_status in days_statuses[d]|sort(reverse=True, attribute="create_time")%}
-                {%set s = repeated_status.status_list[0]%}
-
-                <li>
-                    <div class="message">
-                        <!-- 调用时间：时分秒 -->
-                        <div class="time">{{s.create_time.strftime("%H:%M:%S")}} </div>
-
-                        <div class="text">
-                            <!-- 来源 -->
-                            {%for s in repeated_status.status_list%}
-                                {%set from_ = s.get_origin_uri()%}
-                                {%if from_%}
-                                    <span class="from {{from_[0]}}"><a target="_blank" href="{{from_[1]}}"></a></span>
-                                {%endif%}
-                            {%endfor%}
-
-                            {%if s.category == config.CATE_DOUBAN_STATUS%}
-                                {{status_tmpl_helper.douban_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_SINA_STATUS%}
-                                {{status_tmpl_helper.sina_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_QQWEIBO_STATUS%}
-                                {{status_tmpl_helper.qq_weibo_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_TWITTER_STATUS%}
-                                {{status_tmpl_helper.twitter_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_WORDPRESS_POST%}
-                                {{status_tmpl_helper.wordpress_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_THEPAST_NOTE%}
-                                {{status_tmpl_helper.thepast_note_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_RENREN_STATUS%}
-                                {{status_tmpl_helper.thepast_renren_status(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_RENREN_BLOG%}
-                                {{status_tmpl_helper.thepast_renren_blog(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_RENREN_PHOTO or s.category == config.CATE_RENREN_ALBUM%}
-                                {{status_tmpl_helper.thepast_renren_photo(s)}}
-                            {%endif%}
-
-                            {%if s.category == config.CATE_INSTAGRAM_STATUS%}
-                                {{status_tmpl_helper.thepast_default_status(s)}}
-                            {%endif%}
-
-                        </div>
+                        <ol class="controls clearfix">
+                            <li class="post">
+                                <button class="uibutton confirm" type="submit">Post</button>
+                            </li>
+                        </ol>
                     </div>
-                </li>
-            {%endfor%}
+                </div>
+                <!-- / Units -->
+            </div>
+        </li>
 
-            </ul>
-            <!-- 日循环结束 -->
-            {%endfor%}
-
-        </div>
-        <!-- 月循环结束 -->
+        {%set left = False%}
+        {%for repeated_status in status_list%}
+            {%if left%}
+                <li class="left">
+            {%else%}
+                <li class="right">
+            {%endif%}
+            <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" title="xxxx">&nbsp;</a></i>
+            {{blocks.story_unit_block(repeated_status)}}
+            {%set left = not left%}
+            </li>
         {%endfor%}
 
-        <div class="sep10"></div>
-        <div class="box">
-            {% if g.start>0 %}
-            <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}&cate={{g.cate}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            {% endif %}
-            <a href="?start={{g.start+g.count}}&cate={{g.cate}}">下一页</a>
-        </div>
-    </div>
+    </ol>
+</div> <!--end of row-fluid-->
 
-    <div class="clear"></div>
+<script src="{{ url_for('static', filename='js/jquery.magnifier.js') }}" type="text/javascript"></script>
+<script>
+    jQuery(function($) {
+        $("img").error( function(){$(this).css({ visibility:"hidden" }); });
+    });
+</script>
 
-    <script src="{{ url_for('static', filename='js/jquery.magnifier.js') }}" type="text/javascript"></script>
-    <script>
-        jQuery(function($) {
-            $("img").error( function(){$(this).css({ visibility:"hidden" }); });
-        });
-    </script>
+<script>
+    function fn_click_point(obj){
+        console.log(obj);
+    }
+</script>
 
 {% endblock %}
 
