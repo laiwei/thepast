@@ -4,5 +4,5 @@ hash uwsgi 2>&- || { echo >&2 "I require uwsgi but it's not installed.  Aborting
 
 killall uwsgi
 sleep 2
-nohup uwsgi -s /tmp/uwsgi.sock --file `pwd`/pastme.py --callable app &
-#nohup uwsgi -s /tmp/uwsgi.sock --file `pwd`/pastme.py --callable app --processes 2 &
+#nohup uwsgi -s /tmp/uwsgi.sock --file `pwd`/pastme.py --callable app &
+nohup uwsgi -s /tmp/uwsgi.sock --lazy --file `pwd`/pastme.py --callable app --processes 4 &
