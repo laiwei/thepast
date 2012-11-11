@@ -19,7 +19,7 @@
 {%block content_block%}
     <div class="span12">
         {{self.middlebar_block()}}
-        <div class="pull-right" style="width:282px; margin:20px auto;">
+        <div class="pull-right" style="width:260px; margin:20px 0px auto 9px;">
             {{blocks.rightbar_note_block()}}
             {{blocks.rightbar_feedback_block()}}
         </div>
@@ -32,7 +32,7 @@
     <ol class="timeline clearfix">
         <li class="spine"></li>
         
-        {%if g.cate == g.config.CATE_THEPAST_NOTE%}
+        {%if g.cate == g.config.CATE_THEPAST_NOTE and 0%}
         <li class="left">
             <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" 
                 title="Post some thing, get it remindings next year.">&nbsp;</a></i>
@@ -60,7 +60,7 @@
         </li>
         {%set left = False%}
         {%else%}
-            {%if not status_list%}
+            {%if not status_list and g.start == 0%}
             <div class="alert alert-info">
                 <p>你还没在thepast上写过日记呢。</p>
                 <p>今天记录一下 明年再来看。</p>
@@ -76,13 +76,15 @@
             {%else%}
                 <li class="right">
             {%endif%}
-            <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" title="xxxx">&nbsp;</a></i>
+            <i class="pointer"><a href="#" onclick="javascript:fn_click_point();" title="">&nbsp;</a></i>
             {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
             {%set left = not left%}
             </li>
         {%endfor%}
 
     </ol>
+    <div class="sep10"></div>
+    <hr/>
     <ul class="pager">
         {%if g.start>0%}
         <li class="previous">

@@ -20,7 +20,7 @@
 {%block content_block%}
     <div class="span12">
         {{self.middlebar_block()}}
-        <div class="pull-right" style="width:282px; margin:20px auto;">
+        <div class="pull-right" style="width:260px; margin:20px 0px auto 9px;">
             {{blocks.rightbar_intros_block(intros)}}
             {{blocks.rightbar_feedback_block()}}
         </div>
@@ -37,7 +37,7 @@
     </div>
     {%else%}
         {%for t, status_list in history_status.items()%}
-        <h5><span class="alert alert-info">{{t.decode("utf8")}}，找到{{status_list|length}}条往事</span></h5>
+        <p class="alert alert-info"><strong>{{t.decode("utf8")}}，找到{{status_list|length}}条往事</strong></p>
         <ol class="timeline clearfix">
             <li class="spine"></li>
             {%set left = True%}

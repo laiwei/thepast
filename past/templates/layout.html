@@ -28,7 +28,7 @@
 {%block top_navbar%}
 <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container-fluid">
+        <div class="container">
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -58,7 +58,7 @@
                 <ul class="nav" id="nav-topbar" style="padding:5px;">
                     <li id="menu_user_page" class="active"><a href="/i">首页</a></li>
                     <li><a href="/past">过往</a></li>
-                    <li><a href="/notes">日记本</a></li>
+                    <li id="menu_note_page"><a href="/notes">日记本</a></li>
                     <li><a href="/visual">时间线</a></li>
                     <li><a href="/bind/wordpress">绑定wordpress</a></li>
                     <li class="dropdown">
@@ -83,8 +83,15 @@
                     });
                     var patrn=/^\/user\/[0-9]+$/;
                     var user_page = jQuery("#menu_user_page");
+                    var note_page = jQuery("#menu_note_page");
                     if (patrn.exec(location.pathname)){
-                          user_page.addClass("active");
+                          console.log(location);
+                          var p2 = /cate=600/;
+                          if (p2.exec(location.search)){
+                              note_page.addClass("active");
+                          }else{
+                              user_page.addClass("active");
+                          }
                     }
                 })
 
@@ -98,9 +105,9 @@
 <div class="sep5"></div>
 {%endblock%}
 
-<div id="main" class="container-fluid" style="margin-top:50px;">
+<div id="main" class="container" style="margin-top:50px;">
 {% block main_block %}
-    <div id="content" class="row-fluid"> 
+    <div id="content" class="row"> 
         {%block content_block %}
             <div id="middlebar" class="span9">
             {%block middlebar_block%}
@@ -118,7 +125,7 @@
 
     <div class="sep10"></div>
     <hr/>
-    <div class="row-fluid">
+    <div class="row">
     <div class="span12">
     <footer class="the-center">
     {%block footer_block%}

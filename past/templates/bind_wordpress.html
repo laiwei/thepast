@@ -12,12 +12,6 @@
         <!--提醒-->
         {{ blocks.notification_block() }}
 
-        <!--绑定wordpress-->
-        <div class="box">
-            <div class="inner"><a href="/i">首页</a> &gt; 绑定wordpress</div>
-        </div>
-
-        <div class="sep10"></div>
 
     {%if wordpress_alias_list%}
         <div class="box">
@@ -35,14 +29,14 @@
 
     {% if step == '1'%}
         <div class="box">
-            <div class="cell"><strong>再绑定一个rss地址</strong></div>
+            <div class="cell"><strong>绑定rss地址</strong></div>
             <div id="feed1" class="inner"><table>
                 <tr height="40px">
                     <td width="300px" align="right"><span class="">你的wordpress feed地址：</span></td>
                     <td width="380px" align="left">
                         <input type="text" class="sl" name="wordpress_feed" value=""></input>
                         <div class="sep3"></div>
-                        <span class="tip smaller">比如: http://xxblog.com/feed/, 填写后不可更改</span> 
+                        <span class="tip smaller text-info">比如: http://xxblog.com/feed/, 填写后不可更改</span> 
                     </td>
                 </tr>
                 <tr height="30px"><td align="right"><span class=""></span></td>
@@ -52,16 +46,12 @@
         </div>
     {%else%}
         <div class="box">
-            <div class="cell"><strong>再绑定一个rss地址</strong> &gt; 等待验证...</div>
+            <div class="cell"><strong>绑定rss地址</strong> &gt; 等待验证...</div>
             <div id="feed2" class="inner">
-                你的blog feed地址为：<span id="feed2_1" class="">{{feed_uri}}</span>
-                <div class="sep10"></div>
-                你的blog认领验证码为：<span id="feed2_0" class="">{{random_id}}</span>
-                <div class="sep10"></div>
-                为了验证blog的主人^^，请发一篇blog，"文章内容"为 {{random_id}}，完成该步骤后，请点下一步完成绑定
-                <div class="sep3"></div>
-
-                <input type="submit" name="confirm_bind_wordpress" value="下一步"></input>
+            <p>你的blog feed地址为：<span id="feed2_1" class="">{{feed_uri}}</span></p>
+            <p>你的blog认领验证码为：<span id="feed2_0" class="">{{random_id}}</span></p>
+            <p class="text-info">为了验证blog的主人^^，请发一篇blog，"文章内容"为 {{random_id}}，完成该步骤后，请点下一步完成绑定</p>
+            <input type="submit" name="confirm_bind_wordpress" value="下一步"></input>
             </div>
         </div>
     {%endif%}
@@ -69,12 +59,9 @@
         <div class="sep10"></div>
         <div class="box">
             <div class="inner">
-                0. 如果你在绑定过程中遇到任何问题，请直接给管理员捎个话 help@thepast.me，我想没有解决不了的问题^^
-                <div class="sep3"></div>
-                1. 理论来说，支持导入所有的rss feed，而不仅仅是wordpress，注意尽量不要用feedburner的rss地址
-                <div class="sep3"></div>
-                2. 对于wordpress rss feed来讲，只能导入最近的15篇文章，如果需要导入更多，需要去wordpress的控制面板中设置rss输出的文章数目。
-                <div class="sep3"></div>
+                <p>0. 如果你在绑定过程中遇到任何问题，请直接给管理员捎个话 help@thepast.me，我想没有解决不了的问题^^</p>
+                <p>1. 理论来说，支持导入所有的rss feed，而不仅仅是wordpress，注意尽量不要用feedburner的rss地址</p>
+                <p>2. 对于wordpress rss feed来讲，只能导入最近的15篇文章，如果需要导入更多，需要去wordpress的控制面板中设置rss输出的文章数目。</p>
             </div>
         </div>
 

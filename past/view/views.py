@@ -64,8 +64,11 @@ def before_request():
     g.start = int(request.args.get('start', 0))
     g.count = int(request.args.get('count', 30))
     g.cate = request.args.get("cate", "")
-    if not g.cate.isdigit():
+    if g.cate.isdigit():
+        g.cate = int(g.cate)
+    else:
         g.cate = ""
+        
 
 @app.teardown_request
 def teardown_request(exception):
