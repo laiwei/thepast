@@ -286,6 +286,9 @@
     {% else%}
         {% set user_nickname = thepast_user and (thirdparty_profile.get("name") 
             or thirdparty_profile.get("uid") or thepast_user.name) %}
+        {% if user_nickname == 'null'%}
+            {% set user_nickname = thepast_user and thepast_user.name %}
+        {% endif%}
     {%endif%}
     {% set avatar = thepast_user 
         and (thirdparty_profile.get("avatar") or thepast_user.get_avatar_url())%}
@@ -337,10 +340,13 @@
         <p>{{att.get_description()|safe}}</p>
         {%endfor%}
       
-        {% if images %}
+        {% if images or re_images%}
         <div class="photoUnit">
         {%for image in images%}
-            <img class="post-image" src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" style="height:200px;"/>
+        {%endfor%}
+        {%for image in re_images%}
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" style="height:200px;"/>
         {%endfor%}
         </div>
         {% endif %}
@@ -393,7 +399,7 @@
                 providers.push(jQuery(ck).val());
             });
 
-            console.log(sid + content + images + providers);
+            //console.log(sid + content + images + providers);
             jQuery.ajax({
                 type: "POST",
                 async: false,
@@ -423,7 +429,7 @@
             obj.find(".post-image").each(function(i, img){
                 images.push(jQuery(img).attr("src"));
             });
-            console.log(images);
+            //console.log(images);
 
             var thumbs = jQuery("#modal_reshare_" +sid+ " .thumbnails");
             thumbs.html("");

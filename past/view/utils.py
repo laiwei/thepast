@@ -51,6 +51,7 @@ class RepeatedStatus(object):
         self.status_list = [status]
 
 def get_sync_list(user):
+    print '------user:',user
     user_binded_providers = [ua.type for ua in user.get_alias() if ua.type in config.CAN_SHARED_OPENID_TYPE]
 
     sync_list = []

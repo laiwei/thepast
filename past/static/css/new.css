@@ -43,6 +43,15 @@
 .from.renren a{background-position:0 -96px;}
 .from.instagram a{background-position:0 -112px;}
 
+.login{list-style:none;float:left;}
+.login {background:url(/static/img/login.png) no-repeat;display:block;margin:4px 0 0 10px;width:38px;height:38px;text-indent:-9999em;opacity:0.35;}
+.login a:hover{opacity:1;}
+.login.sina {background-position:0 -38px !important;}
+.login.douban {background-position:0 -76px !important;}
+.login.twitter {background-position:0 -114px !important;}
+.login.renren {background-position:0 -152px !important;}
+.login.instagram {background-position:0 -190px !important;}
+
 .sep20 {height:20px;}
 .sep10 {height:10px;}
 .sep5 {height:5px;}

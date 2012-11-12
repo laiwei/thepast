@@ -53,7 +53,10 @@ def user(uid):
     intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
 
-    sync_list = get_sync_list(g.user)
+    if g.user:
+        sync_list = get_sync_list(g.user)
+    else:
+        sync_list = []
 
     return render_template("timeline.html", user=u, unbinded=[], 
             tags_list=tags_list, intros=intros, 
