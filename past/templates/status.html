@@ -343,10 +343,10 @@
         {% if images or re_images%}
         <div class="photoUnit">
         {%for image in images%}
-            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" style="height:200px;"/>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image" style="height:200px;"/>
         {%endfor%}
         {%for image in re_images%}
-            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify" style="height:200px;"/>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image" style="height:200px;"/>
         {%endfor%}
         </div>
         {% endif %}

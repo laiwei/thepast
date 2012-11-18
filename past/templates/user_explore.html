@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 
 {% block content_block %}
-    <div id="members">
+<div class="sep10"></div>
+
+<div class="row">
+    <div class="span10 offset1">
         <!-- 用户循环开始 输出16个 -->
         {% for u in users %}
         <div class="member">
@@ -19,7 +22,7 @@
                 {%for ua in u.get_alias()%}
                     {%set homepage_info = ua.get_homepage_url()%}
                     {%if homepage_info%}
-                        <span class="from {{homepage_info[2]}}">
+                        <span class="from {{homepage_info[2]}} oauth">
                         <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
                         </span>
                     {%endif%}
@@ -28,16 +31,21 @@
             </div>
         </div>
         {% endfor %}
-        <!-- 用户循环结束 -->
-        <div class="clear"></div>
     </div>
+</div>
 
-    <div class="sep10"></div>
-    <div class="box">
-        {% if g.start>0 %}
-        <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}">上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        {% endif %}
-        <a href="?start={{g.start+g.count}}">下一页</a>
+<div class="row">
+    <div class="span10 offset1">
+    <ul class="pager">
+        {%if g.start>0%}
+        <li class="previous">
+            <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}&cate={{g.cate}}">&larr; Newer</a>
+        </li>
+        {%endif%}
+        <li class="next">
+            <a href="?start={{g.start+g.count}}&cate={{g.cate}}">Older &rarr;</a>
+        </li>
+    </ul>
     </div>
-
+</div>
 {% endblock %}

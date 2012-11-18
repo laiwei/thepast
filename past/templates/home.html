@@ -39,7 +39,7 @@
               {%for ua in u.get_alias()%}
                   {%set homepage_info = ua.get_homepage_url()%}
                   {%if homepage_info%}
-                      <span class="from {{homepage_info[2]}}">
+                      <span class="from {{homepage_info[2]}} oauth">
                       <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
                       </span>
                   {%endif%}
