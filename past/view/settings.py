@@ -54,6 +54,26 @@ def privacy():
     g.user.set_profile_item("user_privacy", p)
     flash(u'隐私设置修改成功', 'tip')
     return redirect("/settings")
+
+@app.route("/settings/set_uid", methods=["POST"])
+@require_login()
+def privacy():
+    ret = {
+        "ok": False,
+        "msg": "",
+    }
+    uid = request.form.get("uid")
+    if not uid:
+        ret["msg"] = "no uid"
+        return json_encode(ret)
+    
+    r = g.user.update_uid(uid)
+    if r:
+        flag, msg = r
+        ret['ok'] = flag
+        ret['msg'] = msg
+
+    return json_encode(ret)
     
 
 @app.route("/bind/wordpress", methods=["GET", "POST"])

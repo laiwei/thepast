@@ -69,7 +69,6 @@ def before_request():
     else:
         g.cate = ""
         
-
 @app.teardown_request
 def teardown_request(exception):
     #http://stackoverflow.com/questions/9318347/why-are-some-mysql-connections-selecting-old-data-the-mysql-database-after-a-del

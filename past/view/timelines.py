@@ -33,6 +33,13 @@ def user(uid):
     u = User.get(uid)
     if not u:
         abort(404, "no such user")
+    return redirect("/%s" % uid)
+
+@app.route("/<uid>")
+def user_by_domain(uid):
+    u = User.get(uid)
+    if not u:
+        abort(404, "no such user")
 
     r = check_access_user(u)
     if r:

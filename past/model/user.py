@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 
+import re
 from MySQLdb import IntegrityError
 from past.corelib.cache import cache, pcache
 from past.store import mc, db_conn
@@ -9,6 +10,10 @@ from .kv import Kv, UserProfile
 from past import config
 
 class User(object):
+    UID_RE = r'^[a-z][0-9a-zA-Z_.-]{3,15}'
+    UID_MAX_LEN = 16
+    UID_MIN_LEN = 4
+
     def __init__(self, id):
         self.id = str(id)
         self.uid = None
@@ -156,6 +161,43 @@ class User(object):
         cursor and cursor.close()
         db_conn.commit()
         User._clear_cache(self.id)
+
+    def update_uid(self, uid):
+        assert isinstance(uid, basestring)
+        if self.id != uid:
+            return False, "already_set"
+
+        if uid == self.uid:
+            return True, "same_with_old"
+
+        if len(uid) > User.UID_MAX_LEN:
+            return False, u"太长了，不能超过%s" %User.UID_MAX_LEN
+        if len(uid) < User.UID_MIN_LEN:
+            return False, u"太短了，不能小于%s" %User.UID_MIN_LEN
+        uid_re = re.compile(User.UID_RE)
+        if not uid_re.match(uid):
+            return False, u"只能包括字母数字和.-_"
+        
+        uid = uid.lower()
+        if uid in ["user", "pdf", "explore", "home", "visual", "settings", "admin", "past", "connect", "bind",
+            "i", "notes", "note", "status", "share", "timeline", "post", "login", "logout", "sync", "about", 
+            "connect", ]:
+            return False, u"被系统占用了:)"
+            
+        try:
+            cursor = db_conn.execute("""update user set uid=%s where id=%s""", 
+                    (uid, self.id))
+            db_conn.commit()
+            User._clear_cache(self.id)
+            return True, u"设置成功"
+        except IntegrityError:
+            db_conn.rollback()
+            return False, u"被别人占用了:)"
+        finally:
+            cursor and cursor.close()
+
+        return False, "fail"
+            
 
     def set_profile(self, profile):
         UserProfile.set(self.id, json_encode(profile))
