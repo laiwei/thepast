@@ -164,7 +164,7 @@ class User(object):
 
     def update_uid(self, uid):
         assert isinstance(uid, basestring)
-        if self.id != uid:
+        if self.id != self.uid:
             return False, "already_set"
 
         if uid == self.uid:
