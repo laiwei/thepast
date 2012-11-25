@@ -223,7 +223,7 @@ def sync(t, old=False):
         print "---sync_exception_catched:", e
     return 0
 
-def sync_wordpress(t, refresh=False):
+def sync_wordpress(t, refresh=True):
     if not t:
         log.warning('no_wordpress_sync_task')
         return

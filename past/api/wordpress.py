@@ -27,7 +27,7 @@ class Wordpress(object):
         r = str(Wordpress.WORDPRESS_ETAG_KEY % self.alias)
         mc.set(r, etag)
 
-    def get_feeds(self, refresh=False):
+    def get_feeds(self, refresh=True):
         import feedparser
         etag = self.get_etag()
         if refresh:
