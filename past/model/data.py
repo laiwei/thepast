@@ -249,7 +249,7 @@ class InstagramUser(AbsUserData):
         return self.data.get("username", "")
 
     def get_nickname(self):
-        return self.data.get("full_name", "")
+        return self.data.get("full_name", "") or self.get_uid()
 
     def get_intro(self):
         return self.data.get("bio", "")
@@ -469,7 +469,7 @@ class DoubanStatusData(DoubanData):
             medias = att and att.get_medias()
             for x in medias:
                 if x and x.get_type() == 'image':
-                    o.append(x.get_src().replace("http://img3", "http://img2").replace("http://img1", "http://img2"))   
+                    o.append(x.get_src().replace("http://img3", "http://img2").replace("http://img1", "http://img2").replace("http://img5", "http://img2"))   
         return o
 
     def get_user(self):
@@ -708,7 +708,7 @@ class WordpressData(AbsData):
         return self.data.get("author", "")
 
     def get_origin_uri(self):
-        return self.data.get("id", "") or self.data.get("link", "")
+        return self.data.get("link", "") or self.data.get("id", "")
 
     def get_summary(self):
         return clear_html_element(self.data.get("summary", ""))[:150]

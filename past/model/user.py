@@ -181,7 +181,7 @@ class User(object):
         uid = uid.lower()
         if uid in ["user", "pdf", "explore", "home", "visual", "settings", "admin", "past", "connect", "bind",
             "i", "notes", "note", "status", "share", "timeline", "post", "login", "logout", "sync", "about", 
-            "connect", "dev", "api",]:
+            "connect", "dev", "api", "thepast", "thepast.me", ]:
             return False, u"被系统占用了:)"
             
         try:
