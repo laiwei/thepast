@@ -16,7 +16,6 @@ from past.model.status import Status
 from past.utils import sizeof_fmt
 from past.utils.pdf import is_pdf_file_exists, get_pdf_filename, get_pdf_full_filename
 from past.utils.escape import json_encode
-from past.cws.cut import get_keywords
 from past import consts
 from .utils import require_login, check_access_user, statuses_timelize, get_sync_list
 

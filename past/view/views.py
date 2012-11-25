@@ -22,7 +22,6 @@ from past.api.sina import SinaWeibo
 from past.api.qqweibo import QQWeibo
 from past.api.twitter import TwitterOAuth1
 
-from past.cws.cut import get_keywords
 from past import consts
 
 from past import app
@@ -137,15 +136,6 @@ def user_explore():
     users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]
     return render_template("user_explore.html",
             users=users, config=config)
-    
-@app.route("/user/<uid>/tag")
-def tag(uid):
-    u = User.get(uid)
-    if not u:
-        abort(404, "no such user")
-    count = min(g.count, 50)
-    kws = get_keywords(u.id, count)
-    return ",".join([x[0] for x in kws])
     
 @app.route("/logout")
 @require_login()

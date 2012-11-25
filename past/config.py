@@ -11,15 +11,6 @@ SMTP_SERVER = "localhost"
 SMTP_USER = ""
 SMTP_PASSWORD = ""
 
-#-- redis config --
-#XXX
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-
-#XXX
-REDIS_CACHE_HOST = "localhost"
-REDIS_CACHE_PORT = 7379
-
 #-- mc config --
 # mc replace redis
 MEMCACHED_HOST = "127.0.0.1"
@@ -175,12 +166,6 @@ CACHE_DIR = "/home/work/proj/thepast/var/cache"
 #file download 
 FILE_DOWNLOAD_DIR = "/home/work/proj/thepast/var/down"
 PDF_FILE_DOWNLOAD_DIR = FILE_DOWNLOAD_DIR + "/pdf"
-
-#scws config
-SCWS = "/usr/local/scws/bin/scws"
-SCWS_XDB_DICT = "/usr/local/scws/etc/dict.utf8.xdb"
-MY_CUT_DICT = "/home/work/proj/thepast/past/cws/mydict.txt"
-HOT_TERMS_DICT = "/home/work/proj/thepast/past/cws/hot_terms.txt"
 
 try:
     from local_config import *
