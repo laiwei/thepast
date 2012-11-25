@@ -321,6 +321,9 @@
           </div>
         </div>
       
+        {%if s.title%}
+        <span class="summary"><a href="/post/{{s.id}}">{{s.title}}</a></span><br/>
+        {%endif%}
         <span class="summary">{{s.summary|safe}}</span>
         
         {%for att in atts%}

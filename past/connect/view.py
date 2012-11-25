@@ -97,7 +97,7 @@ def connect_callback(provider):
                     or token_dict.get("user", {}).get("id")
             client.set_token(access_token, refresh_token)
             user_info = client.get_user_info(uid)
-            print "---user_info", user_info
+            print "---user_info", user_info, user_info.data
         except OAuthError, e:
             log.warning(e)
             abort(400, e.msg)

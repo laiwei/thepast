@@ -74,25 +74,28 @@
                 <script>
 
                 jQuery(function(){
+                    var f = true;
                     jQuery("#nav-topbar").find("li").each(function(){
                         var a = jQuery(this).find("a:first")[0];
                         if (jQuery(a).attr("href") === location.pathname){
                             jQuery(this).addClass("active");
+                            f = false;
                         }else{
                             jQuery(this).removeClass("active");
                         }
                     });
-                    var patrn=/^\/user\/[0-9]+$/;
-                    var user_page = jQuery("#menu_user_page");
-                    var note_page = jQuery("#menu_note_page");
-                    if (patrn.exec(location.pathname)){
-                          //console.log(location);
-                          var p2 = /cate=600/;
-                          if (p2.exec(location.search)){
-                              note_page.addClass("active");
-                          }else{
-                              user_page.addClass("active");
-                          }
+                    if(f){
+                        var user_page = jQuery("#menu_user_page");
+                        var note_page = jQuery("#menu_note_page");
+                        //console.log(location);
+                        var p2 = /cate=600/;
+                        if (p2.exec(location.search)){
+                            note_page.addClass("active");
+                            user_page.removeClass("active");
+                        }else{
+                            user_page.addClass("active");
+                            note_page.removeClass("active");
+                        }
                     }
                 })
 

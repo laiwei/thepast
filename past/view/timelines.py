@@ -23,7 +23,7 @@ from .utils import require_login, check_access_user, statuses_timelize, get_sync
 @app.route("/i")
 @require_login()
 def timeline():
-    redir = "/user/%s" %g.user.id 
+    redir = "/%s" %g.user.uid 
     if g.cate:
         redir = "%s?cate=%s" % (redir, g.cate)
     return redirect(redir)

@@ -41,7 +41,7 @@ def settings():
 
 @app.route("/settings/email_remind", methods=["POST"])
 @require_login()
-def email_remind():
+def settings_email_remind():
     today_in_history = request.form.get("today_in_history", consts.YES)
     g.user.set_profile_item("email_remind_today_in_history", today_in_history)
     flash(u'邮件提醒修改成功', 'tip')
@@ -49,7 +49,7 @@ def email_remind():
 
 @app.route("/settings/privacy", methods=["POST"])
 @require_login()
-def privacy():
+def settings_privacy():
     p = request.form.get("privacy", consts.USER_PRIVACY_PUBLIC)
     g.user.set_profile_item("user_privacy", p)
     flash(u'隐私设置修改成功', 'tip')
@@ -57,7 +57,7 @@ def privacy():
 
 @app.route("/settings/set_uid", methods=["POST"])
 @require_login()
-def privacy():
+def settings_set_uid():
     ret = {
         "ok": False,
         "msg": "",

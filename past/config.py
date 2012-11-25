@@ -157,7 +157,7 @@ QQWEIBO_STATUS = 'http://t.qq.com/t/%s'
 TWITTER_STATUS = 'http://twitter.com/#!/%s/status/%s'
 THEPAST_NOTE = 'http://thepast.me/note/%s'
 RENREN_BLOG = 'http://blog.renren.com/blog/%s/%s'
-INSTAGRAM_USER_PAGE = 'http://pinsta.me/u/%s'
+INSTAGRAM_USER_PAGE = 'http://instagram.com/%s'
 
 DOUBAN_SITE = "http://www.douban.com"
 SINA_SITE = "http://weibo.com"

@@ -19,16 +19,16 @@ from .utils import require_login, check_access_note
 @app.route("/notes", methods=["GET"])
 @require_login()
 def my_notes():
-    return redirect("/user/%s/notes" % g.user.id)
+    return redirect("/%s?cate=%s" % (g.user.uid, config.CATE_THEPAST_NOTE))
 
-@app.route("/user/<uid>/notes", methods=["GET"])
+@app.route("/<uid>/notes", methods=["GET"])
 def user_notes(uid):
     
     user = User.get(uid)
     if not user:
         abort(403, "no_such_user")
     
-    return redirect("/user/%s?cate=%s" % (uid, config.CATE_THEPAST_NOTE))
+    return redirect("/%s?cate=%s" % (uid, config.CATE_THEPAST_NOTE))
 
 @app.route("/note/<nid>", methods=["GET",])
 def note(nid):
