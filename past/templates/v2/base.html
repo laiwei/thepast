@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="baidu-site-verification" content="eXVLFDdOkBAsy29Z" />
+    <title>{%block title_block%} The Past of Me | 旧时光{%endblock%}</title>
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/all.css?v=v0.0.1">
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/new.css?v=v0.0.1">
+{% endblock %}
+
+{% block js%}
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/jquery.masonry.min.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+</head>
+
+<body>
+<!-- Start Header Logined. 高亮“过往”-->
+<div id="header"> 
+    {%block nav_header%}
+    <div class="wrapper">
+        {%block nav_logo%}
+		<a id="past" href="/"><img src="/static/img/logo.png" width="122" height="26" alt="旧时光"></a>
+        {%endblock%}
+
+		<div id="menu_l">
+            {%block nav_menu_left%}
+            <!-- 当前页加 class="active" 与head的 title 匹配 -->
+            {%endblock%}
+		</div>
+
+		<div id="menu_r">
+			<ul id="menu" class="menu">
+            {%block nav_menu_right%} {%endblock%}
+            </ul>
+        </div>
+	</div>
+    {%endblock%}
+</div>
+<!-- End Header -->
+
+<!-- S main 目前无翻页设置，只展示去年的今天 -->
+<div id="main" class="wrapper">
+{%block main%} {%endblock%}
+</div>
+
+<!-- 目前以下内容可处理成,登录用户全站加载 -->
+<div class="clear"></div>
+
+<div id="past_text">
+           <p>总有那么一天，想回过头来看看</p>
+           <p>看看这过往</p>
+           <p>或许是美好的时光</p>
+           <p>亦或是不羁的岁月</p>
+           <p>都是我们一起逝去的青春</p>
+           <p>过去的，总是美好的</p>
+           <p>你好，旧时光... </p>
+</div>
+
+<div id="footer">
+       <span class="fade">
+           &copy; ThePast.Me
+       </span>
+</div>
+
+<!-- 登录用户全站头部点击评论同步发微博 -->
+<div id="navi_comt">
+	<textarea id="navi_comts" onpropertychange="ResizeTextareaC()" oninput="ResizeTextareaC()" onkeyup="ResizeTextareaC()" placeholder="请输入140内文字" autofocus="true"></textarea>
+	<input type="submit" name="submit" value="发布微博">
+	<div href="#" title="关闭" id="comts_off"></div>
+</div>
+
+{%block more_js%}
+<script type="text/javascript">
+$(function(){
+    $(".new_show").each(function(i, obj){
+        $(obj).imagesLoaded(function(){  
+            $(obj).masonry({  
+                itemSelector:'.show',  
+                columnWidth:240,
+                animate:true
+            });
+        });
+	});
+
+	//授权登录&关闭
+	$('#login_btn').click(function(){
+		$('#navi_login').animate({"top": "45px"}, 500);
+	});
+	$('#login_off').click(function(){
+		$('#navi_login').animate({"top": "-165px"}, 300);
+	});
+
+	//同步发微博&关闭
+	$('#login_comt').click(function(){
+		$('#navi_comt').animate({"top": "45px"}, 500);
+	});
+	$('#comts_off').click(function(){
+		$('#navi_comts').css("height","145px");
+		$('#navi_comt').animate({"top": "-220px"}, 300);
+	});
+
+	//下拉导航
+	$("#login_user").hover(function() {
+		$('#login_user ul').show();
+	},function(){
+		$('#login_user ul').hide();
+	});
+
+});
+
+//日记Textarea自适应高度
+var minHeight = 580;
+var maxHeight = 2222;
+function ResizeTextarea(){
+	var t = document.getElementById('create');
+	h = t.scrollHeight;
+	h = h > minHeight ? h : minHeight;
+	h = h > maxHeight ? maxHeight : h;
+	t.style.height = h + "px";
+}
+
+//同步微博Textarea自适应高度
+var minHC = 150;
+var maxHC = 500;
+function ResizeTextareaC(){
+	var t = document.getElementById('navi_comts');
+	h = t.scrollHeight;
+	h = h > minHC ? h : minHC;
+	h = h > maxHC ? maxHC : h;
+	t.style.height = h + "px";
+}
+
+</script>
+{%endblock%}
+</body>
+
+</html>

@@ -460,3 +460,86 @@
     </script>
 {%- endmacro %}
 
+{% macro story_show(g, repeated_status, sync_list=None) -%}
+    <!-- 图片 -->
+    {% set s = repeated_status.status_list[0]%}
+    {% set data = s.get_data()%}
+    {% set atts = data and data.get_attachments() or []%}
+    {% set images = data and data.get_images() or [] %}
+
+    {% set thepast_user = s.get_thepast_user()%}
+    {% set thirdparty_profile = thepast_user and thepast_user.get_thirdparty_profile(s.site)%}
+    {% if s.site == 'R'%}
+        {% set user_nickname = thepast_user and thepast_user.name %}
+    {% else%}
+        {% set user_nickname = thepast_user and (thirdparty_profile.get("name") 
+            or thirdparty_profile.get("uid") or thepast_user.name) %}
+        {% if user_nickname == 'null'%}
+            {% set user_nickname = thepast_user and thepast_user.name %}
+        {% endif%}
+    {%endif%}
+    {% set avatar = thepast_user 
+        and (thirdparty_profile.get("avatar") or thepast_user.get_avatar_url())%}
+
+    {% set re_ = s.get_retweeted_data()%}
+    {% set re_atts = re_ and re_.get_attachments() or []%}
+    {% set re_images = re_ and re_.get_images() or [] %}
+    {% set re_user = re_ and re_.get_user() or ""%}
+    {% set re_user_nickname = re_user if re_user|isstr else re_user.get_nickname()%}
+    
+    <!-- 两种 class="show pic" 与 class="show nopic" 区分，-->
+    {%if images or re_images%}
+    <div class="show pic" id="story-{{s.id}}">
+        <!-- 图片微博 -->
+        {%for image in images%}
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image"/>
+        {%endfor%}
+        {%for image in re_images%}
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image"/>
+        {%endfor%}
+    {%else%}
+    <div class="show nopic" id="story-{{s.id}}">
+        <!-- 纯文字 -->
+    {%endif%}
+        <p>
+            <h5><a href="/post/{{s.id}}">{{s.title}}</a></h5>
+            <div class="sep3"></div>
+            <span class="summary">{{s.summary|safe}}</span>
+            
+            {%for att in atts%}
+            <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+            <p>{{att.get_description()|safe}}</p>
+            {%endfor%}
+
+            {%if re_user_nickname and re_.get_content()%}
+            <span>
+                //@{{re_user_nickname}}: {{re_.get_content()|safe}}
+            </span>
+            {% endif %}
+
+            {%for att in re_atts%}
+            <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
+            <p>{{att.get_description()|safe}}</p>
+            {%endfor%}
+        </p>
+
+        <div class="show_info">
+            <p>
+                <a href="/{{thepast_user.uid}}" title="{{user_nickname}}">
+                    <img class="avatar" src="{{avatar}}" width="24" height="24" ></a>
+				<a href="/{{thepast_user.uid}}">{{user_nickname}}</a>
+                {%for s_ in repeated_status.status_list%}
+                      {%set from_ = s_.get_origin_uri()%}
+                      {%if from_%}
+                          <span class="from {{from_[0]}} oauth"><a target="_blank" href="{{from_[1]}}"></a></span>
+                      {%endif%}
+                {%endfor%}
+                <div class="sep3"></div>
+                <small>@{{s.create_time}} <a href="#"
+                    onclick="javascript:fn_repost_modal({{s.id}}); return false;"
+                    class=""> Recollect</a></small>
+            </p>
+        </div>
+    </div>
+{%- endmacro %}
+

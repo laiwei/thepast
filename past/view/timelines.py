@@ -27,47 +27,6 @@ def timeline():
         redir = "%s?cate=%s" % (redir, g.cate)
     return redirect(redir)
 
-@app.route("/user/<uid>")
-def user(uid):
-    u = User.get(uid)
-    if not u:
-        abort(404, "no such user")
-    return redirect("/%s" % uid)
-
-@app.route("/<uid>")
-def user_by_domain(uid):
-    u = User.get(uid)
-    if not u:
-        abort(404, "no such user")
-
-    r = check_access_user(u)
-    if r:
-        flash(r[1].decode("utf8"), "tip")
-        return redirect(url_for("home"))
-
-    ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
-    status_list = Status.gets(ids)
-    if g.user and g.user.id == uid:
-        pass
-    elif g.user and g.user.id != uid:
-        status_list = [x for x in status_list if x.privacy() != consts.STATUS_PRIVACY_PRIVATE]
-    elif not g.user:
-        status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
-        
-    status_list  = statuses_timelize(status_list)
-    tags_list = []
-    intros = [u.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
-    intros = filter(None, intros)
-
-    if g.user:
-        sync_list = get_sync_list(g.user)
-    else:
-        sync_list = []
-
-    return render_template("timeline.html", user=u, unbinded=[], 
-            tags_list=tags_list, intros=intros, 
-            status_list=status_list, config=config, sync_list=sync_list)
-
 @app.route("/pdf")
 @require_login()
 def mypdf():
