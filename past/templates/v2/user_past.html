@@ -3,56 +3,18 @@
 
 {%block title%}过往-{{user.name}} | 旧时光{%endblock%}
 
-{%block nav_menu_left%}
-    <!-- 当前页加 class="active" 与head的 title 匹配 -->
-    <a class="" href="/explore" title="发现">发现</a>
-    <a class="active" href="/past" title="过往">过往</a>
-    <a class="" href="/note/create" title="日记本">日记</a>
-{%endblock%}
-
-{%block nav_menu_right%} 
-    <li id="login_comt">评论</li>
-    <li id="login_user">
-        <!-- 导航上的头像点击跳转：带个人简介的最新微博展示页面，即公开的“我的旧时光” -->
-        <a href="/{{user.uid}}" id="tools"><img class="avatar" src="{{user.get_icon_url()}}" width="20" hight="20"><em></em></a>
-        <ul>
-            <li class="mine">
-                <div class="links">
-                    <a href="/{{user.uid}}/past">{{user.name}}的旧时光</a>
-                </div>
-                <em></em>
-            </li>
-            <li class="about">
-                <div class="links">
-                    <a href="#">关于&amp;帮助</a>
-                    <a href="#">用户反馈</a>
-                </div>
-                <em></em>
-            </li>
-            <li class="settings">
-                <div class="links">
-                    <a href="/settings">帐号设置</a>
-                    <a href="/logout">退出登录</a>
-                </div>
-                <em></em>
-            </li>
-        </ul>
-    </li>
-
-{%endblock%}
-
 
 {%block main%} 
 {%if not history_status%}
     <div id="date">
-    <p>去年、前年、大前年... 都没有留下什么东西。</p>
-    <p>今天记录一下 明年再来看。</p>
+        <p>去年、前年、大前年... 都没有留下什么东西。</p>
+        <p>今天记录一下 明年再来看。</p>
     </div>
 {%else%}
     {%for t in history_status.keys()|sort(reverse=True)%}
     {%set status_list = history_status.get(t)%}
 	<div class="date">
-		<h2>{{t.decode("utf8")}}</h2>
+		<h4>{{t.decode("utf8")}}</h4>
 		<p>共找到 {{status_list|length}} 条往事。</p>
 	</div>
 	<div class="home_show">
@@ -60,6 +22,7 @@
             {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
         {%endfor%}
 	</div>
+    <div class="clear"></div>
     {%endfor%}
 {%endif%}
 
@@ -69,16 +32,6 @@
 {{super()}}
 <script type="text/javascript">
 $(function(){
-	//瀑布流
-    $(".home_show").each(function(i, obj){
-        $(obj).imagesLoaded(function(){  
-            $(obj).masonry({  
-                itemSelector:'.show',  
-                columnWidth:240,
-                animate:true
-            });
-	    });
-    });
 });
 </script>
 {%endblock%}

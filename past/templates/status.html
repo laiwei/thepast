@@ -503,7 +503,6 @@
     {%endif%}
         <p>
             <h5><a href="/post/{{s.id}}">{{s.title}}</a></h5>
-            <div class="sep3"></div>
             <span class="summary">{{s.summary|safe}}</span>
             
             {%for att in atts%}
@@ -524,22 +523,114 @@
         </p>
 
         <div class="show_info">
+            <p>发布于 {{s.create_time}}</p>
             <p>
-                <a href="/{{thepast_user.uid}}" title="{{user_nickname}}">
-                    <img class="avatar" src="{{avatar}}" width="24" height="24" ></a>
-				<a href="/{{thepast_user.uid}}">{{user_nickname}}</a>
                 {%for s_ in repeated_status.status_list%}
                       {%set from_ = s_.get_origin_uri()%}
                       {%if from_%}
                           <span class="from {{from_[0]}} oauth"><a target="_blank" href="{{from_[1]}}"></a></span>
                       {%endif%}
                 {%endfor%}
-                <div class="sep3"></div>
-                <small>@{{s.create_time}} <a href="#"
-                    onclick="javascript:fn_repost_modal({{s.id}}); return false;"
-                    class=""> Recollect</a></small>
+                <a class="pull-right" href="#" onclick="javascript:fn_repost_modal('{{s.id}}'); return false;">
+                    <i class="icon-share"></i>recollect</a>
             </p>
         </div>
     </div>
+
+    <div id="modal_reshare_{{s.id}}" class="modal hide fade" 
+        tabindex="-1" aria-labelledby="modal-label-reshare" aria-hidden="false">
+        <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+             <h3 id="modal-label-reshare">旧事重提</h3>
+        </div>
+        <div class="modal-body">
+            <textarea rows=4 style="width:100%;"></textarea>
+            <ul class="thumbnails"> </ul>
+            {%if sync_list%}
+            {%for s in sync_list%}
+            <label class="checkbox inline">
+                <input type="checkbox" name="provider" value="{{s[0]}}" 
+                    {%if s[1] == "Y"%}checked{%endif%}>
+                {{g.config.OPENID_TYPE_NAME_DICT[s[0]]}}
+            </label>
+            {%endfor%}
+            {%endif%}
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+            <button class="btn btn-primary" data-dismiss="modal" onclick="javascript:fn_repost_status({{s.id}})">确定</button>
+        </div>
+    </div>
+
+
+    <script>
+        function fn_repost_status(sid){
+            var obj = jQuery("#story-" + sid);
+            var content = jQuery("#modal_reshare_" +sid+ " textarea").val();
+            var images = new Array();
+            jQuery("#modal_reshare_" +sid+ " img").each(function(i, img){
+                images.push(jQuery(img).attr("src"));
+            });
+            var providers = new Array();
+            jQuery("#modal_reshare_" +sid+ " input[name='provider']:checked").each(function(i, ck){
+                providers.push(jQuery(ck).val());
+            });
+
+            //console.log(sid + content + images + providers);
+            jQuery.ajax({
+                type: "POST",
+                async: false,
+                dataType: "json",
+                url: "/reshare_ajax",
+                data: {
+                    "text": content,
+                    "images": images.join("|"),
+                    "providers": providers.join("|")
+                },
+                success: function(data){
+                    if (data.ok == '1'){
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            });
+        }
+
+        function fn_repost_modal(sid){
+            var obj = jQuery("#story-" + sid);
+
+            var summary = "#thepast.me# " + jQuery(obj.find(".summary")[0]).html();
+            jQuery("#modal_reshare_" +sid+ " textarea").val(summary);
+
+            var images = new Array();
+            obj.find(".post-image").each(function(i, img){
+                images.push(jQuery(img).attr("src"));
+            });
+            //console.log(images);
+
+            var thumbs = jQuery("#modal_reshare_" +sid+ " .thumbnails");
+            thumbs.html("");
+            for (var i in images){
+                var img = images[i];
+                var thumb_id = "thumb-" + sid + "-" + i;
+                var thumb_html = '<li class="span4" id="'+ thumb_id +'">'
+                + '<i class="icon-remove"></i>'
+                + '<a href="#" class="thumbnail">' 
+                + '<img src="' + img +  '"></img> </a>'
+                + '</li>';
+                thumbs.append(jQuery(thumb_html));
+                jQuery("#" + thumb_id + " i").click(function(){
+                    jQuery("#" + thumb_id).remove();
+                });
+            }
+
+            
+            jQuery("#modal_reshare_" + sid).modal({
+                "keyboard": true,
+                "show": true,
+                "backdrop": "static"
+            });
+        }
+    </script>
 {%- endmacro %}
 

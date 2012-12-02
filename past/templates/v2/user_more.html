@@ -1,0 +1,5 @@
+{% import "status.html" as status_tmpl_helper %}
+
+{%for repeated_status in status_list%}
+    {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
+{%endfor%}

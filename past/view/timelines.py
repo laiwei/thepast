@@ -95,7 +95,7 @@ def pdf(uid):
         files_dict[date.year].append([date, filename, filesize])
 
     pdf_applyed = PdfSettings.is_user_id_exists(g.user.id)
-    return render_template("pdf.html", **locals())
+    return render_template("v2/pdf.html", **locals())
 
 @app.route("/pdf/<filename>")
 @require_login()

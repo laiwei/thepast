@@ -14,7 +14,7 @@ import settings, timelines, note, user_past, views
 def before_request():
     g.config = config
     g.user = auth_user_from_session(session)
-    g.user = User.get(8)
+    #g.user = User.get(8)
     g.user_alias = UserAlias.gets_by_user_id(g.user.id) if g.user else None
 
     g.start = int(request.args.get('start', 0))

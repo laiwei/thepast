@@ -19,13 +19,10 @@ from .utils import require_login
 @app.route("/settings", methods=["GET", "POST"])
 @require_login()
 def settings():
-    ##XXX:
-    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
-    intros = filter(None, intros)
-
     uas = g.user.get_alias()
     wordpress_alias_list = [x for x in uas if x.type == config.OPENID_TYPE_DICT[config.OPENID_WORDPRESS]]
     wordpress_alias = wordpress_alias_list and wordpress_alias_list[0]
+    user = g.user
 
     if request.method == "POST":
         email = request.form.get("email")
@@ -37,7 +34,7 @@ def settings():
                 flash(u'电子邮箱已被占用了', 'error')
         else:
             flash(u'电子邮箱格式不正确', 'error')
-    return render_template("settings.html", consts=consts, **locals())
+    return render_template("v2/settings.html", consts=consts, **locals())
 
 @app.route("/settings/email_remind", methods=["POST"])
 @require_login()
@@ -81,6 +78,7 @@ def bind_wordpress():
     if not g.user:
         flash(u"请先使用豆瓣、微博、QQ、Twitter任意一个帐号登录后，再来做绑定blog的操作^^", "tip")
         return redirect("/home")
+    user = g.user
 
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)
@@ -99,7 +97,7 @@ def bind_wordpress():
     
 
     if request.method == "GET":
-        return render_template("bind_wordpress.html", consts=consts, **locals())
+        return render_template("v2/bind_wordpress.html", consts=consts, **locals())
     
     elif request.method == "POST":
         ret = {}

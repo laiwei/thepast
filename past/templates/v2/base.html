@@ -2,57 +2,98 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="baidu-site-verification" content="eXVLFDdOkBAsy29Z" />
     <title>{%block title_block%} The Past of Me | 旧时光{%endblock%}</title>
 
 {% block css %}
     <link rel="stylesheet" type="text/css" media="screen" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/bootstrap/css/bootstrap-responsive.min.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/all.css?v=v0.0.1">
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/new.css?v=v0.0.1">
 {% endblock %}
 
 {% block js%}
-    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/jquery.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/date.format.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/jquery.masonry.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/scrollpagination.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
 {% endblock %}
-
 </head>
 
 <body>
-<!-- Start Header Logined. 高亮“过往”-->
-<div id="header"> 
-    {%block nav_header%}
-    <div class="wrapper">
-        {%block nav_logo%}
-		<a id="past" href="/"><img src="/static/img/logo.png" width="122" height="26" alt="旧时光"></a>
-        {%endblock%}
 
-		<div id="menu_l">
+{%block top_nav%}
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/"><img src="/static/img/logo.png" style="height:26px;width:122px;" alt="旧时光"></img></a>
+
+          <div class="nav-collapse collapse navbar-responsive-collapse">
+            <ul class="nav">
             {%block nav_menu_left%}
-            <!-- 当前页加 class="active" 与head的 title 匹配 -->
+              <li><a style="padding-top:12px;" href="explore">发现</a></li>
+              <li><a style="padding-top:12px;" href="/past">过往</a></li>
+              <li class="dropdown">
+                  <a style="padding-top:12px;" href="#" class="dropdown-toggle" data-toggle="dropdown">日记<b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/notes">我的日记</a></li>
+                    <li class="divider"></li>
+                    <li><a href="/note/create">写日记</a></li>
+                  </ul>
+              </li>
             {%endblock%}
-		</div>
-
-		<div id="menu_r">
-			<ul id="menu" class="menu">
-            {%block nav_menu_right%} {%endblock%}
             </ul>
+
+            <ul class="nav pull-right">
+            {%block nav_menu_right%}
+            <li><a id="login_comt" style="padding-top:12px;" href="#"><i class="icon-share"></i>同步</a></li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <img src="{{user.get_icon_url()}}" style="width:26px;height:26px; alt="{{user.name}}"></img><b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#" onclick="javascript:fn_connect();return false;"><i class="icon-plus"></i>绑定我的其他帐号</a></li>
+                <li class="divider"></li>
+                <li><a href="/{{user.uid}}"><i class="icon-user"></i>{{user.name}}的旧时光</a></li>
+                <li class="divider"></li>
+                <li><a href="/about"><i class="icon-question-sign"></i>关于和帮助</a></li>
+                <li class="divider"></li>
+                <li><a href="/settings"><i class="icon-wrench"></i>帐号和设置</a></li>
+                <li class="divider"></li>
+                <li><a href="/logout"><i class="icon-off"></i>退出登录</a></li>
+              </ul>
+            </li>
+            {%endblock%}
+            </ul>
+          </div> <!-- collapse-->
+        </div> <!--container-->
+    </div> <!-- narvbar inner-->
+</div> <!-- navbar-->
+{%endblock%}
+
+
+<div class="container" style="margin-top:47px;">
+{%block container%}
+    {%block hero_unit%}{%endblock%}
+    <div class="row">
+        <div class="span10 offset1">
+        {%block main%}
+        {%endblock%}
         </div>
-	</div>
-    {%endblock%}
-</div>
-<!-- End Header -->
+    </div>
+    
+    <hr/>
+    <hr/>
 
-<!-- S main 目前无翻页设置，只展示去年的今天 -->
-<div id="main" class="wrapper">
-{%block main%} {%endblock%}
-</div>
-
-<!-- 目前以下内容可处理成,登录用户全站加载 -->
-<div class="clear"></div>
-
-<div id="past_text">
+    <footer>
+        {%block footer%}
+        <div id="past_text">
            <p>总有那么一天，想回过头来看看</p>
            <p>看看这过往</p>
            <p>或许是美好的时光</p>
@@ -60,37 +101,59 @@
            <p>都是我们一起逝去的青春</p>
            <p>过去的，总是美好的</p>
            <p>你好，旧时光... </p>
-</div>
-
-<div id="footer">
-       <span class="fade">
-           &copy; ThePast.Me
-       </span>
-</div>
-
-<!-- 登录用户全站头部点击评论同步发微博 -->
-<div id="navi_comt">
-	<textarea id="navi_comts" onpropertychange="ResizeTextareaC()" oninput="ResizeTextareaC()" onkeyup="ResizeTextareaC()" placeholder="请输入140内文字" autofocus="true"></textarea>
-	<input type="submit" name="submit" value="发布微博">
-	<div href="#" title="关闭" id="comts_off"></div>
+        </div>
+        <span class="text-info">
+            &copy; ThePast.Me 2012
+        </span>
+        {%endblock%}
+    </footer>
+{%endblock%}
 </div>
 
 {%block more_js%}
+<!-- 登录用户全站头部点击评论同步发微博 -->
+<div id="navi_comt">
+	<textarea id="navi_comts" onpropertychange="ResizeTextareaC()" oninput="ResizeTextareaC()" onkeyup="ResizeTextareaC()" placeholder="请输入140内文字" autofocus="true"></textarea>
+	<input type="submit" name="submit" id="navi_reshare_btn" value="发布微博">
+	<div href="#" title="关闭" id="comts_off"></div>
+</div>
+
+<!-- 匿名首页登录框 -->
+<div id="navi_login">
+	<div class="login_head"><h3>授权登录</h3></div>
+	<div class="login_connent">
+		<ul class="">
+			<li class="login qq"><a title="使用腾讯微博授权登录" href="/connect/qq">qq</a></li>
+			<li class="login sina"><a title="使用新浪微博授权登录" href="/connect/sina">sina</a></li>
+			<li class="login douban"><a title="使用豆瓣授权登录" href="/connect/douban">douban</a></li>
+			<li class="login twitter"><a title="使用 Twitter 授权登录" href="/connect/twitter">twitter</a></li>
+			<li class="login renren"><a title="使用人人授权登录" href="/connect/renren">renren</a></li>
+			<li class="login instagram"><a title="使用 instagram 授权登录" href="/connect/instagram">instagram</a></li>        
+		</ul>
+	</div>
+	<div href="#" title="关闭" id="login_off"></div>
+</div>
+
+
 <script type="text/javascript">
+function fn_connect(){
+    $('#navi_login').animate({"top": "45px"}, 500);
+}
+//同步微博Textarea自适应高度
+var minHC = 150;
+var maxHC = 500;
+function ResizeTextareaC(){
+    var t = document.getElementById('navi_comts');
+    h = t.scrollHeight;
+    h = h > minHC ? h : minHC;
+    h = h > maxHC ? maxHC : h;
+    t.style.height = h + "px";
+}
 $(function(){
-    $(".new_show").each(function(i, obj){
-        $(obj).imagesLoaded(function(){  
-            $(obj).masonry({  
-                itemSelector:'.show',  
-                columnWidth:240,
-                animate:true
-            });
-        });
-	});
 
 	//授权登录&关闭
 	$('#login_btn').click(function(){
-		$('#navi_login').animate({"top": "45px"}, 500);
+		fn_connect();
 	});
 	$('#login_off').click(function(){
 		$('#navi_login').animate({"top": "-165px"}, 300);
@@ -105,39 +168,56 @@ $(function(){
 		$('#navi_comt').animate({"top": "-220px"}, 300);
 	});
 
-	//下拉导航
-	$("#login_user").hover(function() {
-		$('#login_user ul').show();
-	},function(){
-		$('#login_user ul').hide();
+    $('#navi_reshare_btn').click(function(){
+            if(! "{{g.user.id}}"){
+                alert("请先登录：）");
+                return false;
+            }
+            var content = $("#navi_comts").val();
+            jQuery.ajax({
+                type: "POST",
+                async: false,
+                dataType: "json",
+                url: "/reshare_ajax",
+                data: {
+                    "text": content,
+                    "images": "",
+                    "providers": "",
+                },
+                success: function(data){
+                    if (data.ok == '1'){
+                        $('#navi_comts').css("height","145px");
+                        $('#navi_comt').animate({"top": "-220px"}, 300);
+                    }else{
+                        alert(data.msg);
+                    }
+                }
+            });
+    });
+
+    //瀑布流
+    $(".new_show").each(function(i, obj){
+        $(obj).imagesLoaded(function(){  
+            $(obj).masonry({  
+                itemSelector:'.show',  
+                columnWidth:240,
+                animate:true
+            });
+        });
 	});
+    $(".home_show").each(function(i, obj){
+        $(obj).imagesLoaded(function(){  
+            $(obj).masonry({  
+                itemSelector:'.show',  
+                columnWidth:240,
+                animate:true
+            });
+	    });
+    });
 
 });
-
-//日记Textarea自适应高度
-var minHeight = 580;
-var maxHeight = 2222;
-function ResizeTextarea(){
-	var t = document.getElementById('create');
-	h = t.scrollHeight;
-	h = h > minHeight ? h : minHeight;
-	h = h > maxHeight ? maxHeight : h;
-	t.style.height = h + "px";
-}
-
-//同步微博Textarea自适应高度
-var minHC = 150;
-var maxHC = 500;
-function ResizeTextareaC(){
-	var t = document.getElementById('navi_comts');
-	h = t.scrollHeight;
-	h = h > minHC ? h : minHC;
-	h = h > maxHC ? maxHC : h;
-	t.style.height = h + "px";
-}
-
 </script>
 {%endblock%}
-</body>
 
+</body>
 </html>

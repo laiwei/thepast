@@ -54,7 +54,7 @@ font-size:12px;
 
     background-color: #fff;
     /*background-color: #fff;*/
-    border: 1px solid #F1EDED;
+    border: 0.5px solid #F1EDED;
 }
 .box .cell {
     padding: 10px;

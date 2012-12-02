@@ -1,0 +1,76 @@
+{% extends "v2/base.html" %}
+{% import "status.html" as status_tmpl_helper %}
+{% import "blocks.html" as blocks_tmpl_helper %}
+
+<!-- 日记 -->
+{%block title%}写日记{{user.name}} | 旧时光{%endblock%}
+
+{%block main%}
+    <form action="/note/create" method="post">
+	<div class="date now_date">
+		<h4 id="note_date"></h4>
+		<input type="hidden" name="title"></input>
+	</div>
+	<div id="note">
+		<textarea name="content" id="create" onpropertychange="ResizeTextarea()" oninput="ResizeTextarea()" onkeyup="ResizeTextarea()" placeholder="请输入文字" autofocus="true"></textarea>
+	</div>
+	<div class="created">
+         <label class="radio inline">格式： </label>
+         <label class="radio inline">
+                <input type="radio" name="fmt" value="P" {%if not fmt or fmt=="P"%}checked{%endif%}> 文本 </label>
+         <label class="radio inline">
+                <input class="note_fmt" type="radio" name="fmt" value="M" {%if fmt=="M"%}checked{%endif%}> Markdown </label>
+        <br/>
+         <label class="radio inline">隐私： </label>
+         <label class="radio inline">
+                    <input type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PUBLIC}}" 
+                    {%if not privacy or privacy==consts.STATUS_PRIVACY_PUBLIC%}checked{%endif%}></input>
+                    公开</label>
+         <label class="radio inline">
+                    <input type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_THEPAST}}" 
+                    {%if privacy==consts.STATUS_PRIVACY_THEPAST%}checked{%endif%}></input>
+                    登录用户可见</label>
+         <label class="radio inline">
+                    <input type="radio" name="privacy" 
+                    value="{{consts.STATUS_PRIVACY_PRIVATE}}" 
+                    {%if privacy==consts.STATUS_PRIVACY_PRIVATE%}checked{%endif%}></input>
+                    仅自己可见</label>
+
+        <input type="submit" name="submit" value="写好了">
+    </div>
+    </form>
+  <div class="clear"></div>
+  <div class="message">
+    <p>
+    thepast友情提醒，每天只能记一篇日记，写好了就不能再修改。
+    </p>
+  </div>
+
+{%endblock%}
+
+{%block more_js%}
+    {{super()}}
+    <script>
+    $(function(){
+        var timer = setInterval(function(){
+            var current_date = new Date();
+            $("#note_date").html(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
+            $("input[name='title']").val(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
+        }, 1000);    
+    });
+
+    //日记Textarea自适应高度
+    var minHeight = 420;
+    var maxHeight = 2222;
+    function ResizeTextarea(){
+        var t = document.getElementById('create');
+        h = t.scrollHeight;
+        h = h > minHeight ? h : minHeight;
+        h = h > maxHeight ? maxHeight : h;
+        t.style.height = h + "px";
+    }
+
+    </script>
+{%endblock%}

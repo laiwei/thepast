@@ -48,7 +48,7 @@ def note(nid):
         content = markdown2.markdown(note.content, extras=["wiki-tables", "code-friendly"])
     create_time = note.create_time
     user = User.get(note.user_id)
-    return render_template("note.html", consts=consts, **locals())
+    return render_template("v2/note.html", consts=consts, **locals())
 
 @app.route("/note/edit/<nid>", methods=["GET", "POST"])
 @require_login()
@@ -91,10 +91,10 @@ def note_edit(nid):
         else:
             return redirect("/note/%s" % note.id)
     
-
 @app.route("/note/create", methods=["GET", "POST"])
 @require_login(msg="先登录才能写日记")
 def note_create():
+    user = g.user
     error = ""
     if request.method == "POST":
 
@@ -118,10 +118,10 @@ def note_create():
                 error = "添加日记的时候失败了，真不走运，再试试吧^^"
         if error:
             flash(error.decode("utf8"), "error")
-            return render_template("note_create.html", consts=consts, **locals())
+            return render_template("v2/note_create.html", consts=consts, **locals())
 
     elif request.method == "GET":
-        return render_template("note_create.html", consts=consts, **locals())
+        return render_template("v2/note_create.html", consts=consts, **locals())
 
     else:
         abort("wrong_http_method")

@@ -1,0 +1,28 @@
+{% extends "v2/base.html" %}
+{% import "status.html" as status_tmpl_helper %}
+{% import "blocks.html" as blocks_tmpl_helper %}
+
+<!-- 日记 -->
+{%block title%}日记本{{user.name}} | 旧时光{%endblock%}
+
+{%block main%}
+	<div class="date now_date">
+		<!-- 一天最多一篇日记
+        <input type="text" name="title" placeholder="题目" style="background:none;height:24px;width:400px;font-size:20px;"></input> 
+        -->
+		<h4 id="note_date">{{title}}</h4>
+	</div>
+
+    {%if note.fmt == consts.NOTE_FMT_MARKDOWN%}
+        <div class="markdown">
+            {{content|safe}}
+        </div>
+    {%else%}
+        <div id="note">
+            <div  name="content" id="create">
+            {{content}}
+            </div>
+        </div>
+    {%endif%}
+    <div class="clear"></div>
+{%endblock%}

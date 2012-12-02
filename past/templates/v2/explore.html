@@ -5,6 +5,28 @@
 <!-- 个人&&其他用户最新页  -->
 {%block title%}{{user.name}} | 旧时光{%endblock%}
 
+{%block nav_menu_left%}
+  <li class="active"><a style="padding-top:12px;" href="explore">发现</a></li>
+{%endblock%}
+
+{%block nav_menu_right%}
+<li><button id="login_btn" class="btn btn-small" href="#">登录</button></li>
+{%endblock%}
+
+{%block hero_unit%}
+<div class="row" style="margin-top:5px;">
+    <div class="span10 offset1">
+        <div class="well" style="border:0px;margin-bottom:5px;">
+            <h4>你好，旧时光<sup><a target="_blank" href="https://github.com/laiwei/thepast">[开源]</a></sup></h4>
+            <blockquote>实时聚合你在“豆瓣”、“人人”、“新浪微博”、“腾讯微博”、“Twitter”、“wordpress”、“instagram”等平台的 Timeline。</blockquote>
+            <blockquote>每天清晨，会邮件提醒你过往的今天都发生了些什么，或许是惊喜，亦或是怀念。</blockquote>
+            <blockquote>聚合后的Timeline，生成PDF<sup><a target="_blank" href="/demo-pdf">[预览]</a></sup>版本,供离线阅读或永久保存，打造你自己的个人杂志。</blockquote>
+            <blockquote>同步更新微博到多个平台。</blockquote>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
 {%block main%}
 	<div id="sidebar">
 		<div id="user_info" class="side_box">
@@ -71,49 +93,21 @@
 	</div> <!--end of sidebar-->
 
 	<div id="new_bar">
-		<h3>你好 . 旧时光</h3>
-		<p>{{now.decode("utf8")}}</p>
+		<h4>你好 . 旧时光</h4>
     </div>
 
-    <div class="new_show" id="div_new_show">
+    <div class="new_show">
         {%for repeated_status in status_list%}
             {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
         {%endfor%}
     </div>
-
-    <div class="loading" id="loading">Wait a moment... it's loading!</div>
-    <div class="loading" id="nomoreresults">Sorry, no more results for your pagination demo.</div>
-
 {%endblock%}
 
 {%block more_js%}
 {{super()}}
-<script type="text/javascript">
-var g_start = parseInt("{{g.start}}");
-$(function(){
-    $('#div_new_show').scrollPagination({
-        'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
-        'contentData': {
-            'start': g_start + parseInt("{{g.count}}") 
-        }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
-        'scrollTarget': $(window), // who gonna scroll? in this example, the full window
-        'heightOffset': 100, // it gonna request when scroll is 10 pixels before the page ends
-        'beforeLoad': function(){ // before load function, you can display a preloader div
-            $('#loading').fadeIn(); 
-        },
-        'afterLoad': function(elementsLoaded){ // after loading content, you can use this function to animate your new elements
-            $('#loading').fadeOut();
-            var $newElems = $(elementsLoaded).css({ opacity: 0 });
-            $newElems.imagesLoaded(function () {
-                // show elems now they're ready
-                $newElems.animate({ opacity: 1 });
-                $('#div_new_show').masonry('appended', $newElems, true);
-                g_start = g_start + parseInt("{{g.count}}");
-                console.log(g_start);
-            });
 
-        }
-    });
+<script type="text/javascript">
+$(function(){
 })
 </script>
 {%endblock%}

@@ -1,0 +1,165 @@
+{% extends "v2/base.html" %}
+{% import "blocks.html" as blocks_tmpl_helper %}
+
+{%block title%}设置-{{user.name}} | 旧时光{%endblock%}
+
+{%block main%} 
+<div class="sep10"></div>
+<div class="row">
+    <div class="span7 settings">
+            <h2>账户设置</h2>
+
+            {%if g.user.id == g.user.uid%}
+            <div class="box">
+                <div class="cell">
+                    <span class="text-info">设置个性域名</span>
+                </div>
+                <div class="inner">
+                    <form method="post" class="form-inline">
+                        <input type="text" id="input_uid" placeholder="你的个性域名xxx, 数字字母和.-_">
+                        <button type="submit" class="btn" id="btn_set_uid" onclick="return fn_set_uid();">设置</button>
+                        <label id="label_set_uid" style="display:none;"></label>
+                        <div class="sep3"></div>
+                        <p class="text-info">然后就可以 http://thepast.me/xxx 来访问个人页面了(设置后无法变更)</p>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sep20"></div>
+            {%endif%}
+
+            <!--设置email-->
+            <div class="box">
+                <div class="cell">
+                    <span class="text-info">我的信息</span>
+                </div>
+                <form method="post">
+                <div class="inner"><table>
+                    <tr height="30px"><td width="100px" align="right"><span class="">thepast_id：</span></td>
+                        <td width="180px" align="left">{{g.user.id}}</td>
+                    </tr>
+                    {%if g.user.id != g.user.uid%}
+                    <tr height="30px"><td width="100px" align="right"><span class="">个性域名：</span></td>
+                        <td width="180px" align="left"><a href="http://thepast.me/{{g.user.uid}}">http://thepast.me/{{g.user.uid}}</a></td>
+                    </tr>
+                    {%endif%}
+                    <tr height="30px"><td align="right"><span class="">注册时间：</span></td>
+                        <td align="left">{{g.user.create_time}}</td>
+                    </tr>
+                    {% if wordpress_alias %}
+                    <tr height="30px">
+                        <td width="200px" align="right"><span class="">你的wordpress feed地址：</span></td>
+                        <td width="280px" align="left"> {{wordpress_alias.alias}} </td>
+                    </tr>
+                    {% endif%}
+                    <tr height="40px"><td align="right"><span class="">电子邮件：</span></td>
+                        <td>
+                            <input type="text" class="sl" name="email" value="{{g.user.get_email() or ''}}"></input> 
+                            <div class="sep3"></div>
+                            <span class="smaller">定期发送更新好的PDF版本和历史上的今天提醒<br/>(建议把help@thepast.me添加到你的邮件联系人中)</span>
+                        </td>
+                    </tr>
+                    <tr height="30px"><td align="right"><span class=""></span></td>
+                        <td> <input type="submit" value="保存设置"></input> </td>
+                    </tr>
+                
+                </table></div>
+                </form>
+            </div>
+
+            <div class="sep20"></div>
+            <div class="box">
+                <div class="cell">邮件提醒</div>
+                <div class="cell"><span class="">thepast会通过email提醒一些与你有关的事情</span></div>
+                <div class="inner"><table>
+                    <form action="/settings/email_remind" method="post">
+                    <tr height="30px">
+                        <td width="180px" align="left"></td>
+                        <td width="100px" align="left">接受</td>
+                        <td width="100px" align="left">不接受</td>
+                    </tr>
+                    <tr height="30px">
+                        <td><span class="">历史上的今天</span></td>
+                        {%set s = g.user.get_profile_item("email_remind_today_in_history")%}
+                        <td> <input type="radio" name="today_in_history" {%if s!="N" %}checked{%endif%} value="Y"></input>  </td>
+                        <td> <input type="radio" name="today_in_history" {%if s=="N" %}checked{%endif%} value="N"></input>  </td>
+                    </tr>
+                    <tr height="30px">
+                        <td></td>
+                        <td><input type="submit" value="修改提醒设置"></input></td>
+                        <td></td>
+                    </tr>
+                    </form>
+                </table></div>
+            </div>
+
+            <div class="sep20"></div>
+            <div class="box">
+                <div class="cell">隐私设置</div>
+                <div class="cell"><span class="">thepast的信息流默认所有用户可见，你可以方便的分享给其他用户，作为自己的about页面是个很不错的选择</span></div>
+                <div class="inner"><table>
+                    <form action="/settings/privacy" method="post">
+                    <tr height="30px">
+                        {%set p = g.user.get_profile_item("user_privacy")%}
+                        <td width=200px> 
+                            <input type="radio" name="privacy" {%if not p or p==consts.USER_PRIVACY_PUBLIC %}checked{%endif%} 
+                                value="{{consts.USER_PRIVACY_PUBLIC}}">公开</input>
+                        </td>
+                        <td width=200px> 
+                            <input type="radio" name="privacy" {%if p==consts.USER_PRIVACY_THEPAST %}checked{%endif%} 
+                                value="{{consts.USER_PRIVACY_THEPAST}}">登录用户可见</input>
+                        </td>
+                        <td width=200px> 
+                            <input type="radio" name="privacy" {%if p==consts.USER_PRIVACY_PRIVATE %}checked{%endif%} 
+                                value="{{consts.USER_PRIVACY_PRIVATE}}">仅自己可见</input>  
+                        </td>
+                    </tr>
+                    <tr height="30px">
+                        <td><input type="submit" value="修改隐私设置"></input></td>
+                        <td></td>
+                    </tr>
+                    </form>
+                </table></div>
+            </div>
+
+            <script>
+                function fn_set_uid(){
+                    var input_uid = $("#input_uid");
+                    var label = $("#label_set_uid");
+                    var uid = input_uid.val();
+                    if (!uid){
+                        label.addClass("text-warning").html("不能为空").show();
+                    }
+                    jQuery.ajax({
+                        type: "POST",
+                        async: false,
+                        dataType: "json",
+                        url: "/settings/set_uid",
+                        data: {
+                            "uid": uid,
+                            "_r": Math.random()
+                        },
+                        success: function(data){
+                            if (data.ok == 'true'){
+                                label.addClass("text-success").html("设置成功").show();
+                            }else{
+                                label.addClass("text-error").html(data.msg).show();
+                            }
+                        }
+                    });
+                    return false;
+                }
+            </script>
+    </div>
+    <div class="span5" style="width:270px;">
+        <div class="sep20"></div>
+        <div class="sep20"></div>
+        <div class="sep20"></div>
+        <div class="sep20"></div>
+        {{super()}}
+        {{blocks_tmpl_helper.rightbar_intros_block(intros)}}
+        {{blocks_tmpl_helper.rightbar_feedback_block()}}
+    </div>
+</div>
+{%endblock%}
+

@@ -31,18 +31,6 @@ from .utils import require_login, check_access_user, statuses_timelize, get_sync
 log = logging.getLogger(__file__)
 
 
-@app.route("/")
-def index():
-    return redirect(url_for("home"))
-
-@app.route("/home")
-def home():
-    user_ids = Status.get_recent_updated_user_ids()
-    users = filter(None, [User.get(x) for x in user_ids])
-    users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]
-    return render_template("home.html",
-            users=users, config=config)
-
 @app.route("/past")
 @require_login()
 def past():
@@ -118,13 +106,16 @@ def reshare():
         "msg": "",
     }
     
-    providers_ = []
-    for p in config.CAN_SHARED_OPENID_TYPE:
-        if p in providers:
-            g.user.set_thirdparty_profile_item(p, "share", "Y")
-            providers_.append(p)
-        else:
-            g.user.set_thirdparty_profile_item(p, "share", "N")
+    if not providers:
+        providers = config.CAN_SHARED_OPENID_TYPE
+    else:
+        providers_ = []
+        for p in config.CAN_SHARED_OPENID_TYPE:
+            if p in providers:
+                g.user.set_thirdparty_profile_item(p, "share", "Y")
+                providers_.append(p)
+            else:
+                g.user.set_thirdparty_profile_item(p, "share", "N")
 
     failed_providers = []
     for p in providers_:

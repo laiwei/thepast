@@ -1,0 +1,85 @@
+{% extends "v2/base.html" %}
+{% import "blocks.html" as blocks_tmpl_helper %}
+
+{%block title%}PDF-{{user.name}} | 旧时光{%endblock%}
+
+{%block main%} 
+<div class="sep10"></div>
+<div class="row">
+    <div class="span7 settings">
+        <!--PDF下载列表-->
+        <div class="box">
+            <div class="cell"><a href="/i">首页</a> &gt; PDF下载 [PDF会按月归档，下载链接如下]</div>
+            <div class="cell">
+            <table>
+                {%if not pdf_applyed%}
+                <form action="/pdf/apply" method="post">
+                    <tr>
+                    <p>由于系统资源受限（主要是磁盘），为了给大家提供更好的服务，</p>
+                    <p>PDF备份功能只开放给切实需要的用户，请点下面的按钮申请（申请后，自动开通！）</p>
+                    </tr>
+                    <tr height="30px">
+                        <td><input type="submit" value="提交PDF备份申请"></input></td>
+                        <td></td>
+                    </tr>
+                </form>
+                {%else%}
+                <form action="/pdf/apply" method="post">
+                    <tr>
+                    <p>由于系统资源受限（主要是磁盘），为了给大家提供更好的服务，</p>
+                    <p>如果PDF文件你已经下载完毕了，那么请点下面的按钮，系统会在接下里的一天，删除掉生成的PDF！</p>
+                    </tr>
+                    <input type="hidden" name="delete" value="true"></input>
+                    <tr height="30px">
+                        <td><input type="submit" value="提交PDF删除申请"></input></td>
+                        <td></td>
+                    </tr>
+                </form>
+                {%endif%}
+            </table>
+            </div>
+            {% for year in files_dict.keys()|sort(reverse=True)%}
+            <div class="cell">{{year}}年</div>
+                <div class="cell"><table>
+                <tr height="30px">
+                {%for i in [0,1,2,3,4,5]%}
+                    {% if files_dict[year][i]%}
+                    {%set date = files_dict[year][i][0]%}
+                    {%set filename = files_dict[year][i][1]%}
+                    {%set filesize = files_dict[year][i][2]%}
+                    <td width="100px" align="left"><a href="/pdf/{{filename}}">{{date.month}}月</a>&nbsp;[{{filesize}}]</td>
+                    {% else%}
+                    <td width="100px" align="left"></td>
+                    {% endif%}
+                {%endfor%}
+                </tr>
+
+            {%if files_dict[year]|length > 6%}
+                <tr height="30px">
+                {%for i in [6,7,8,9,10,11]%}
+                    {% if files_dict[year][i]%}
+                    {%set date = files_dict[year][i][0]%}
+                    {%set filename = files_dict[year][i][1]%}
+                    {%set filesize = files_dict[year][i][2]%}
+                    <td width="100px" align="left"><a href="/pdf/{{filename}}">{{date.month}}月</a>&nbsp;[{{filesize}}]</td>
+                    {% else%}
+                    <td width="100px" align="left"></td>
+                    {% endif%}
+                {%endfor%}
+                </tr>
+            {%endif%}
+                </table></div>
+            {%endfor%}
+            <div class="inner">
+            <span class="">说明：PDF每月会生成一个单独的文件，如果你想将多个PDF文件合并为一个，请下载各个PDF文件后，使用PDF编辑软件进行编辑合并</span>
+            </div>
+        </div>
+    </div>
+    <div class="span5" style="width:270px;">
+        {{super()}}
+        {{blocks_tmpl_helper.rightbar_intros_block(intros)}}
+        {{blocks_tmpl_helper.rightbar_feedback_block()}}
+    </div>
+</div>
+{%endblock%}
+
