@@ -35,12 +35,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" 
           {%if g.user%}
-            href="/{{g.user.uid}}"
+          <a class="brand" href="/{{g.user.uid}}">
           {%else%}
-            href="/"
-          {%endif%}><img src="/static/img/logo.png" style="height:26px;width:122px;" alt="旧时光"></img></a>
+          <a class="brand" href="/">
+          {%endif%}
+          <img src="/static/img/logo.png" style="height:26px;width:122px;" alt="旧时光"></img></a>
 
           <div class="nav-collapse collapse navbar-responsive-collapse">
             <ul class="nav">
@@ -171,6 +171,75 @@ function ResizeTextareaC(){
     h = h > minHC ? h : minHC;
     h = h > maxHC ? maxHC : h;
 }
+
+function fn_repost_status(sid){
+    var obj = jQuery("#story-" + sid);
+    var content = jQuery("#modal_reshare_" +sid+ " textarea").val();
+    var images = new Array();
+    jQuery("#modal_reshare_" +sid+ " img").each(function(i, img){
+        images.push(jQuery(img).attr("src"));
+    });
+    var providers = new Array();
+    jQuery("#modal_reshare_" +sid+ " input[name='provider']:checked").each(function(i, ck){
+        providers.push(jQuery(ck).val());
+    });
+
+    //console.log(sid + content + images + providers);
+    jQuery.ajax({
+        type: "POST",
+        async: false,
+        dataType: "json",
+        url: "/reshare_ajax",
+        data: {
+            "text": content,
+            "images": images.join("|"),
+            "providers": providers.join("|")
+        },
+        success: function(data){
+            if (data.ok == '1'){
+            }else{
+                alert(data.msg);
+            }
+        }
+    });
+}
+
+function fn_repost_modal(sid){
+    var obj = jQuery("#story-" + sid);
+
+    var summary = "#thepast.me# " + jQuery(obj.find(".summary")[0]).html();
+    jQuery("#modal_reshare_" +sid+ " textarea").val(summary);
+
+    var images = new Array();
+    obj.find(".post-image").each(function(i, img){
+        images.push(jQuery(img).attr("src"));
+    });
+    //console.log(images);
+
+    var thumbs = jQuery("#modal_reshare_" +sid+ " .thumbnails");
+    thumbs.html("");
+    for (var i in images){
+        var img = images[i];
+        var thumb_id = "thumb-" + sid + "-" + i;
+        var thumb_html = '<li class="span4" id="'+ thumb_id +'">'
+        + '<i class="icon-remove"></i>'
+        + '<a href="#" class="thumbnail">' 
+        + '<img src="' + img +  '"></img> </a>'
+        + '</li>';
+        thumbs.append(jQuery(thumb_html));
+        jQuery("#" + thumb_id + " i").click(function(){
+            jQuery("#" + thumb_id).remove();
+        });
+    }
+
+    
+    jQuery("#modal_reshare_" + sid).modal({
+        "keyboard": true,
+        "show": true,
+        "backdrop": "static"
+    });
+}
+
 jQuery(function(){
 
 	//授权登录&关闭
