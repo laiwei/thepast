@@ -94,7 +94,8 @@ jQuery(function(){
     jQuery('#div_new_show').scrollPagination({
         'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
         'contentData': {
-            'start': g_start + parseInt("{{g.count}}") 
+            'start': g_start + parseInt("{{g.count}}"),
+            'cate': "{{g.cate}}"
         }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
         'scrollTarget': jQuery(window), // who gonna scroll? in this example, the full window
         'heightOffset': 100, // it gonna request when scroll is 10 pixels before the page ends
