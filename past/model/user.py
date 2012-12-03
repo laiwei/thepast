@@ -206,7 +206,11 @@ class User(object):
     def get_profile(self):
         r = UserProfile.get(self.id)
         p = r.val if r else ""
-        return json_decode(p) if p else {}
+        try:
+            return json_decode(p) if p else {}
+        except ValueError, e:
+            print '------decode profile fail:', e
+            return {}
     
     def set_profile_item(self, k, v):
         p = self.get_profile()
