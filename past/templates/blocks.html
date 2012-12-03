@@ -59,7 +59,7 @@
     {% if with_flash or fillup_email %}
     {% with msgs = get_flashed_messages(with_categories=true) %}
         {% if msgs or fillup_email%}
-<div id="notification" class="alert alert-info">
+<div id="notification" class="alert alert-info" style="margin-top:5px;">
             {%if fillup_email%}
                 <li class="tip">请在<a href="/settings">设置页面</a>补充一下你的邮箱，PDF文件和往事提醒，会发送到你的邮箱。</li>
             {%endif%}

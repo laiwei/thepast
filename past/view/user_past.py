@@ -15,6 +15,7 @@ from .utils import require_login, check_access_user, statuses_timelize, get_sync
 
 @app.route("/")
 @app.route("/home")
+@app.route("/explore")
 def anonymous_home():
     user_ids = User.get_ids(limit=10000)
 
@@ -56,6 +57,7 @@ def my_home():
     return redirect("/past")
 
 @app.route("/<uid>/past")
+@require_login()
 def user_past(uid):
     user = User.get(uid)
     if not user:
@@ -65,9 +67,7 @@ def user_past(uid):
     except:
         now = datetime.datetime.now()
 
-    #TODO
-    #history_ids = get_status_ids_today_in_history(g.user.id, now) 
-    history_ids = Status.get_ids(user.id, start=0, limit=50)
+    history_ids = get_status_ids_today_in_history(user.id, now) 
     status_list = Status.gets(history_ids)
     status_list  = statuses_timelize(status_list)
     if g.user:

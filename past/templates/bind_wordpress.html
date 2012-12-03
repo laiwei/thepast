@@ -66,10 +66,10 @@
         </div>
 
     <script language="javascript">
-        jQuery(function($) {
-            $("input[name='bind_wordpress']").bind("click", function(){
-                var feed_uri = $("input[name='wordpress_feed']").val();
-                $.post("/bind/wordpress", {'_r':Math.random(), 'feed_uri':feed_uri}, function(data){
+        jQuery(function() {
+            jQuery("input[name='bind_wordpress']").bind("click", function(){
+                var feed_uri = jQuery("input[name='wordpress_feed']").val();
+                jQuery.post("/bind/wordpress", {'_r':Math.random(), 'feed_uri':feed_uri}, function(data){
                     if(data.ok === 'true'){
                         window.location="/bind/wordpress";
                     }else{
@@ -79,10 +79,10 @@
                 return false;
             });
 
-            var c = $("input[name='confirm_bind_wordpress']");
+            var c = jQuery("input[name='confirm_bind_wordpress']");
             c.bind("click", function(){
                 c.val("正在验证中... 可能需要1分钟，请不要刷新页面");
-                $.post("/bind/wordpress", {'_r':Math.random()}, function(data){
+                jQuery.post("/bind/wordpress", {'_r':Math.random()}, function(data){
                     c.val("下一步");
                     if(data.ok === 'true'){
                         alert(data.msg);

@@ -1,0 +1,46 @@
+{% extends "v2/base.html" %}
+{% import "status.html" as status_tmpl_helper %}
+{% import "blocks.html" as blocks_tmpl_helper %}
+
+{%block title%}浏览用户 | 旧时光{%endblock%}
+
+{%block main%}
+    <div class="sep10"></div>
+    {% for u in users %}
+    <div class="member">
+        <div class="avatar">
+            <a href="/user/{{u.id}}"><img src="{{u.get_icon_url()}}" alt="{{u.name}}"></a>
+        </div>
+        <div class="entry">
+            <div class="name"><a href="/user/{{u.id}}">{{u.name}}</a>
+                {%if u.is_pdf_ready()%}
+                    <sup><a target="_blank" href="/{{u.id}}/pdf">[PDF]</a></sup>
+                {%endif%}
+                <span><i>N.{{u.id}}</i></span>
+            </div>
+            <p>
+            {%for ua in u.get_alias()%}
+                {%set homepage_info = ua.get_homepage_url()%}
+                {%if homepage_info%}
+                    <span class="from {{homepage_info[2]}} oauth">
+                    <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
+                    </span>
+                {%endif%}
+            {%endfor%}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="clear"></div>
+    <ul class="pager">
+        {%if g.start>0%}
+        <li class="previous">
+            <a href="?start={{g.start-g.count if g.start-g.count > 0 else 0}}&cate={{g.cate}}">&larr; Newer</a>
+        </li>
+        {%endif%}
+        <li class="next">
+            <a href="?start={{g.start+g.count}}&cate={{g.cate}}">Older &rarr;</a>
+        </li>
+    </ul>
+{%endblock%}

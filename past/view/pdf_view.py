@@ -19,14 +19,6 @@ from past.utils.escape import json_encode
 from past import consts
 from .utils import require_login, check_access_user, statuses_timelize, get_sync_list
 
-@app.route("/i")
-@require_login()
-def timeline():
-    redir = "/%s" %g.user.uid 
-    if g.cate:
-        redir = "%s?cate=%s" % (redir, g.cate)
-    return redirect(redir)
-
 @app.route("/pdf")
 @require_login()
 def mypdf():
@@ -47,7 +39,6 @@ def pdf_apply():
         PdfSettings.add_user_id(g.user.id)
         flash(u"申请已通过，请明天早上来下载数据吧！", "tip")
         return redirect("/pdf")
-
 
 @app.route("/demo-pdf")
 def demo_pdf():

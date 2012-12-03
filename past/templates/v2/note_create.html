@@ -53,11 +53,11 @@
 {%block more_js%}
     {{super()}}
     <script>
-    $(function(){
+    jQuery(function(){
         var timer = setInterval(function(){
             var current_date = new Date();
-            $("#note_date").html(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
-            $("input[name='title']").val(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
+            jQuery("#note_date").html(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
+            jQuery("input[name='title']").val(current_date.format("yyyy年mm月dd日 HH:MM:ss"));
         }, 1000);    
     });
 
@@ -65,11 +65,10 @@
     var minHeight = 420;
     var maxHeight = 2222;
     function ResizeTextarea(){
-        var t = document.getElementById('create');
-        h = t.scrollHeight;
+        var t = jQuery('#create');
+        h = t.scrollTop();
         h = h > minHeight ? h : minHeight;
         h = h > maxHeight ? maxHeight : h;
-        t.style.height = h + "px";
     }
 
     </script>

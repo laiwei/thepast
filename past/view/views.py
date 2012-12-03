@@ -31,31 +31,7 @@ from .utils import require_login, check_access_user, statuses_timelize, get_sync
 log = logging.getLogger(__file__)
 
 
-@app.route("/past")
-@require_login()
-def past():
-    intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
-    intros = filter(None, intros)
-    
-    try:
-        now = datetime.datetime.strptime(request.args.get("now"), "%Y-%m-%d")
-    except:
-        now = datetime.datetime.now()
-
-    history_ids = get_status_ids_today_in_history(g.user.id, now) 
-    status_list = Status.gets(history_ids)
-    status_list  = statuses_timelize(status_list)
-
-    sync_list = get_sync_list(g.user)
-
-    d = defaultdict(list)
-    for x in status_list:
-        t = x.create_time.strftime("%Y年%m月%d日")
-        d[t].append(x)
-    history_status = d
-    
-    return render_template("past.html", **locals())
-
+#TODO:
 @app.route("/post/<id>")
 def post(id):
     status = Status.get(id)
@@ -72,15 +48,14 @@ def post(id):
         else:
             abort(403, "没有权限访问该文章")
 
-
-#TODO:xxx
+#XXX:
 @app.route("/user")
 def user_explore():
     g.count = 24
     user_ids = User.get_ids(start=g.start, limit=g.count)
     users = [User.get(x) for x in user_ids]
     users = [x for x in users if x.get_profile_item('user_privacy') != consts.USER_PRIVACY_PRIVATE]
-    return render_template("user_explore.html",
+    return render_template("v2/explore_user.html",
             users=users, config=config)
     
 @app.route("/logout")
@@ -128,7 +103,6 @@ def reshare():
         ret['ok'] = 0
         ret['msg'] = "分享到" + ",".join(failed_providers) + "失败了，可能是授权过期了，重新授权就ok：）"
     return json_encode(ret)
-
 
 @app.route("/sync/<cates>", methods=["GET", "POST"])
 @require_login()

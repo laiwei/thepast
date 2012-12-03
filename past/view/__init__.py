@@ -8,7 +8,7 @@ from past.store import db_conn
 from past.model.user import User, UserAlias
 from past.corelib import auth_user_from_session
 
-import settings, timelines, note, user_past, views
+import settings, pdf_view, note, user_past, views
 
 @app.before_request
 def before_request():

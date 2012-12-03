@@ -5,14 +5,6 @@
 <!-- 个人&&其他用户最新页  -->
 {%block title%}{{user.name}} | 旧时光{%endblock%}
 
-{%block nav_menu_left%}
-  <li class="active"><a style="padding-top:12px;" href="explore">发现</a></li>
-{%endblock%}
-
-{%block nav_menu_right%}
-<li><button id="login_btn" class="btn btn-small" href="#">登录</button></li>
-{%endblock%}
-
 {%block hero_unit%}
 <div class="row" style="margin-top:5px;">
     <div class="span10 offset1">
@@ -107,7 +99,7 @@
 {{super()}}
 
 <script type="text/javascript">
-$(function(){
+jQuery(function(){
 })
 </script>
 {%endblock%}

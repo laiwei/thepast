@@ -23,7 +23,6 @@ def my_notes():
 
 @app.route("/<uid>/notes", methods=["GET"])
 def user_notes(uid):
-    
     user = User.get(uid)
     if not user:
         abort(403, "no_such_user")
@@ -66,7 +65,7 @@ def note_edit(nid):
         content = note.content
         fmt = note.fmt
         privacy = note.privacy
-        return render_template("note_create.html", consts=consts, **locals())
+        return render_template("v2/note_create.html", consts=consts, **locals())
         
     elif request.method == "POST":
         # edit
@@ -86,7 +85,7 @@ def note_edit(nid):
                 return redirect("/note/%s" % note.id)
             else:
                 flash(error.decode("utf8"), "error")
-                return render_template("note_create.html", consts=consts, **locals())
+                return render_template("v2/note_create.html", consts=consts, **locals())
                 
         else:
             return redirect("/note/%s" % note.id)
