@@ -35,13 +35,18 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/"><img src="/static/img/logo.png" style="height:26px;width:122px;" alt="旧时光"></img></a>
+          <a class="brand" 
+          {%if g.user%}
+            href="/{{g.user.uid}}"
+          {%else%}
+            href="/"
+          {%endif%}><img src="/static/img/logo.png" style="height:26px;width:122px;" alt="旧时光"></img></a>
 
           <div class="nav-collapse collapse navbar-responsive-collapse">
             <ul class="nav">
             {%block nav_menu_left%}
             {%if g.user%}
-              <li><a style="padding-top:12px;" href="explore">发现</a></li>
+              <li><a style="padding-top:12px;" href="/explore">发现</a></li>
               <li><a style="padding-top:12px;" href="/past">过往</a></li>
               <li class="dropdown">
                   <a style="padding-top:12px;" href="#" class="dropdown-toggle" data-toggle="dropdown">日记<b class="caret"></b></a>
@@ -52,7 +57,7 @@
                   </ul>
               </li>
             {%else%}
-              <li class="active"><a style="padding-top:12px;" href="explore">发现</a></li>
+              <li class="active"><a style="padding-top:12px;" href="/explore">发现</a></li>
             {%endif%}
             {%endblock%}
             </ul>

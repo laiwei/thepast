@@ -492,10 +492,10 @@
     <div class="show pic" id="story-{{s.id}}">
         <!-- 图片微博 -->
         {%for image in images%}
-            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image"/>
         {%endfor%}
         {%for image in re_images%}
-            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify"/>
+            <img src="{{image}}" alt="" data-magnifyto="400" class="magnify post-image"/>
         {%endfor%}
     {%else%}
     <div class="show nopic" id="story-{{s.id}}">
