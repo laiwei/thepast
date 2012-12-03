@@ -46,9 +46,9 @@
             <ul class="nav">
             {%block nav_menu_left%}
             {%if g.user%}
-              <li><a style="padding-top:12px;" href="/explore">发现</a></li>
-              <li><a style="padding-top:12px;" href="/past">过往</a></li>
-              <li class="dropdown">
+              <li id="nav_item_explore"><a style="padding-top:12px;" href="/explore">发现</a></li>
+              <li id="nav_item_past"><a style="padding-top:12px;" href="/past">过往</a></li>
+              <li id="nav_item_note" class="dropdown">
                   <a style="padding-top:12px;" href="#" class="dropdown-toggle" data-toggle="dropdown">日记<b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li><a href="/notes">我的日记</a></li>
@@ -57,7 +57,7 @@
                   </ul>
               </li>
             {%else%}
-              <li class="active"><a style="padding-top:12px;" href="/explore">发现</a></li>
+              <li id="nav_item_explore" class="active"><a style="padding-top:12px;" href="/explore">发现</a></li>
             {%endif%}
             {%endblock%}
             </ul>
@@ -126,6 +126,7 @@
         </div>
         <span class="text-info">
             &copy; ThePast.Me 2012
+            <script src="http://s17.cnzz.com/stat.php?id=3877715&web_id=3877715" language="JavaScript"></script>
         </span>
         {%endblock%}
     </footer>

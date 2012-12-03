@@ -26,3 +26,12 @@
     {%endif%}
     <div class="clear"></div>
 {%endblock%}
+
+{%block more_js%}
+{{super()}}
+<script type="text/javascript">
+    jQuery("#nav_item_explore").removeClass("active");
+    jQuery("#nav_item_past").removeClass("active");
+    jQuery("#nav_item_note").addClass("active");
+</script>
+{%endblock%}
