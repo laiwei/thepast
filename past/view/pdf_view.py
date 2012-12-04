@@ -63,7 +63,7 @@ def pdf(uid):
 
     if uid != g.user.id and user.get_profile_item('user_privacy') == consts.USER_PRIVACY_PRIVATE:
         flash(u"由于该用户设置了仅自己可见的权限，所以，我们就看不到了", "tip")
-        return redirect(url_for("timeline"))
+        return redirect("/")
 
     intros = [g.user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
     intros = filter(None, intros)

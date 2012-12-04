@@ -16,7 +16,7 @@ from .utils import require_login, check_access_user, statuses_timelize, get_sync
 @app.route("/")
 @app.route("/home")
 @app.route("/explore")
-def anonymous_home():
+def home():
     user_ids = User.get_ids(limit=10000)
 
     user = None
@@ -106,7 +106,7 @@ def user_by_domain(uid):
     r = check_access_user(u)
     if r:
         flash(r[1].decode("utf8"), "tip")
-        return redirect(url_for("home"))
+        return redirect("/")
 
     ids = Status.get_ids(user_id=u.id, start=g.start, limit=g.count, cate=g.cate)
     status_list = Status.gets(ids)

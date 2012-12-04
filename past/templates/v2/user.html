@@ -89,12 +89,12 @@
 {%block more_js%}
 {{super()}}
 <script type="text/javascript">
-var g_start = parseInt("{{g.start}}");
 jQuery(function(){
+    var g_start = parseInt("{{g.start}}");
     jQuery('#div_new_show').scrollPagination({
         'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
         'contentData': {
-            'start': g_start + parseInt("{{g.count}}"),
+            'start': function() {return g_start + parseInt("{{g.count}}");},
             'cate': "{{g.cate}}"
         }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
         'scrollTarget': jQuery(window), // who gonna scroll? in this example, the full window

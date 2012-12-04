@@ -17,9 +17,14 @@ def before_request():
     #g.user = User.get(8)
     g.user_alias = UserAlias.gets_by_user_id(g.user.id) if g.user else None
 
-    g.start = int(request.args.get('start', 0))
-    g.count = int(request.args.get('count', 30))
-    g.cate = request.args.get("cate", "")
+    if request.method == 'POST':
+        g.start = int(request.form.get('start', 0))
+        g.count = int(request.form.get('count', 30))
+        g.cate = request.form.get("cate", "")
+    else:
+        g.start = int(request.args.get('start', 0))
+        g.count = int(request.args.get('count', 30))
+        g.cate = request.args.get("cate", "")
     g.cate = int(g.cate) if g.cate.isdigit() else ""
         
     if g.user:

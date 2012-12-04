@@ -118,10 +118,10 @@ def connect_callback(provider):
         if not user.get_email():
             return redirect("/settings")
 
-        return redirect(url_for('index'))
+        return redirect("/")
     else:
         flash(u"连接到%s失败了，可能是对方网站忙，请稍等重试..." %provider,  "error")
-        return redirect(url_for("home"))
+        return redirect("/")
 
 def _qqweibo_callback(request):
     openid_type = config.OPENID_TYPE_DICT[config.OPENID_QQ]
