@@ -507,18 +507,18 @@
             
             {%for att in atts%}
             <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-            <p>{{att.get_description()|safe}}</p>
+            <p>{{att.get_description()}}</p>
             {%endfor%}
 
             {%if re_user_nickname and re_.get_content()%}
             <span>
-                //@{{re_user_nickname}}: {{re_.get_content()|safe}}
+                //@{{re_user_nickname}}: {{re_.get_content()}}
             </span>
             {% endif %}
 
             {%for att in re_atts%}
             <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-            <p>{{att.get_description()|safe}}</p>
+            <p>{{att.get_description()}}</p>
             {%endfor%}
         </p>
 
@@ -528,7 +528,7 @@
                 {%for s_ in repeated_status.status_list%}
                       {%set from_ = s_.get_origin_uri()%}
                       {%if from_%}
-                          <span class="from {{from_[0]}} oauth"><a target="_blank" href="{{from_[1]}}"></a></span>
+                          <span class="from {{from_[0]}} oauth"><a target="_blank" href="{{from_[1]|safe}}"></a></span>
                       {%endif%}
                 {%endfor%}
                 <a class="pull-right" href="#" onclick="javascript:fn_repost_modal('{{s.id}}'); return false;">
