@@ -28,8 +28,9 @@ def before_request():
     g.cate = int(g.cate) if g.cate.isdigit() else ""
         
     if g.user:
+        g.binds = [ua.type for ua in g.user.get_alias()]
         unbinded = list(set(config.OPENID_TYPE_DICT.values()) - 
-                set([ua.type for ua in g.user.get_alias()]) - set([config.OPENID_TYPE_DICT[config.OPENID_THEPAST]]))
+                set(g.binds) - set([config.OPENID_TYPE_DICT[config.OPENID_THEPAST]]))
         tmp = {}
         for k, v in config.OPENID_TYPE_DICT.items():
             tmp[v] = k

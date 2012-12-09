@@ -240,6 +240,43 @@ function fn_repost_modal(sid){
     });
 }
 
+function fn_do_sync_status(){
+        if(! "{{g.user.id}}"){
+            alert("请先登录：）");
+            return false;
+        }
+        var content = jQuery("#navi_comts").val();
+        jQuery.ajax({
+            type: "POST",
+            async: false,
+            dataType: "json",
+            url: "/reshare_ajax",
+            data: {
+                "text": content,
+                "images": "",
+                "providers": "",
+            },
+            success: function(data){
+                if (data.ok == '1'){
+                    jQuery('#navi_comts').css("height","145px");
+                    jQuery('#navi_comt').animate({"top": "-250px"}, 300);
+                }else{
+                    alert(data.msg);
+                }
+            }
+        });
+}
+
+function fn_open_comt(text){
+    jQuery("#navi_comts").val(text);
+	jQuery('#navi_comt').animate({"top": "45px"}, 500);
+}
+function fn_close_comt(){
+    jQuery('#navi_comts').css("height","145px");
+    jQuery('#navi_comt').animate({"top": "-250px"}, 300);
+}
+
+
 jQuery(function(){
 
 	//授权登录&关闭
@@ -252,38 +289,14 @@ jQuery(function(){
 
 	//同步发微博&关闭
 	jQuery('#login_comt').click(function(){
-		jQuery('#navi_comt').animate({"top": "45px"}, 500);
+		fn_open_comt("");
 	});
 	jQuery('#comts_off').click(function(){
-		jQuery('#navi_comts').css("height","145px");
-		jQuery('#navi_comt').animate({"top": "-250px"}, 300);
+		fn_close_comt();
 	});
 
     jQuery('#navi_reshare_btn').click(function(){
-            if(! "{{g.user.id}}"){
-                alert("请先登录：）");
-                return false;
-            }
-            var content = jQuery("#navi_comts").val();
-            jQuery.ajax({
-                type: "POST",
-                async: false,
-                dataType: "json",
-                url: "/reshare_ajax",
-                data: {
-                    "text": content,
-                    "images": "",
-                    "providers": "",
-                },
-                success: function(data){
-                    if (data.ok == '1'){
-                        jQuery('#navi_comts').css("height","145px");
-                        jQuery('#navi_comt').animate({"top": "-250px"}, 300);
-                    }else{
-                        alert(data.msg);
-                    }
-                }
-            });
+        fn_do_sync_status();
     });
 
     //瀑布流

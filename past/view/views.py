@@ -73,8 +73,10 @@ def about():
 @require_login()
 def reshare():
     text = request.form.get("text", "")
-    providers = request.form.get("providers", "").split("|")
-    images = request.form.get("images", "").split("|") or []
+    providers = request.form.get("providers")
+    providers = providers and providers.split("|") or []
+    images = request.form.get("images")
+    images = images and images.split("|") or []
 
     ret = {
         "ok": 1,
@@ -82,16 +84,16 @@ def reshare():
     }
     
     if not providers:
-        providers = config.CAN_SHARED_OPENID_TYPE
-    else:
-        providers_ = []
-        for p in config.CAN_SHARED_OPENID_TYPE:
-            if p in providers:
-                g.user.set_thirdparty_profile_item(p, "share", "Y")
-                providers_.append(p)
-            else:
-                g.user.set_thirdparty_profile_item(p, "share", "N")
-
+        providers = g.binds
+    
+    providers_ = []
+    for p in config.CAN_SHARED_OPENID_TYPE:
+        if p in providers:
+            g.user.set_thirdparty_profile_item(p, "share", "Y")
+            providers_.append(p)
+        else:
+            g.user.set_thirdparty_profile_item(p, "share", "N")
+    
     failed_providers = []
     for p in providers_:
         try:
