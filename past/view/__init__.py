@@ -19,11 +19,11 @@ def before_request():
 
     if request.method == 'POST':
         g.start = int(request.form.get('start', 0))
-        g.count = int(request.form.get('count', 30))
+        g.count = int(request.form.get('count', 24))
         g.cate = request.form.get("cate", "")
     else:
         g.start = int(request.args.get('start', 0))
-        g.count = int(request.args.get('count', 30))
+        g.count = int(request.args.get('count', 24))
         g.cate = request.args.get("cate", "")
     g.cate = int(g.cate) if g.cate.isdigit() else ""
         
