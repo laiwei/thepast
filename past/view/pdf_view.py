@@ -106,7 +106,8 @@ def pdf_down(filename):
     full_file_name = get_pdf_full_filename(pdf_filename)
     resp = make_response()
     resp.headers['Cache-Control'] = 'no-cache'
-    resp.headers['Content-Type'] = 'application/pdf'
+    resp.headers['Content-Type'] = 'text/html'
+    resp.headers['Content-Encoding'] = 'gzip'
     resp.headers['Content-Disposition'] = 'attachment; filename=%s' % pdf_filename
     resp.headers['Content-Length'] = os.path.getsize(full_file_name)
     redir = '/down/pdf/' + pdf_filename

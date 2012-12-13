@@ -159,11 +159,15 @@ def link_callback(uri, rel):
 
     return ''
 
-def get_pdf_filename(uid, suffix=None):
+def is_user_pdf_file_exists(uid, suffix=None, compressed=".tar.gz"):
+    f = get_pdf_filename(uid, suffix, compressed)
+    return is_pdf_file_exists(f)
+
+def get_pdf_filename(uid, suffix=None, compressed=".tar.gz"):
     if suffix:
-        return "thepast.me_%s_%s.pdf" % (uid, suffix)
+        return "thepast.me_%s_%s.pdf%s" % (uid, suffix, compressed)
     else:
-        return "thepast.me_%s.pdf" % uid
+        return "thepast.me_%s.pdf%s" % (uid, compressed)
 
 def get_pdf_full_filename(filename):
     filename = filename.replace("..", "").replace("/", "")
@@ -182,6 +186,3 @@ def is_pdf_file_exists(filename):
         return True
     return False
 
-def is_user_pdf_file_exists(uid, suffix=None):
-    f = get_pdf_filename(uid, suffix)
-    return is_pdf_file_exists(f)
