@@ -19,7 +19,7 @@ def file_visitor(args, dir_, files):
     if not isinstance(files, list):
         return
     for f in files:
-        if not (f.startswith("thepast.me") and f.endswith(".pdf")):
+        if not (f.startswith("thepast.me") and f.endswith(".pdf.tar.gz")):
             continue
         user_id = int(f.split("_")[1])
         if user_id not in user_ids:
@@ -27,6 +27,6 @@ def file_visitor(args, dir_, files):
     print pendding, len(pendding)
     for user_id in pendding:
         print '---deleting pdf of', user_id
-        os.popen("rm ../var/down/pdf/thepast.me_%s_2*.pdf" %user_id)
+        os.popen("rm ../var/down/pdf/thepast.me_%s_2*.pdf.tar.gz" %user_id)
 
 os.path.walk("../var/down/pdf/", file_visitor, None)
