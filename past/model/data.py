@@ -556,13 +556,13 @@ class SinaWeiboStatusData(SinaWeiboData):
         return SinaWeiboUser(self.data.get("user"))
 
     def get_origin_pic(self):
-        return self.data.get("original_pic", "")
+        return self.data.get("original_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
 
     def get_thumbnail_pic(self):
-        return self.data.get("thumbnail_pic", "")
+        return self.data.get("thumbnail_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
 
     def get_middle_pic(self):
-        return self.data.get("bmiddle_pic", "")
+        return self.data.get("bmiddle_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
 
     def get_images(self, size="origin"):
         method = "get_%s_pic" % size
