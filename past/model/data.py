@@ -1,5 +1,6 @@
 #-*- coding:utf-8 -*-
 
+import re
 import time
 import datetime
 import hashlib
@@ -556,13 +557,13 @@ class SinaWeiboStatusData(SinaWeiboData):
         return SinaWeiboUser(self.data.get("user"))
 
     def get_origin_pic(self):
-        return self.data.get("original_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
+        return re.sub("ww[23456].sinaimg.cn", "ww1.sinaimg.cn", self.data.get("original_pic", ""))
 
     def get_thumbnail_pic(self):
-        return self.data.get("thumbnail_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
+        return re.sub("ww[23456].sinaimg.cn", "ww1.sinaimg.cn", self.data.get("thumbnail_pic", ""))
 
     def get_middle_pic(self):
-        return self.data.get("bmiddle_pic", "").replace("ww3.sinaimg.cn", "ww1.sinaimg.cn")
+        return re.sub("ww[23456].sinaimg.cn", "ww1.sinaimg.cn", self.data.get("bmiddle_pic", ""))
 
     def get_images(self, size="origin"):
         method = "get_%s_pic" % size
