@@ -8,6 +8,7 @@ execfile(activate_this, dict(__file__=activate_this))
 
 import datetime
 import time
+import traceback
 
 from past.utils import wrap_long_line, filters 
 from past.utils.escape import clear_html_element
@@ -233,7 +234,10 @@ if __name__ == '__main__':
         if t >= 100:
             t = 0
             time.sleep(5)
-        send_today_in_history(uid)
+        try:
+            send_today_in_history(uid)
+        except:
+            print traceback.format_exc()
         time.sleep(1)
         t += 1
 
