@@ -61,7 +61,6 @@ def generate_pdf_by_user(user_id):
     #XXX:暂时只生成2012年的(uid从98开始的用户)
     #XXX:暂时只生成2012年3月份的(uid从166开始的用户)
     start_date = Status.get_oldest_create_time(None, user_id)
-    #start_date = datetime.datetime(2012, 3, 1, 0, 0, 0)
     if not start_date:
         return
     now = datetime.datetime.now()
@@ -78,5 +77,11 @@ def generate_pdf_by_user(user_id):
 
 if __name__ == "__main__":
     for uid in PdfSettings.get_all_user_ids():
-        print '------begin generate pdf of user:', uid
-        generate_pdf_by_user(uid)
+        #print '------begin generate pdf of user:', uid
+        #generate_pdf_by_user(uid)
+
+        now = datetime.datetime.now()
+        last_mongth = datetime.datetime(now.year, now.month, now.day) \
+                - datetime.timedelta(days = calendar.monthrange(now.year, now.month)[1])
+        print '----- generate last month pdf of user:', last_mongth, uid
+        generate(uid, last_mongth)
