@@ -11,6 +11,7 @@ build/
 third-src/
 third/
 var/
+log
 
 nohup.out
 
