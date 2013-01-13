@@ -19,7 +19,8 @@ def stream_time(d):
     now = datetime.now()
     delta = now -d
     
-    duration = delta.total_seconds()
+    #duration = delta.total_seconds()  ##python2.7
+    duration = delta.days * 365 * 86400 + delta.seconds
     if duration < 0:
         return u'穿越了...'
     elif duration <= 60:
