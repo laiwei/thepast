@@ -78,8 +78,8 @@
                   }
       };
 
-     jQuery('#calendar').Calendar({ 'events': evnts, 'weekStart': 1 })
-     .on('changeDay', function(event){ 
+     var c = jQuery('#calendar').Calendar({ 'events': evnts, 'weekStart': 1 });
+     c.on('changeDay', function(event){ 
         var s = event.year.valueOf() + "-" + event.month.valueOf() + "-" + event.day.valueOf();
         var new_url = "?now=" + s;
         window.location.href=new_url;

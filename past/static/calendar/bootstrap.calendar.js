@@ -259,7 +259,7 @@
             if (target.length == 1) {
                 switch(target[0].nodeName.toLowerCase()) {
                     case 'td':
-                        if (target.is('.day')){
+                        if (target.is('.day') || target.is(".weekend")){
                             var day = parseInt(target.attr('day'), 10)||1;
                             var month = parseInt(target.attr('month'), 10)||1;
                             var year = parseInt(target.attr('year'), 10)||1;
