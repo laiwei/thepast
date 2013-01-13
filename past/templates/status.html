@@ -306,12 +306,13 @@
       <div class="storyUnit" id="story-{{s.id}}">
         <div class="imageUnit">
           {%if avatar%}
-          <a href="{{avatar}}"><img src="{{avatar}}" width="24" height="24" alt="{{user_nickname}}"></a>
+          <a href="{{avatar}}"><img src="{{avatar}}" width="32" height="32" alt="{{user_nickname}}"></a>
           {%endif%}
           <div class="imageUnit-content">
-            <a href="/user/{{thepast_user.id}}" >{{user_nickname}}</a>&nbsp;
-            <span class="time">{{s.create_time|stream_time}}</span>&nbsp;
-            <span class="recollect"><a href="#" onclick="javascript:fn_repost_modal('{{s.id}}'); return false;">旧时重提</a></span>
+            <p><a href="/user/{{thepast_user.id}}" >{{user_nickname}}</a></p>
+            <p class="time">
+                {{s.create_time|stream_time}} 
+                <span class="recollect"><a href="#" onclick="javascript:fn_repost_modal('{{s.id}}'); return false;">&nbsp;旧时重提</a></span></p>
           </div>
 
           <div class="pull-right">

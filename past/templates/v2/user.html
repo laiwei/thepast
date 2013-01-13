@@ -1,142 +1,49 @@
-{% extends "v2/base.html" %}
-{% import "status.html" as status_tmpl_helper %}
-{% import "blocks.html" as blocks_tmpl_helper %}
-
-{%block css%}
-    {{super()}}
-    <link href="/static/fbtimeline/stylesheets/timeline.css" media="screen" rel="stylesheet" type="text/css" />
-{%endblock%}
-
-{% block js%}
-    {{super()}}
-    <script src="/static/fbtimeline/javascripts/all.js" type="text/javascript"></script> 
-{% endblock %}
+{% extends "v2/timeline_base.html" %}
 
 <!-- 个人&&其他用户最新页  -->
 {%block title%}{{user.name}} | 旧时光{%endblock%}
-
-{%block sidebar%}
-	<div class="span3">
-    <div id="sidebar">
-		<div id="user_info" class="side_box">
-			<div class="info_profile">
-				<div class="avatar">
-				    <a href="/{{user.uid}}" title="{{user.name}}" class="img x">
-                        <img width="64px" height="64px" src="{{user.get_avatar_url()}}"></a>
-				</div>
-				<div class="entry">
-                    <div class="name"><a href="/{{user.uid}}">{{user.name}}</a></div>
-                    <p>
-                        <!-- 其他用户展示已绑定平台的图标，点击跳转个平台 -->
-                        {%if user.id != g.user.id%}
-                            {%for ua in user.get_alias()%}
-                                {%set homepage_info = ua.get_homepage_url()%}
-                                {%if homepage_info%}
-                                    <span class="from {{homepage_info[2]}} oauth">
-                                    <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
-                                    </span>
-                                {%endif%}
-                            {%endfor%}
-                        {%else%}
-                            <!-- 个人展示页面未绑定图标灰色：无 "oauth"，点击跳转授权 -->
-                            {%set uas = user.get_alias()%}
-                            {%for ua in uas%}
-                                {%set h = ua.get_homepage_url()%}
-                                <span class="from {{h[2]}} oauth">
-                                    <a title="访问{{h[0]}}" href="{{h[1]}}" target="_blank">{{h[0]}}</a>
-                                </span>
-                            {%endfor%}
-
-                            {%if g.unbinded%}
-                                {%for ub in g.unbinded%}
-                                    <span class="from {{ub[1]}}">
-                                        {%if ub[0] == 'W'%}
-                                        <a title="绑定wordpress" href="/bind/{{ub[1]}}">{{ub[1]}}</a>
-                                        {%else%}
-                                        <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
-                                        {%endif%}
-                                    </span>
-                                {%endfor%}
-                            {%endif%}
-                        {%endif%}
-                    </p>
-            	</div>
-            </div>
-            <!-- 个人简介 -->
-            <div class="info_inner">
-            	<p>
-                {%if intros%}
-                    {% for intro in intros%}
-                    {% if intro%}
-                        {{intro|nl2br|safe}}
-                        <br/>
-                    {%endif%}
-                    {% endfor%}
-                {%endif%}
-            	</p>
-            </div>
-        </div>
-        <div class="side_box">
-            {{blocks_tmpl_helper.rightbar_feedback_block()}}
-        </div>
-    </div>
-	</div> <!--end of sidebar-->
-{%endblock%}
-
-{%block rightbar%}
-    <div class="span9">
-        <div id="rightbar">
-        <ol id="timeline" class="timeline clearfix">
-            <li class="spine"></li>
-            {%set left = True%}
-            {%for repeated_status in status_list[:]%}
-                {%if left%}
-                <li class="left">
-                {%else%}
-                <li class="right">
-                {%endif%}
-                {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
-                </li>
-                {%set left=not left%}
-            {%endfor%}
-        </ol>
-        </div>
-    </div>
-{%endblock%}
 
 {%block more_js%}
 {{super()}}
 <script type="text/javascript">
 jQuery(function(){
-
     var g_start = parseInt("{{g.start}}");
-    //jQuery('#div_new_show').scrollPagination({
-    //    'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
-    //    'contentData': {
-    //        'start': function() {return g_start + parseInt("{{g.count}}");},
-    //        'cate': "{{g.cate}}"
-    //    }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
-    //    'scrollTarget': jQuery(window), // who gonna scroll? in this example, the full window
-    //    'heightOffset': 100, // it gonna request when scroll is 10 pixels before the page ends
-    //    'beforeLoad': function(){ // before load function, you can display a preloader div
-    //        jQuery('#loading').fadeIn(); 
-    //    },
-    //    'afterLoad': function(elementsLoaded){ // after loading content, you can use this function to animate your new elements
-    //        jQuery('#loading').fadeOut();
-    //        var jQuerynewElems = jQuery(elementsLoaded).css({ opacity: 0 });
-    //        jQuerynewElems.imagesLoaded(function () {
-    //            // show elems now they're ready
-    //            jQuerynewElems.animate({ opacity: 1 });
-    //            jQuery('#div_new_show').masonry('appended', jQuerynewElems, true);
-    //            g_start = g_start + parseInt("{{g.count}}");
-    //        });
+    var next_start = function(){
+        return g_start + parseInt("{{g.count}}");
+    }
 
-    //    }
-    //});
+    var jQuerytimeline = jQuery('.timeline'),
+        jQueryspinner = jQuery('#Spinner').hide();
+   
+    function loadMore(){
+      jQuery(window).unbind('scroll.posts');
+      jQueryspinner.show();
 
-    //jQuery("#nav_item_explore").removeClass("active");
-    //jQuery("#nav_item_past").removeClass("active");
-    //jQuery("#nav_item_note").removeClass("active");
+      jQuery.ajax({
+        url: "/{{user.uid}}/more?start=" + next_start() + "&cate={{g.cate}}",
+        success: function(html){
+            if(html){
+                jQuerytimeline.append(html);
+                jQueryspinner.hide();
+                g_start = g_start + parseInt("{{g.count}}");
+            }else{
+                jQueryspinner.html('<p>没有更多消息了：）</p>');
+            }
+            
+            jQuery(window).bind('scroll.posts',scrollEvent);
+        }
+      });
+    }
+   
+    //lastAddedLiveFunc();
+    jQuery(window).bind('scroll.posts',scrollEvent);
+    
+    function scrollEvent(){
+      var wintop = jQuery(window).scrollTop(), docheight = jQuery(document).height(), winheight = jQuery(window).height();
+      var  scrolltrigger = 0.95;
+
+      if  ((wintop/(docheight-winheight)) > scrolltrigger)  loadMore();
+    }
 })
 </script>
 {%endblock%}

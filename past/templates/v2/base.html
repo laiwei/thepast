@@ -306,26 +306,6 @@ jQuery(function(){
         fn_do_sync_status();
     });
 
-    //瀑布流
-    jQuery(".new_show").each(function(i, obj){
-        jQuery(obj).imagesLoaded(function(){  
-            jQuery(obj).masonry({  
-                itemSelector:'.show',  
-                columnWidth:240,
-                animate:true
-            });
-        });
-	});
-    jQuery(".home_show").each(function(i, obj){
-        jQuery(obj).imagesLoaded(function(){  
-            jQuery(obj).masonry({  
-                itemSelector:'.show',  
-                columnWidth:240,
-                animate:true
-            });
-	    });
-    });
-
 });
 </script>
 {%endblock%}

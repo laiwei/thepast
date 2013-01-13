@@ -1,27 +1,10 @@
-{% extends "v2/base.html" %}
-{% import "status.html" as status_tmpl_helper %}
-{% import "blocks.html" as blocks_tmpl_helper %}
-
-{%block css%}
-    {{super()}}
-    <link href="/static/fbtimeline/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />
-    <link href="/static/fbtimeline/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
-    <link href="/static/fbtimeline/stylesheets/timeline.css" media="screen" rel="stylesheet" type="text/css" />
-    <link href="/static/fbtimeline/stylesheets/fb-buttons.css" media="screen" rel="stylesheet" type="text/css" />
-{%endblock%}
-
-{% block js%}
-    {{super()}}
-    <script src="/static/fbtimeline/javascripts/all.js" type="text/javascript"></script> 
-{% endblock %}
-
-
+{% extends "v2/timeline_base.html" %}
 <!-- 个人&&其他用户最新页  -->
 {%block title%}{{user.name}} | 旧时光{%endblock%}
 
 {%block hero_unit%}
 <div class="row" style="margin-top:5px;">
-    <div class="span10 offset1">
+    <div class="span12">
         <div class="well" style="border:0px;margin-bottom:5px;">
             <h4>你好，旧时光<sup><a target="_blank" href="https://github.com/laiwei/thepast">[开源]</a></sup></h4>
             <blockquote>实时聚合你在“豆瓣”、“人人”、“新浪微博”、“腾讯微博”、“Twitter”、“wordpress”、“instagram”等平台的 Timeline。</blockquote>
@@ -33,88 +16,3 @@
 </div>
 {%endblock%}
 
-{%block main%}
-	<div id="sidebar">
-		<div id="user_info" class="side_box">
-			<div class="info_profile">
-				<div class="avatar">
-				    <a href="/{{user.uid}}" title="{{user.name}}" class="img x">
-                        <img width="64px" height="64px" src="{{user.get_avatar_url()}}"></a>
-				</div>
-				<div class="entry">
-                    <div class="name"><a href="/{{user.uid}}">{{user.name}}</a></div>
-                    <p>
-                        <!-- 其他用户展示已绑定平台的图标，点击跳转个平台 -->
-                        {%if user.id != g.user.id%}
-                            {%for ua in user.get_alias()%}
-                                {%set homepage_info = ua.get_homepage_url()%}
-                                {%if homepage_info%}
-                                    <span class="from {{homepage_info[2]}} oauth">
-                                    <a title="访问 Ta 的{{homepage_info[0]}}" href="{{homepage_info[1]}}"></a>
-                                    </span>
-                                {%endif%}
-                            {%endfor%}
-                        {%else%}
-                            <!-- 个人展示页面未绑定图标灰色：无 "oauth"，点击跳转授权 -->
-                            {%set uas = user.get_alias()%}
-                            {%for ua in uas%}
-                                {%set h = ua.get_homepage_url()%}
-                                <span class="from {{h[2]}} oauth">
-                                    <a title="访问{{h[0]}}" href="{{h[1]}}" target="_blank">{{h[0]}}</a>
-                                </span>
-                            {%endfor%}
-
-                            {%if g.unbinded%}
-                                {%for ub in g.unbinded%}
-                                    <span class="from {{ub[1]}}">
-                                        {%if ub[0] == 'W'%}
-                                        <a title="绑定wordpress" href="/bind/{{ub[1]}}">{{ub[1]}}</a>
-                                        {%else%}
-                                        <a title="添加{{ub[2]}}授权登录" href="/connect/{{ub[1]}}">{{ub[1]}}</a>
-                                        {%endif%}
-                                    </span>
-                                {%endfor%}
-                            {%endif%}
-                        {%endif%}
-                    </p>
-            	</div>
-            </div>
-            <!-- 个人简介 -->
-            <div class="info_inner">
-            	<p>
-                {%if intros%}
-                    {% for intro in intros%}
-                    {% if intro%}
-                        {{intro|nl2br|safe}}
-                        <br/>
-                    {%endif%}
-                    {% endfor%}
-                {%endif%}
-            	</p>
-            </div>
-        </div>
-        <div class="side_box">
-            {{blocks_tmpl_helper.rightbar_feedback_block()}}
-        </div>
-	</div> <!--end of sidebar-->
-
-	<div id="new_bar">
-		<h4>你好 . 旧时光</h4>
-    </div>
-
-    <div class="new_show">
-        {%for repeated_status in status_list%}
-            {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
-        {%endfor%}
-    </div>
-{%endblock%}
-
-{%block more_js%}
-{{super()}}
-
-<script type="text/javascript">
-jQuery(function(){
-    jQuery("#nav_item_explore").addClass("active");
-})
-</script>
-{%endblock%}

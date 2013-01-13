@@ -131,7 +131,7 @@ def user_by_domain(uid):
             status_list=status_list, config=config, sync_list=sync_list, 
             now = now)
 
-@app.route("/<uid>/more", methods=["POST"])
+@app.route("/<uid>/more", methods=["GET"])
 def user_more_by_domain(uid):
     u = User.get(uid)
     if not u:

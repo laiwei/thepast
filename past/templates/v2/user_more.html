@@ -1,5 +1,13 @@
 {% import "status.html" as status_tmpl_helper %}
 
-{%for repeated_status in status_list%}
-    {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
+{%set left = True%}
+{%for repeated_status in status_list[:]%}
+    {%if left%}
+    <li class="left">
+    {%else%}
+    <li class="right">
+    {%endif%}
+    {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
+    </li>
+    {%set left=not left%}
 {%endfor%}

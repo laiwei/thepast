@@ -63,7 +63,7 @@ body{font-family:"Microsoft Yahei",Tahoma;background:#E3E8EC url(/static/img/bg.
 /*main*/
 .home_show{width:1141px;}
 .loading{display:none;}
-.date,.settings h2{position:relative;min-height:24px;margin:10px 0 15px;padding:10px 0 18px;text-shadow:0 1px rgba(255, 255, 255, .9);border-bottom: 3px double rgba(34, 25, 25, .1);color: #6E3939;font-size:20px;}
+.date,.settings h2{position:relative;min-height:24px;margin:0 0 15px;padding:0px 0 18px;text-shadow:0 1px rgba(255, 255, 255, .9);border-bottom: 3px double rgba(34, 25, 25, .1);color: #6E3939;font-size:20px;}
 
 .date p,#new_bar p{color:#999;font-size:12px;margin-top:6px;}
 .show{position:relative;background:#FFF;width:190px;overflow:hidden;float:left;background-color:white;
