@@ -13,11 +13,13 @@ jQuery(function(){
     }
 
     var jQuerytimeline = jQuery('.timeline'),
-        jQueryspinner = jQuery('#Spinner').hide();
+        jQueryspinner = jQuery('#Spinner').hide(),
+        jLoadmoreIndicator = jQuery('#loadmore_indicator');
    
     function loadMore(){
       jQuery(window).unbind('scroll.posts');
       jQueryspinner.show();
+      jLoadmoreIndicator.show();
 
       jQuery.ajax({
         url: "/{{user.uid}}/more?start=" + next_start() + "&cate={{g.cate}}",
@@ -26,6 +28,7 @@ jQuery(function(){
                 jQuerytimeline.append(html);
                 jQueryspinner.hide();
                 g_start = g_start + parseInt("{{g.count}}");
+                jLoadmoreIndicator.hide();
             }else{
                 jQueryspinner.html('<p>没有更多消息了：）</p>');
             }
