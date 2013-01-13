@@ -37,3 +37,12 @@
         </div>
     </div>
 {%endblock%}
+
+{%block more_js%}
+{{super()}}
+<script type="text/javascript">
+    jQuery("#nav_item_past").addClass("active");
+    jQuery("#nav_item_explore").removeClass("active");
+    jQuery("#nav_item_note").removeClass("active");
+</script>
+{%endblock%}

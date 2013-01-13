@@ -23,11 +23,11 @@ def stream_time(d):
     if duration < 0:
         return u'穿越了...'
     elif duration <= 60:
-        return u'%s秒前' %duration
+        return u'%s秒前' %int(duration)
     elif duration <= 3600:
-        return u'%s分钟前' %(duration/60)
+        return u'%s分钟前' %int(duration/60)
     elif duration <= 3600*12:
-        return u'%s小时前' %(duration/3600)
+        return u'%s小时前' %int(duration/3600)
     elif d.year==now.year and d.month==now.month and d.day == now.day:
         return u'今天 %s' %d.strftime("%H:%M")
     elif d.year==now.year and d.month==now.month and d.day + 1 == now.day:

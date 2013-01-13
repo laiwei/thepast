@@ -5,10 +5,11 @@
 <!-- 日记 -->
 {%block title%}写日记{{user.name}} | 旧时光{%endblock%}
 
-{%block main%}
+{%block middlebar%}
+<div class="span12">
     <form action="/note/create" method="post">
 	<div class="date now_date">
-		<h4 id="note_date"></h4>
+		<h5 id="note_date"></h5>
 		<input type="hidden" name="title"></input>
 	</div>
 	<div id="note">
@@ -47,7 +48,7 @@
     thepast友情提醒，每天只能记一篇日记，写好了就不能再修改。
     </p>
   </div>
-
+</div>
 {%endblock%}
 
 {%block more_js%}

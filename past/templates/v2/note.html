@@ -5,26 +5,26 @@
 <!-- 日记 -->
 {%block title%}日记本{{user.name}} | 旧时光{%endblock%}
 
-{%block main%}
-	<div class="date now_date">
-		<!-- 一天最多一篇日记
-        <input type="text" name="title" placeholder="题目" style="background:none;height:24px;width:400px;font-size:20px;"></input> 
-        -->
-		<h4 id="note_date">{{title}}</h4>
-	</div>
+{%block middlebar%}
+    <div class="span12">
+        <div class="alert alert-success">
+            作者：<a href="/{{user.uid}}">{{user.name}}</a> <br/>
+            题目：<a id="note_date" href="/note/{{note.id}}">{{title}}</a>
+        </div>
 
-    {%if note.fmt == consts.NOTE_FMT_MARKDOWN%}
-        <div class="markdown">
-            {{content|safe}}
-        </div>
-    {%else%}
-        <div id="note">
-            <div  name="content" id="create">
-            {{content}}
+        {%if note.fmt == consts.NOTE_FMT_MARKDOWN%}
+            <div class="markdown">
+                {{content|safe}}
             </div>
-        </div>
-    {%endif%}
-    <div class="clear"></div>
+        {%else%}
+            <div id="note">
+                <div  name="content" id="create">
+                {{content}}
+                </div>
+            </div>
+        {%endif%}
+        <div class="clear"></div>
+    </div>
 {%endblock%}
 
 {%block more_js%}
