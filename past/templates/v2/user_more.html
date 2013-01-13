@@ -1,7 +1,7 @@
 {% import "status.html" as status_tmpl_helper %}
 
 {%set left = True%}
-{%for repeated_status in status_list[:]%}
+{%for repeated_status in status_list%}
     {%if left%}
     <li class="left">
     {%else%}

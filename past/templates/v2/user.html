@@ -7,6 +7,15 @@
 {{super()}}
 <script type="text/javascript">
 jQuery(function(){
+    function masonry(){
+        jQuery("#timeline").masonry({
+            itemSelector: '.left',
+        });
+        jQuery("#timeline").masonry({
+            itemSelector: '.right',
+        });
+    }
+
     var g_start = parseInt("{{g.start}}");
     var next_start = function(){
         return g_start + parseInt("{{g.count}}");
@@ -25,10 +34,11 @@ jQuery(function(){
         url: "/{{user.uid}}/more?start=" + next_start() + "&cate={{g.cate}}",
         success: function(html){
             if(html){
-                jQuerytimeline.append(html);
+                jQuerytimeline.append(jQuery(html));
+                //jQuery('#timeline').masonry('appended', jQuery(html), true);
                 jQueryspinner.hide();
-                g_start = g_start + parseInt("{{g.count}}");
                 jLoadmoreIndicator.hide();
+                g_start = g_start + parseInt("{{g.count}}");
             }else{
                 jQueryspinner.html('<p>没有更多消息了：）</p>');
             }

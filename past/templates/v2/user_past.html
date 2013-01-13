@@ -1,13 +1,37 @@
 {% extends "v2/timeline_base.html" %}
 {% import "status.html" as status_tmpl_helper %}
 
+{%block css%}
+    {{super()}}
+    <link href="/static/calendar/css/bootstrap.calendar.css" media="screen" rel="stylesheet" type="text/css" />
+{%endblock%}
+
+{% block js%}
+    {{super()}}
+    <script src="/static/calendar/bootstrap.calendar.js" type="text/javascript"></script> 
+{% endblock %}
+
+{%block sidebox%}
+    <div class="side_box">
+        <div class="box">
+            <div class="cell"><h6>历史上的每一天</h6></div>
+            <div class="inner">
+                <div style="width:210px;" id="calendar"></div>
+            </div>
+        </div>
+    </div>
+    {{super()}}
+{%endblock%}
+
 {%block rightbar%}
     <div class="span9">
         <div id="rightbar">
             {%if not history_status%}
                 <div id="date">
-                    <p>去年、前年、大前年... 都没有留下什么东西。</p>
+                    <p>去年、前年、大前年的今天... 都没有留下什么东西。</p>
                     <p>今天记录一下 明年再来看。</p>
+                    <p>或者</p>
+                    <p>看看历史上的昨天和前天吧:)</p>
                 </div>
             {%else%}
                 {%for t in history_status.keys()|sort(reverse=True)%}
@@ -44,5 +68,23 @@
     jQuery("#nav_item_past").addClass("active");
     jQuery("#nav_item_explore").removeClass("active");
     jQuery("#nav_item_note").removeClass("active");
+
+    jQuery(document).ready(function(){
+
+      var evnts = function(){
+          return {
+                  "event":
+                      []
+                  }
+      };
+
+     jQuery('#calendar').Calendar({ 'events': evnts, 'weekStart': 1 })
+     .on('changeDay', function(event){ 
+        var s = event.year.valueOf() + "-" + event.month.valueOf() + "-" + event.day.valueOf();
+        var new_url = "?now=" + s;
+        window.location.href=new_url;
+     });
+  });
+
 </script>
 {%endblock%}

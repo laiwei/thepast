@@ -73,9 +73,11 @@
             	</p>
             </div>
         </div>
+        {%block sidebox%}
         <div class="side_box">
             {{blocks_tmpl_helper.rightbar_feedback_block()}}
         </div>
+        {%endblock%}
     </div>
 	</div> <!--end of sidebar-->
 {%endblock%}
@@ -83,21 +85,21 @@
 {%block rightbar%}
     <div class="span9">
         <div id="rightbar">
-        <ol id="timeline" class="timeline clearfix">
-            <li class="spine"></li>
-            {%set left = True%}
-            {%for repeated_status in status_list[:]%}
-                {%if left%}
-                <li class="left">
-                {%else%}
-                <li class="right">
-                {%endif%}
-                {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
-                </li>
-                {%set left=not left%}
-            {%endfor%}
-            <div id="loadmore_indicator" class="alert alert-info fade">正在自动加载更多...</div>
-        </ol>
+            <ol id="timeline" class="timeline clearfix">
+                <li class="spine"></li>
+                {%set left = True%}
+                {%for repeated_status in status_list%}
+                    {%if left%}
+                    <li class="left">
+                    {%else%}
+                    <li class="right">
+                    {%endif%}
+                    {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
+                    </li>
+                    {%set left=not left%}
+                {%endfor%}
+            </ol>
+            <div id="loadmore_indicator" class="alert alert-info" style="text-align:center;">正在努力加载更多中...</div>
         </div>
     </div>
 {%endblock%}
