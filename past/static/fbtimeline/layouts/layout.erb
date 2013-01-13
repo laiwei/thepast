@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title><%= data.page.title || "The Middleman" %></title>
+    
+    <%= stylesheet_link_tag "normalize", "all" %>
+		<%= stylesheet_link_tag "timeline", "fb-buttons" %>
+    <%= javascript_include_tag  "all" %>
+  </head>
+  
+  <body class="<%= page_classes %>">
+    
+    <div class="container">
+      
+      <%= yield %>
+    
+    </div>
+    
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    
+      // Simple infinite Scrolling
+      
+      $(function(){
+        
+          var $timeline = $('.timeline'),
+              $spinner = $('#Spinner').hide();
+        
+          function loadMore(){
+            
+            $(window).unbind('scroll.posts');
+            
+            $spinner.show();
+            
+            $.ajax({
+              url: "more.html",
+              success: function(html){
+                  if(html){
+                      $timeline.append(html);
+                      $spinner.hide();
+                  }else{
+                      $spinner.html('<p>No more posts to show.</p>');
+                  }
+                  
+                  $(window).bind('scroll.posts',scrollEvent);
+              }
+            });
+          }
+        
+        
+          //lastAddedLiveFunc();
+          $(window).bind('scroll.posts',scrollEvent);
+          
+          function scrollEvent(){
+            var wintop = $(window).scrollTop(), docheight = $(document).height(), winheight = $(window).height();
+            var  scrolltrigger = 0.95;
+
+            if  ((wintop/(docheight-winheight)) > scrolltrigger)  loadMore();
+          }
+          
+      });
+    </script>
+  </body>
+</html>

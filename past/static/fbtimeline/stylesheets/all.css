@@ -1,0 +1,64 @@
+@charset "utf-8";
+
+body{
+    background:#E7EBF2;
+    font-size:12px; 
+    line-height:1.4;
+    font-family:'lucida grande',tahoma,verdana,arial,sans-serif;
+}
+
+.container{
+    width:901px;
+    margin:20px auto;
+}
+
+a, a:visited{
+    color:#3B5998;
+    text-decoration:none;
+}
+
+a:hover, a:focus{
+    text-decoration:underline;
+}
+
+img{
+  vertical-align:top;
+}
+
+/* Types */
+
+p{
+    margin:0 0 15px 0;
+}
+
+h4{
+  margin:0;
+  padding:0;
+}
+
+
+textarea{
+  border:none;
+  width:100%;
+  padding:0;
+  font-size:13px;
+}
+
+/*
+ * Contain floats: h5bp.com/q
+ */
+
+.clearfix:before,
+.clearfix:after {
+    content: "";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+

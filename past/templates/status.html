@@ -299,18 +299,21 @@
     {% set re_user = re_ and re_.get_user() or ""%}
     {% set re_user_nickname = re_user if re_user|isstr else re_user.get_nickname()%}
 
+    <i class="pointer"></i>
     <div class="unit">
       
       <!-- Story -->
       <div class="storyUnit" id="story-{{s.id}}">
         <div class="imageUnit">
-        {%if avatar%}
-          <a href="{{avatar}}"><img src="{{avatar}}" width="32" height="32" alt="{{user_nickname}}"></a>
-        {%endif%}
+          {%if avatar%}
+          <a href="{{avatar}}"><img src="{{avatar}}" width="24" height="24" alt="{{user_nickname}}"></a>
+          {%endif%}
           <div class="imageUnit-content">
             <a href="/user/{{thepast_user.id}}" >{{user_nickname}}</a>&nbsp;
-            <span>{{s.create_time.strftime("%Y-%m-%d %H:%M:%S")}}</span>
+            <span class="time">{{s.create_time|stream_time}}</span>&nbsp;
+            <span class="recollect"><a href="#" onclick="javascript:fn_repost_modal('{{s.id}}'); return false;">旧时重提</a></span>
           </div>
+
           <div class="pull-right">
             {%for s_ in repeated_status.status_list%}
                 {%set from_ = s_.get_origin_uri()%}
@@ -322,25 +325,26 @@
         </div>
       
         {%if s.title%}
-        <span class="summary"><a href="/post/{{s.id}}">{{s.title}}</a></span><br/>
+        <div>
+            <a href="/post/{{s.id}}">{{s.title}}</a>
+        </div>
         {%endif%}
-        <span class="summary">{{s.summary|safe}}</span>
+        <p class="summary">{{s.summary|safe}}</p>
         
         {%for att in atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-        <p>{{att.get_description()|safe}}</p>
+        <p>{{att.get_description()}}</p>
         {%endfor%}
 
         {%if re_user_nickname and re_.get_content()%}
         <span>
-            //@{{re_user_nickname}}: {{re_.get_content()|safe}}
+            //@{{re_user_nickname}}: {{re_.get_content()}}
         </span>
         {% endif %}
 
-
         {%for att in re_atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-        <p>{{att.get_description()|safe}}</p>
+        <p>{{att.get_description()}}</p>
         {%endfor%}
       
         {% if images or re_images%}
@@ -354,12 +358,6 @@
         </div>
         {% endif %}
       <!-- / Story -->
-      
-      <!-- Units -->
-      <ol class="storyActions">
-        <li><a href="#" onclick="javascript:fn_repost_modal({{s.id}})">旧事重提</a></li>
-      </ol>
-      <!-- / Units -->
       
     </div>
 
@@ -387,77 +385,6 @@
             <button class="btn btn-primary" data-dismiss="modal" onclick="javascript:fn_repost_status({{s.id}})">确定</button>
         </div>
     </div>
-
-
-    <script>
-        function fn_repost_status(sid){
-            var obj = jQuery("#story-" + sid);
-            var content = jQuery("#modal_reshare_" +sid+ " textarea").val();
-            var images = new Array();
-            jQuery("#modal_reshare_" +sid+ " img").each(function(i, img){
-                images.push(jQuery(img).attr("src"));
-            });
-            var providers = new Array();
-            jQuery("#modal_reshare_" +sid+ " input[name='provider']:checked").each(function(i, ck){
-                providers.push(jQuery(ck).val());
-            });
-
-            //console.log(sid + content + images + providers);
-            jQuery.ajax({
-                type: "POST",
-                async: false,
-                dataType: "json",
-                url: "/reshare_ajax",
-                data: {
-                    "text": content,
-                    "images": images.join("|"),
-                    "providers": providers.join("|")
-                },
-                success: function(data){
-                    if (data.ok == '1'){
-                    }else{
-                        alert(data.msg);
-                    }
-                }
-            });
-        }
-
-        function fn_repost_modal(sid){
-            var obj = jQuery("#story-" + sid);
-
-            var summary = "#thepast.me# " + jQuery(obj.find(".summary")[0]).html();
-            jQuery("#modal_reshare_" +sid+ " textarea").val(summary);
-
-            var images = new Array();
-            obj.find(".post-image").each(function(i, img){
-                images.push(jQuery(img).attr("src"));
-            });
-            //console.log(images);
-
-            var thumbs = jQuery("#modal_reshare_" +sid+ " .thumbnails");
-            thumbs.html("");
-            for (var i in images){
-                var img = images[i];
-                var thumb_id = "thumb-" + sid + "-" + i;
-                var thumb_html = '<li class="span4" id="'+ thumb_id +'">'
-                + '<i class="icon-remove"></i>'
-                + '<a href="#" class="thumbnail">' 
-                + '<img src="' + img +  '"></img> </a>'
-                + '</li>';
-                thumbs.append(jQuery(thumb_html));
-                jQuery("#" + thumb_id + " i").click(function(){
-                    jQuery("#" + thumb_id).remove();
-                });
-            }
-
-            
-            jQuery("#modal_reshare_" + sid).modal({
-                "keyboard": true,
-                "show": true,
-                "backdrop": "static"
-            });
-        }
-    </script>
 {%- endmacro %}
 
 {% macro story_show(g, repeated_status, sync_list=None) -%}

@@ -2,11 +2,22 @@
 {% import "status.html" as status_tmpl_helper %}
 {% import "blocks.html" as blocks_tmpl_helper %}
 
+{%block css%}
+    {{super()}}
+    <link href="/static/fbtimeline/stylesheets/timeline.css" media="screen" rel="stylesheet" type="text/css" />
+{%endblock%}
+
+{% block js%}
+    {{super()}}
+    <script src="/static/fbtimeline/javascripts/all.js" type="text/javascript"></script> 
+{% endblock %}
+
 <!-- 个人&&其他用户最新页  -->
 {%block title%}{{user.name}} | 旧时光{%endblock%}
 
-{%block main%}
-	<div id="sidebar">
+{%block sidebar%}
+	<div class="span3">
+    <div id="sidebar">
 		<div id="user_info" class="side_box">
 			<div class="info_profile">
 				<div class="avatar">
@@ -68,56 +79,64 @@
         <div class="side_box">
             {{blocks_tmpl_helper.rightbar_feedback_block()}}
         </div>
+    </div>
 	</div> <!--end of sidebar-->
+{%endblock%}
 
-	<div id="new_bar">
-		<h3>你好 . 旧时光</h3>
-		<p>{{now.decode("utf8")}}</p>
+{%block rightbar%}
+    <div class="span9">
+        <div id="rightbar">
+        <ol id="timeline" class="timeline clearfix">
+            <li class="spine"></li>
+            {%set left = True%}
+            {%for repeated_status in status_list[:]%}
+                {%if left%}
+                <li class="left">
+                {%else%}
+                <li class="right">
+                {%endif%}
+                {{status_tmpl_helper.story_unit(g, repeated_status, sync_list)}}
+                </li>
+                {%set left=not left%}
+            {%endfor%}
+        </ol>
+        </div>
     </div>
-
-    <div class="new_show" id="div_new_show">
-        {%for repeated_status in status_list%}
-            {{status_tmpl_helper.story_show(g, repeated_status, sync_list)}}
-        {%endfor%}
-    </div>
-
-    <div class="loading" id="loading">Wait a moment... it's loading!</div>
-    <div class="loading" id="nomoreresults">Sorry, no more results for your pagination demo.</div>
-
 {%endblock%}
 
 {%block more_js%}
 {{super()}}
 <script type="text/javascript">
 jQuery(function(){
+
     var g_start = parseInt("{{g.start}}");
-    jQuery('#div_new_show').scrollPagination({
-        'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
-        'contentData': {
-            'start': function() {return g_start + parseInt("{{g.count}}");},
-            'cate': "{{g.cate}}"
-        }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
-        'scrollTarget': jQuery(window), // who gonna scroll? in this example, the full window
-        'heightOffset': 100, // it gonna request when scroll is 10 pixels before the page ends
-        'beforeLoad': function(){ // before load function, you can display a preloader div
-            jQuery('#loading').fadeIn(); 
-        },
-        'afterLoad': function(elementsLoaded){ // after loading content, you can use this function to animate your new elements
-            jQuery('#loading').fadeOut();
-            var jQuerynewElems = jQuery(elementsLoaded).css({ opacity: 0 });
-            jQuerynewElems.imagesLoaded(function () {
-                // show elems now they're ready
-                jQuerynewElems.animate({ opacity: 1 });
-                jQuery('#div_new_show').masonry('appended', jQuerynewElems, true);
-                g_start = g_start + parseInt("{{g.count}}");
-            });
+    //jQuery('#div_new_show').scrollPagination({
+    //    'contentPage': '/{{user.uid}}/more', // the url you are fetching the results
+    //    'contentData': {
+    //        'start': function() {return g_start + parseInt("{{g.count}}");},
+    //        'cate': "{{g.cate}}"
+    //    }, // these are the variables you can pass to the request, for example: children().size() to know which page you are
+    //    'scrollTarget': jQuery(window), // who gonna scroll? in this example, the full window
+    //    'heightOffset': 100, // it gonna request when scroll is 10 pixels before the page ends
+    //    'beforeLoad': function(){ // before load function, you can display a preloader div
+    //        jQuery('#loading').fadeIn(); 
+    //    },
+    //    'afterLoad': function(elementsLoaded){ // after loading content, you can use this function to animate your new elements
+    //        jQuery('#loading').fadeOut();
+    //        var jQuerynewElems = jQuery(elementsLoaded).css({ opacity: 0 });
+    //        jQuerynewElems.imagesLoaded(function () {
+    //            // show elems now they're ready
+    //            jQuerynewElems.animate({ opacity: 1 });
+    //            jQuery('#div_new_show').masonry('appended', jQuerynewElems, true);
+    //            g_start = g_start + parseInt("{{g.count}}");
+    //        });
 
-        }
-    });
+    //    }
+    //});
 
-    jQuery("#nav_item_explore").removeClass("active");
-    jQuery("#nav_item_past").removeClass("active");
-    jQuery("#nav_item_note").removeClass("active");
+    //jQuery("#nav_item_explore").removeClass("active");
+    //jQuery("#nav_item_past").removeClass("active");
+    //jQuery("#nav_item_note").removeClass("active");
 })
 </script>
 {%endblock%}

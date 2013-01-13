@@ -98,39 +98,45 @@
 {%block container%}
     {%block top_tips%}
     <div class="row">
-        <div class="span10 offset1">
+        <div class="span12">
         {{blocks_tmpl_helper.notification_block(g.user)}}
         </div>
     </div>
     {%endblock%}
     {%block hero_unit%}{%endblock%}
+    {%block main%}
     <div class="row">
-        <div class="span10 offset1">
-        {%block main%}
+        {%block sidebar%}
         {%endblock%}
+        {%block middlebar%}
+        {%endblock%}
+        {%block rightbar%}
+        {%endblock%}
+    </div>
+    {%endblock%}
+    
+    <div class="row">
+        <div class="span12">
+        <hr/>
+        <footer>
+            {%block footer%}
+            <div id="past_text">
+               <p>总有那么一天，想回过头来看看</p>
+               <p>看看这过往</p>
+               <p>或许是美好的时光</p>
+               <p>亦或是不羁的岁月</p>
+               <p>都是我们一起逝去的青春</p>
+               <p>过去的，总是美好的</p>
+               <p>你好，旧时光... </p>
+            </div>
+            <span class="text-info">
+                &copy; ThePast.Me 2012
+                <script src="http://s17.cnzz.com/stat.php?id=3877715&web_id=3877715" language="JavaScript"></script>
+            </span>
+            {%endblock%}
+        </footer>
         </div>
     </div>
-    
-    <hr/>
-    <hr/>
-
-    <footer>
-        {%block footer%}
-        <div id="past_text">
-           <p>总有那么一天，想回过头来看看</p>
-           <p>看看这过往</p>
-           <p>或许是美好的时光</p>
-           <p>亦或是不羁的岁月</p>
-           <p>都是我们一起逝去的青春</p>
-           <p>过去的，总是美好的</p>
-           <p>你好，旧时光... </p>
-        </div>
-        <span class="text-info">
-            &copy; ThePast.Me 2012
-            <script src="http://s17.cnzz.com/stat.php?id=3877715&web_id=3877715" language="JavaScript"></script>
-        </span>
-        {%endblock%}
-    </footer>
 {%endblock%}
 </div>
 

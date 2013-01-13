@@ -17,18 +17,22 @@ body{font-family:"Microsoft Yahei",Tahoma;background:#E3E8EC url(/static/img/bg.
 .from.renren a{background-position:0 -96px;}
 .from.instagram a{background-position:0 -112px;}
 
-.time{font-size:11.5px;color:#999;font-style:italic;}
+.recollect {display:inline-block;margin:0 0 -2px 0px;}
+.recollect a{opacity: 0.47;}
+.recollect a:hover{opacity:0.67;}
+
+.time{font-size:10px;color:#999;}
 
 /*sidebar*/
-#sidebar{float:left;width:240px;margin-top:28px;margin-right:28px;}
-.side_box{padding:15px;background-color:white;box-shadow:0 1px 3px rgba(34, 25, 25, .4);margin-bottom:28px;}
-#user_info .avatar{float:left;margin-right:15px;width:64px;height:64px;}
-#user_info .name{margin:0 6px 2px 4px;}
-.info_profile{border-bottom: 1px solid #F5F2F2;margin-left:-15px;margin-right:-15px;padding:0 15px 15px;}
-.info_inner{background:#FFFEF0;margin:0 -15px -15px;padding:10px 15px;line-height:22px;word-wrap:break-word;}
+#sidebar{float:left; width:268px; margin-top:5px; margin:0;}
+    .side_box{padding:15px;background-color:white;box-shadow:0 1px 3px rgba(34, 25, 25, .4);margin-bottom:28px;}
+    #user_info .avatar{float:left;margin-right:15px;width:64px;height:64px;}
+    #user_info .name{margin:0 6px 2px 4px;}
+    .info_profile{border-bottom: 1px solid #F5F2F2;margin-left:-15px;margin-right:-15px;padding:0 15px 15px;}
+    .info_inner{background:#FFFEF0;margin:0 -15px -15px;padding:10px 15px;line-height:22px;word-wrap:break-word;}
 
 #new_bar{margin-top:20px;margin-left:267px;border-bottom:3px double rgba(34, 25, 25, .1);padding-bottom:8px;color:#6E3939;font-size:20px;}
-.new_show{margin:15px 0 0 267px;width:740px;position:relative;right:0;top:0;}
+#rightbar{margin:0;width:901px;}
 
 
 #login_btn{display:inline-block;line-height:28px;border:1px solid #DDD;padding:0 15px;border-radius:5px;font-size:16px;cursor:pointer;margin-top:8px;color: #CB2027;}
@@ -57,8 +61,7 @@ body{font-family:"Microsoft Yahei",Tahoma;background:#E3E8EC url(/static/img/bg.
 
 
 /*main*/
-#main{font-size:13px;line-height:18px;min-height:800px;width:940px;margin:0px auto 20px auto;padding:88px 0px 30px 0px;color:#666;position:relative;}
-.home_show{width:980px;}
+.home_show{width:1141px;}
 .loading{display:none;}
 .date,.settings h2{position:relative;min-height:24px;margin:10px 0 15px;padding:10px 0 18px;text-shadow:0 1px rgba(255, 255, 255, .9);border-bottom: 3px double rgba(34, 25, 25, .1);color: #6E3939;font-size:20px;}
 
