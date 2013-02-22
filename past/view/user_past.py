@@ -57,11 +57,16 @@ def my_home():
     return redirect("/past")
 
 @app.route("/<uid>/past")
-@require_login()
 def user_past(uid):
     user = User.get(uid)
     if not user:
         abort(404, "no such user")
+
+    r = check_access_user(user)
+    if r:
+        flash(r[1].decode("utf8"), "tip")
+        return redirect("/")
+
     try:
         now = datetime.datetime.strptime(request.args.get("now"), "%Y-%m-%d")
     except:
@@ -69,11 +74,21 @@ def user_past(uid):
 
     history_ids = get_status_ids_today_in_history(user.id, now) 
     status_list = Status.gets(history_ids)
+    if g.user and g.user.id == uid:
+        pass
+    elif g.user and g.user.id != uid:
+        status_list = [x for x in status_list if x.privacy() != consts.STATUS_PRIVACY_PRIVATE]
+    elif not g.user:
+        status_list = [x for x in status_list if x.privacy() == consts.STATUS_PRIVACY_PUBLIC]
+
     status_list  = statuses_timelize(status_list)
     if g.user:
         sync_list = get_sync_list(g.user)
     else:
         sync_list = []
+
+    intros = [user.get_thirdparty_profile(x).get("intro") for x in config.OPENID_TYPE_DICT.values()]
+    intros = filter(None, intros)
 
     d = defaultdict(list)
     for x in status_list:

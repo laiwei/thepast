@@ -18,12 +18,24 @@ def before_request():
     g.user_alias = UserAlias.gets_by_user_id(g.user.id) if g.user else None
 
     if request.method == 'POST':
-        g.start = int(request.form.get('start', 0))
-        g.count = int(request.form.get('count', 24))
+        try:
+            g.start = int(request.form.get('start', 0))
+        except ValueError:
+            g.start = 0
+        try:
+            g.count = int(request.form.get('count', 24))
+        except ValueError:
+            g.count = 0
         g.cate = request.form.get("cate", "")
     else:
-        g.start = int(request.args.get('start', 0))
-        g.count = int(request.args.get('count', 24))
+        try:
+            g.start = int(request.args.get('start', 0))
+        except ValueError:
+            g.start = 0
+        try:
+            g.count = int(request.args.get('count', 24))
+        except ValueError:
+            g.count = 0
         g.cate = request.args.get("cate", "")
     g.cate = int(g.cate) if g.cate.isdigit() else ""
         

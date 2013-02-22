@@ -50,7 +50,7 @@ class SinaWeibo(OAuth2):
 
     def check_result(self, uri, resp, content):
         #{"error":"expired_token","error_code":21327,"request":"/2/statuses/update.json"}
-        log.debug("---sina check result, status: %s, resp: %s, content: %s" %(resp.status, resp, content))
+        #log.debug("---sina check result, status: %s, resp: %s, content: %s" %(resp.status, resp, content))
         jdata = json_decode(content) if content else None
         if jdata and isinstance(jdata, dict):
             error_code = jdata.get("error_code")

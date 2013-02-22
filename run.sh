@@ -12,4 +12,4 @@
 hash gunicorn 2>&- || { echo >&2 "I require gunicorn but it's not installed.  Aborting."; exit 1; }
 killall gunicorn
 sleep 2
-gunicorn -c gunicorn.conf pastme:app -D
+gunicorn -c gunicorn.conf pastme:app -D --error-logfile ./app.log

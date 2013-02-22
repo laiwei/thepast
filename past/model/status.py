@@ -130,7 +130,10 @@ class Status(object):
         else:
             r = RawStatus.get(self.id)
             _raw = r.raw if r else ""
-            return json_decode(_raw) if _raw else ""
+            try:
+                return json_decode(_raw) if _raw else ""
+            except:
+                return ""
         
     @classmethod
     def add(cls, user_id, origin_id, create_time, site, category, title, 

@@ -147,7 +147,7 @@
 
 {% macro qq_weibo_status(s, pdf=False) -%}
     {%if pdf%}
-        {{s.summary|wrap_long_line|safe}}
+        {{s.summary|wrap_long_line}}
     {%else%}
         {{s.summary|safe}}
     {%endif%}
@@ -222,7 +222,7 @@
     {%if pdf%}
         {{s.text}}
     {%else%}
-        {{s.summary|safe}}
+        {{s.summary}}
     {%endif%}
     </p>
 
@@ -330,7 +330,7 @@
             <a href="/post/{{s.id}}">{{s.title}}</a>
         </div>
         {%endif%}
-        <p class="summary">{{s.summary|safe}}</p>
+        <p class="summary">{{s.summary}}</p>
         
         {%for att in atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
@@ -431,7 +431,7 @@
     {%endif%}
         <p>
             <h5><a href="/post/{{s.id}}">{{s.title}}</a></h5>
-            <span class="summary">{{s.summary|safe}}</span>
+            <span class="summary">{{s.summary}}</span>
             
             {%for att in atts%}
             <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>

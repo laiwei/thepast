@@ -68,6 +68,7 @@ def send_today_in_history(user_id, now=None, include_yestorday=False):
     env = Environment(loader=PackageLoader('past', 'templates'))
     env.filters['wrap_long_line'] = wrap_long_line
     env.filters['nl2br'] = filters.nl2br
+    env.filters['stream_time'] = filters.stream_time
     env.filters['clear_html_element'] = clear_html_element
     env.filters['isstr'] = lambda x: isinstance(x, basestring)
     t = env.get_template('mail.html')
@@ -121,6 +122,7 @@ def send_yesterday(user_id, now=None):
     env = Environment(loader=PackageLoader('past', 'templates'))
     env.filters['wrap_long_line'] = wrap_long_line
     env.filters['nl2br'] = filters.nl2br
+    env.filters['stream_time'] = filters.stream_time
     env.filters['clear_html_element'] = clear_html_element
     t = env.get_template('mail.html')
     m = t.module

@@ -15,6 +15,13 @@
 {%block sidebar%}
 	<div class="span3">
     <div id="sidebar">
+        {%block sidebox%}
+        <div class="side_box">
+            {{blocks_tmpl_helper.rightbar_feedback_block()}}
+        </div>
+        {%endblock%}
+
+        {%block user_info%}
 		<div id="user_info" class="side_box">
 			<div class="info_profile">
 				<div class="avatar">
@@ -65,17 +72,13 @@
                 {%if intros%}
                     {% for intro in intros%}
                     {% if intro%}
-                        {{intro|nl2br|safe}}
+                        {{intro}}
                         <br/>
                     {%endif%}
                     {% endfor%}
                 {%endif%}
             	</p>
             </div>
-        </div>
-        {%block sidebox%}
-        <div class="side_box">
-            {{blocks_tmpl_helper.rightbar_feedback_block()}}
         </div>
         {%endblock%}
     </div>
@@ -85,6 +88,14 @@
 {%block rightbar%}
     <div class="span9">
         <div id="rightbar">
+            {%if not status_list%}
+                <div class="alert alert-success">
+                    <p>欢迎加入旧时光，thepast正在从第三方同步你的消息，请稍等（最多5分钟哦）</p>
+                    <p>趁着这块空闲，你可以随机看看<a href="/explore">别人的页面</a></p>
+                    <p>或者</p>
+                    <p>看看<a href="/laiwei/past">laiwei历史上的每天</a></p>
+                </div>
+            {%else%}
             <ol id="timeline" class="timeline clearfix">
                 <li class="spine"></li>
                 {%set left = True%}
@@ -100,6 +111,7 @@
                 {%endfor%}
             </ol>
             <div id="loadmore_indicator" class="alert alert-info" style="text-align:center;">正在努力加载更多中...</div>
+            {%endif%}
         </div>
     </div>
 {%endblock%}
