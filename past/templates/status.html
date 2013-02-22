@@ -330,7 +330,7 @@
             <a href="/post/{{s.id}}">{{s.title}}</a>
         </div>
         {%endif%}
-        <p class="summary">{{s.summary}}</p>
+        <p class="summary">{{s.summary|safe}}</p>
         
         {%for att in atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
@@ -339,13 +339,13 @@
 
         {%if re_user_nickname and re_.get_content()%}
         <span>
-            //@{{re_user_nickname}}: {{re_.get_content()}}
+            //@{{re_user_nickname}}: {{re_.get_content()|safe}}
         </span>
         {% endif %}
 
         {%for att in re_atts%}
         <a href="{{att.get_href()|safe}}">{{att.get_title()}}</a>
-        <p>{{att.get_description()}}</p>
+        <p>{{att.get_description()|safe}}</p>
         {%endfor%}
       
         {% if images or re_images%}
