@@ -9,8 +9,10 @@ app.config.from_object("past.config")
 ##-- register blueprint --
 from past.connect import blue_print as connect_bp
 from past.dev import blue_print as dev_bp
+from past.weixin import blue_print as weixin_bp
 app.register_blueprint(connect_bp, url_prefix="/connect")
 app.register_blueprint(dev_bp, url_prefix="/dev")
+app.register_blueprint(weixin_bp, url_prefix="/weixin")
 
 import view
 
