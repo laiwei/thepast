@@ -167,6 +167,9 @@ CACHE_DIR = "/home/work/proj/thepast/var/cache"
 FILE_DOWNLOAD_DIR = "/home/work/proj/thepast/var/down"
 PDF_FILE_DOWNLOAD_DIR = FILE_DOWNLOAD_DIR + "/pdf"
 
+#suicide log
+SUICIDE_LOG = "/home/work/proj/thepast/suicide.log"
+
 try:
     from local_config import *
 except:

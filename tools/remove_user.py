@@ -6,36 +6,43 @@ from past.model.user import User
 from past.model.status import Status
 from past.model.kv import RawStatus
 from past import consts
+from past import config
 
+from past.utils.logger import logging
+log = logging.getLogger(__file__)
 
-def remove_user(uid):
+suicide_log = logging.getLogger(__file__)
+suicide_log.addHandler(logging.FileHandler(config.SUICIDE_LOG))
+
+def remove_user(uid, clear_status=True):
     user = User.get(uid)
     if not user:
         print '---no user:%s' % uid
 
-    print "---- delete from user, uid=", uid
+    suicide_log.info("---- delete from user, uid=%s" %uid)
     db_conn.execute("delete from user where id=%s", uid)
     db_conn.commit()
     User._clear_cache(uid)
 
-    cursor = db_conn.execute("select id from status where user_id=%s", uid)
-    if cursor:
-        rows = cursor.fetchall()
-        for row in rows:
-            sid = row[0]
-            print "---- delete mongo text, sid=", sid
-            RawStatus.remove(sid)
+    if clear_status:
+        cursor = db_conn.execute("select id from status where user_id=%s", uid)
+        if cursor:
+            rows = cursor.fetchall()
+            for row in rows:
+                sid = row[0]
+                suicide_log.info("---- delete status text, sid=%s" % sid)
+                RawStatus.remove(sid)
 
-    print "---- delete from status, uid=", uid
-    db_conn.execute("delete from status where user_id=%s", uid)
-    db_conn.commit()
-    Status._clear_cache(uid, None)
+        suicide_log.info("---- delete from status, uid=" %uid)
+        db_conn.execute("delete from status where user_id=%s", uid)
+        db_conn.commit()
+        Status._clear_cache(uid, None)
 
-    print "---- delete from passwd, uid=", uid
+    suicide_log.info("---- delete from passwd, uid=%s" %uid)
     db_conn.execute("delete from passwd where user_id=%s", uid)
-    print "---- delete from sync_task, uid=", uid
+    suicide_log.info("---- delete from sync_task, uid=%s" % uid)
     db_conn.execute("delete from sync_task where user_id=%s", uid)
-    print "---- delete from user_alias, uid=", uid
+    suicide_log.info("---- delete from user_alias, uid=%s" % uid)
     db_conn.execute("delete from user_alias where user_id=%s", uid)
     db_conn.commit()
 
