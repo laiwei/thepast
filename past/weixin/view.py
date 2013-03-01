@@ -66,11 +66,15 @@ def echo(cmds):
             reply_content = "你怎么没有提供thepast_id啊..."
         reply_content = cmd_bind(from_user, l[1])
     elif l[0] == 'p' or l[0] == 'past':
-        reply_type = "news"
-        if len(l) == 2:
-            reply_content = cmd_past(from_user, l[1], reply_type)
+        
+        if not UserWeixin.get_by_weixin(from_user):
+            reply_content = "请先回复 bind thepast_id 告诉机器狗你的thepast_id是多少"
         else:
-            reply_content = cmd_past(from_user, "", reply_type)
+            reply_type = "news"
+            if len(l) == 2:
+                reply_content = cmd_past(from_user, l[1], reply_type)
+            else:
+                reply_content = cmd_past(from_user, "", reply_type)
 
     if not isinstance(reply_content, unicode):
         reply_content = reply_content.decode("utf8")
