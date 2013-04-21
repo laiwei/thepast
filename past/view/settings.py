@@ -172,7 +172,7 @@ def suicide():
     logout_user(g.user)
 
     from tools.remove_user import remove_user
-    remove_user(u.id, False)
+    remove_user(u.id, True)
 
     flash(u"已注销",  "error")
     return redirect("/")
