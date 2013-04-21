@@ -8,7 +8,7 @@ body{font-family:"Microsoft Yahei",Tahoma;background:#E3E8EC url(/static/img/bg.
 .from a:hover{opacity:0.47;}
 .oauth a{opacity:1;}
 .from {display:inline-block;margin:0 0 -2px 0px;}
-.from a{background:url(/static/img/sns.png) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
+.from a{background:url(/static/img/sns2.png) no-repeat;display:inline-block;text-indent:-9999em;width:16px;height:16px;}
 .from.twitter a{background-position:0 -16px;}
 .from.sina a{background-position:0 -32px;}
 .from.douban a{background-position:0 -48px;}

@@ -163,3 +163,16 @@ def bind_wordpress():
     else:
         return "method not allowed"
 
+
+@app.route("/suicide")
+@require_login()
+def suicide():
+    u = g.user
+    from past.corelib import logout_user
+    logout_user(g.user)
+
+    from tools.remove_user import remove_user
+    remove_user(u.id, True)
+
+    flash(u"已注销",  "error")
+    return redirect("/")

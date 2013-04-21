@@ -26,7 +26,7 @@ log = logging.getLogger(__file__)
 @blue_print.route("/<provider>")
 def connect(provider):
     if provider == "renren":
-        return "人人的api因为备案问题尚未审核通过，请先绑定其他平台吧，比如豆瓣:)"
+        return "我已经实在受不了人人，被人人的管理员快搞死了，怎么修改都不通过，唉...  有兴趣可以看看这边豆瓣网友的帖子：http://www.douban.com/note/250372684/"
     #return "thepast.me 正在升级硬件，暂时不提供登录、注册功能，请谅解，有问题请邮件到 help@thepast.me"
 
     client = None
@@ -100,7 +100,7 @@ def connect_callback(provider):
             print "---user_info", user_info, user_info.data
         except OAuthError, e:
             log.warning(e)
-            abort(400, e.msg)
+            abort(400, u"我已经实在受不了人人，被人人的管理员快搞死了，怎么修改都不通过，唉")
 
         user = _save_user_and_token(token_dict, user_info, openid_type)
 

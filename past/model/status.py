@@ -153,7 +153,7 @@ class Status(object):
                 db_conn.commit()
                 status = cls.get(status_id)
         except IntegrityError:
-            #log.warning("add status duplicated, ignore...")
+            log.warning("add status duplicated, uniq key is %s:%s:%s, ignore..." %(origin_id, site, category))
             db_conn.rollback()
         finally:
             cls._clear_cache(user_id, None, cate=category)
