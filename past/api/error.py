@@ -49,7 +49,7 @@ class OAuthAccessError(OAuthError):
     TYPE = "access_error"
     def __init__(self, user_id=None, openid_type=None, msg=""):
         super(OAuthAccessError, self).__init__(
-            OAuthTokenExpiredError.TYPE, user_id, openid_type, msg)
+            OAuthAccessError.TYPE, user_id, openid_type, msg)
 
 
 class OAuthLoginError(OAuthError):
